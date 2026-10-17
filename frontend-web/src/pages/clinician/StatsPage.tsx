@@ -42,6 +42,61 @@ function CoverageRing({ rate, M, N }: { rate: number | null; M: number; N: numbe
   )
 }
 
+/** 逐日覆盖率趋势：折线 + 每日刻度格（有数据的日期着色，深浅按覆盖率） */
+function TrendChart({ trend }: { trend: { day: string; rate: number | null; N: number; M: number }[] }) {
+  if (trend.length === 0) {
+    return <p className="muted" style={{ margin: 0 }}>暂无趋势数据</p>
+  }
+  const W = 720
+  const H = 180
+  const padL = 34
+  const padB = 26
+  const n = trend.length
+  const x = (i: number) => padL + (n === 1 ? (W - padL) / 2 : (i * (W - padL)) / (n - 1))
+  const y = (v: number) => 12 + (1 - v / 100) * (H - padB - 12)
+  const pts = trend.map((t, i) => (t.rate === null ? null : `${x(i)},${y(t.rate)}`)).filter(Boolean) as string[]
+  const valid = trend.filter((t) => t.rate !== null)
+  const first = valid[0]?.rate ?? null
+  const last = valid[valid.length - 1]?.rate ?? null
+  const delta = first !== null && last !== null ? Math.round((last - first) * 10) / 10 : null
+
+  return (
+    <div>
+      {delta !== null && n > 1 && (
+        <p className="muted" style={{ margin: '0 0 8px' }}>
+          区间变化：<b style={{ color: delta > 0 ? '#14938E' : delta < 0 ? '#B02A2A' : undefined }}>
+            {delta > 0 ? `+${delta}` : delta}
+          </b>{' '}
+          个百分点（{valid[0]?.day} → {valid[valid.length - 1]?.day}）｜ 仅统计已到期时点
+        </p>
+      )}
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 180 }} role="img" aria-label="逐日覆盖率趋势">
+        {[0, 50, 100].map((g) => (
+          <g key={g}>
+            <line x1={padL} y1={y(g)} x2={W} y2={y(g)} stroke="#F0F2F7" strokeWidth={1} />
+            <text x={4} y={y(g) + 4} fontSize={11} fill="#6B6E7F">{g}%</text>
+          </g>
+        ))}
+        {pts.length > 1 && <polyline points={pts.join(' ')} fill="none" stroke="#573BF4" strokeWidth={2.5} strokeLinejoin="round" />}
+        {trend.map((t, i) => (
+          <g key={t.day}>
+            {t.rate !== null && <circle cx={x(i)} cy={y(t.rate)} r={4} fill="#573BF4" />}
+            {t.rate !== null && (
+              <text x={x(i)} y={y(t.rate) - 9} fontSize={11} fill="#24243E" textAnchor="middle">{t.rate}%</text>
+            )}
+            <text x={x(i)} y={H - 8} fontSize={11} fill="#6B6E7F" textAnchor="middle">
+              {t.day.slice(5)}
+            </text>
+          </g>
+        ))}
+      </svg>
+      {trend.every((t) => t.N === 0) && (
+        <p className="muted" style={{ margin: '8px 0 0' }}>该区间内无固定计划时点（按需用药不计入覆盖率）。</p>
+      )}
+    </div>
+  )
+}
+
 /** 缺失时点按日分布柱状图（纯 SVG） */
 function MissingBars({ missing }: { missing: { scheduled_at: string }[] }) {
   if (missing.length === 0) {
@@ -87,6 +142,7 @@ export default function StatsPage() {
   const [from, setFrom] = useState('2026-10-08')
   const [to, setTo] = useState('2026-10-15')
   const [stats, setStats] = useState<Stats | null>(null)
+  const [trend, setTrend] = useState<{ day: string; rate: number | null; N: number; M: number }[]>([])
   const [loading, setLoading] = useState(false)
 
   const fetchPatients = async () => {
@@ -104,6 +160,22 @@ export default function StatsPage() {
     try {
       const r = await apiFetch<Stats>(`/api/patients/${selected}/stats?from=${from}&to=${to}`)
       setStats(r)
+      // 逐日趋势：把 [from, to) 按天切片并行查询（每天一个左闭右开窗口）
+      const days: string[] = []
+      let cur = dayjs(from)
+      const end = dayjs(to)
+      while (cur.isBefore(end) && days.length < 31) {
+        days.push(cur.format('YYYY-MM-DD'))
+        cur = cur.add(1, 'day')
+      }
+      const daily = await Promise.all(
+        days.map((d) =>
+          apiFetch<Stats>(`/api/patients/${selected}/stats?from=${d}&to=${dayjs(d).add(1, 'day').format('YYYY-MM-DD')}`)
+            .then((s) => ({ day: d, rate: s.coverage_rate, N: s.N, M: s.M }))
+            .catch(() => ({ day: d, rate: null, N: 0, M: 0 })),
+        ),
+      )
+      setTrend(daily)
     } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
   }
 
@@ -176,6 +248,10 @@ export default function StatsPage() {
               </div>
             </div>
             <p className="muted" style={{ margin: '16px 0 0' }}>{stats.disclaimer}</p>
+          </Card>
+
+          <Card title="逐日覆盖率趋势">
+            <TrendChart trend={trend} />
           </Card>
 
           <div className="stats-grid">

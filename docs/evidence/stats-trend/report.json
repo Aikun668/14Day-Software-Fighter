@@ -1,0 +1,15 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [
+      "第 9 步「click text=赵女士」：中心点被 main.ant-layout-content.css-dev-only-do-not-override-jdb7z4.css-var-_r_0_ 挡住，动作仍照常执行",
+      "第 11 步「click text=查询」：中心点被 div.ant-space-item:nth-of-type(7) > button.ant-btn.css-dev-only-do-not-override-jdb7z4.css-var-_r_0_ 挡住，动作仍照常执行",
+      "第 11 步「click text=查询」：目标处于禁用状态（pointer-events: none），动作仍照常执行"
+    ],
+    "lint": []
+  }
+]

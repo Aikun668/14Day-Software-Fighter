@@ -1,0 +1,13 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [
+      "第 13 步「click button.ant-btn-primary」：目标处于禁用状态（disabled），动作仍照常执行"
+    ],
+    "lint": []
+  }
+]
