@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, Form, Input, message, Modal, Select, Space, Table, Tabs, Tag, Typography } from 'antd'
+import { Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tabs, Tag, Typography } from 'antd'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 
@@ -273,10 +273,19 @@ export default function AdminPage() {
                       { title: '需改密', dataIndex: 'must_change_password', render: (v: boolean) => v ? '是' : '否' },
                       {
                         title: '操作', key: 'action',
-                        render: (_: unknown, r: UserRow) => (
-                          <Button type="link" size="small" danger={r.status === 'ACTIVE'} onClick={() => toggleUser(r)}>
-                            {r.status === 'ACTIVE' ? '停用' : '启用'}
-                          </Button>
+                        render: (_: unknown, r: UserRow) => r.status === 'ACTIVE' ? (
+                          <Popconfirm
+                            title="停用该账号？"
+                            description="停用后其所有登录会话立即失效。"
+                            okText="确认停用"
+                            okButtonProps={{ danger: true }}
+                            cancelText="取消"
+                            onConfirm={() => toggleUser(r)}
+                          >
+                            <Button type="link" size="small" danger>停用</Button>
+                          </Popconfirm>
+                        ) : (
+                          <Button type="link" size="small" onClick={() => toggleUser(r)}>启用</Button>
                         ),
                       },
                     ]} />

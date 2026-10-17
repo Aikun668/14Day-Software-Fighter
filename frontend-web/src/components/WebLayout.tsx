@@ -1,23 +1,86 @@
-import type { ReactNode } from 'react'
-import { Button, Avatar, Dropdown, Layout, Menu, Typography } from 'antd'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { AutoComplete, Badge, Button, Avatar, Dropdown, Layout, Menu, Typography } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
+import { apiFetch } from '../api/client'
 import BrandMark from './BrandMark'
 
 const { Header, Sider, Content } = Layout
+
+interface PatientHit {
+  id: string
+  patient_code: string
+  display_name: string
+  diagnosis_label: string | null
+}
 
 // 医护 Web 布局（UI_DESIGN §5）：顶栏 56px + 左侧导航 232px + 内容区 28px 留白
 export default function WebLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuth()
+  const [openTasks, setOpenTasks] = useState(0)
+  const [hits, setHits] = useState<PatientHit[]>([])
+  const [keyword, setKeyword] = useState('')
+
+  // 侧栏待办数角标：仅医护拉取 OPEN 任务数（管理员无此菜单）
+  useEffect(() => {
+    if (user?.role !== 'CLINICIAN') return
+    let alive = true
+    apiFetch<{ total: number }>('/api/tasks?status=OPEN&page_size=1')
+      .then((r) => { if (alive) setOpenTasks(r.total) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [user?.role, location.pathname])
+
+  // 顶栏全局搜索：仅医护可用（按编号/姓名过滤，本地过滤已加载列表）
+  const [roster, setRoster] = useState<PatientHit[]>([])
+  useEffect(() => {
+    if (user?.role !== 'CLINICIAN') return
+    let alive = true
+    apiFetch<{ items: PatientHit[] }>('/api/patients?page_size=100')
+      .then((r) => { if (alive) setRoster(r.items) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [user?.role])
+
+  useEffect(() => {
+    const kw = keyword.trim().toLowerCase()
+    if (!kw) { setHits([]); return }
+    setHits(roster.filter(
+      (p) => p.patient_code.toLowerCase().includes(kw) || (p.display_name || '').toLowerCase().includes(kw),
+    ).slice(0, 8))
+  }, [keyword, roster])
+
+  const searchOptions = useMemo(
+    () => hits.map((p) => ({
+      value: p.id,
+      label: (
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+          <span style={{ color: 'var(--ink)' }}>{p.display_name}</span>
+          <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+            {p.patient_code}{p.diagnosis_label ? ` · ${p.diagnosis_label}` : ''}
+          </span>
+        </div>
+      ),
+    })),
+    [hits],
+  )
 
   // 按角色区分菜单（PRD：管理员不继承患者临床数据访问权）
   const isAdmin = user?.role === 'ADMIN'
-  const items = isAdmin
+  const items: { key: string; label: ReactNode }[] = isAdmin
     ? [{ key: '/admin', label: '内容与账号管理' }]
     : [
-        { key: '/workbench', label: '工作台' },
+        {
+          key: '/workbench',
+          label: (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              工作台
+              {openTasks > 0 && <Badge count={openTasks} size="small" title={`${openTasks} 条待核查任务`} />}
+            </span>
+          ),
+        },
         { key: '/patients', label: '患者管理' },
         { key: '/stats', label: '统计与核查' },
         { key: '/followups', label: '随访中心' },
@@ -47,6 +110,24 @@ export default function WebLayout({ children }: { children: ReactNode }) {
             吸入治疗指导与依从性辅助管理软件
           </Typography.Text>
         </span>
+
+        {/* 顶栏全局搜索（仅医护）：输入编号或姓名，选择后直达患者详情 */}
+        {user?.role === 'CLINICIAN' && (
+          <AutoComplete
+            style={{ width: 320 }}
+            value={keyword}
+            options={searchOptions}
+            onChange={setKeyword}
+            onSelect={(pid: string) => {
+              setKeyword('')
+              navigate(`/patients/${pid}`)
+            }}
+            placeholder="搜索患者编号或姓名"
+            aria-label="全局搜索患者"
+            allowClear
+          />
+        )}
+
         <Dropdown
           menu={{
             items: [

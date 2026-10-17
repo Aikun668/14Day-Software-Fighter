@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Form, Input, message, Modal, Select, Space, Table, Tag } from 'antd'
 import { apiFetch } from '../../api/client'
@@ -110,12 +110,29 @@ export default function PatientListPage() {
     } catch (e) { message.error((e as Error).message) }
   }
 
+  // 诊断标签筛选项（去重）
+  const diagnosisFilters = useMemo(() => {
+    const set = new Set<string>()
+    data.forEach((p) => { if (p.diagnosis_label) set.add(p.diagnosis_label) })
+    return [...set].map((v) => ({ text: v, value: v }))
+  }, [data])
+
   const columns = [
     { title: '患者编号', dataIndex: 'patient_code', width: 120, render: (v: string) => <span className="tabular">{v}</span> },
     { title: '姓名/别名', dataIndex: 'display_name', render: (v: string) => <span className="strong">{v}</span> },
-    { title: '诊断标签', dataIndex: 'diagnosis_label', render: (v: string | null) => v || '—' },
+    {
+      title: '诊断标签', dataIndex: 'diagnosis_label',
+      filters: diagnosisFilters,
+      onFilter: (value: unknown, r: Patient) => r.diagnosis_label === value,
+      render: (v: string | null) => v || '—',
+    },
     {
       title: '账号', dataIndex: 'account_user_id', width: 120,
+      filters: [
+        { text: '已绑定', value: 'bound' },
+        { text: '未绑定', value: 'unbound' },
+      ],
+      onFilter: (value: unknown, r: Patient) => (value === 'bound' ? !!r.account_user_id : !r.account_user_id),
       render: (v: string | null) => v ? <Tag className="tag-brand">已绑定</Tag> : <Tag>未绑定</Tag>,
     },
     { title: '操作', key: 'action', width: 180, render: (_: unknown, r: Patient) => (

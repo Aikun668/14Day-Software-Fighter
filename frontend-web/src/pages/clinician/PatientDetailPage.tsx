@@ -290,6 +290,13 @@ export default function PatientDetailPage() {
   }
 
   const blank = (text: string) => <p className="card-empty" style={{ padding: 0 }}>{text}</p>
+  // 空状态给下一步：说明数据从哪来（UI/UX 规范：空状态不应是死胡同）
+  const blankHint = (text: string, action?: React.ReactNode) => (
+    <div className="card-empty" style={{ padding: 0 }}>
+      <p style={{ margin: '0 0 8px' }}>{text}</p>
+      {action}
+    </div>
+  )
 
   return (
     <div>
@@ -367,7 +374,9 @@ export default function PatientDetailPage() {
             {
               key: 'device',
               label: `装置（${devices.length}）`,
-              children: devices.length === 0 ? blank('该患者暂无装置记录') : (
+              children: devices.length === 0 ? blankHint('该患者暂无装置记录。', (
+                <Button size="small" type="primary" onClick={openBindDev}>立即绑定装置</Button>
+              )) : (
                 <ul className="record-list">
                   {devices.map((dv) => (
                     <li key={dv.id} className="record-row">
@@ -381,7 +390,9 @@ export default function PatientDetailPage() {
             {
               key: 'plan',
               label: `用药计划（${plans.length}）`,
-              children: plans.length === 0 ? blank('该患者暂无用药计划') : (
+              children: plans.length === 0 ? blankHint('该患者暂无用药计划。', (
+                <Button size="small" type="primary" onClick={() => navigate('/plans')}>去创建用药计划</Button>
+              )) : (
                 <ul className="record-list">
                   {plans.map((p) => (
                     <li key={p.id}>
@@ -442,7 +453,7 @@ export default function PatientDetailPage() {
             {
               key: 'training',
               label: `训练记录（${trainings.length}）`,
-              children: trainings.length === 0 ? blank('暂无训练记录') : (
+              children: trainings.length === 0 ? blankHint('暂无训练记录。患者完成操作自检或医护提交现场评估后，会显示在这里。') : (
                 <ul className="record-list">
                   {trainings.map((t) => (
                     <li key={t.id} className="record-row">
@@ -461,7 +472,9 @@ export default function PatientDetailPage() {
             {
               key: 'followup',
               label: `随访（${followups.length}）`,
-              children: followups.length === 0 ? blank('暂无随访记录') : (
+              children: followups.length === 0 ? blankHint('暂无随访记录。', (
+                <Button size="small" onClick={() => navigate('/followups')}>去记录随访</Button>
+              )) : (
                 <ul className="record-list">
                   {followups.map((f) => (
                     <li key={f.id}>
