@@ -41,33 +41,51 @@ interface AuditRow {
   created_at: string
 }
 
-// M06 内容与账号管理（J020 + 账号 + 审计）
+interface KnowledgeDoc {
+  id: string
+  device_model_id: string
+  title: string
+  version: string
+  review_status: string
+  source_url: string | null
+  reviewed_at: string | null
+  published_at: string | null
+  chunks: { id: string; chunk_no: number; text: string }[]
+}
+
+// M06 内容与账号管理（J020 + 账号 + 审计 + 知识内容）
 export default function AdminPage() {
   const [models, setModels] = useState<DeviceModel[]>([])
   const [guides, setGuides] = useState<Guide[]>([])
   const [users, setUsers] = useState<UserRow[]>([])
   const [audits, setAudits] = useState<AuditRow[]>([])
+  const [kdocs, setKdocs] = useState<KnowledgeDoc[]>([])
   const [loading, setLoading] = useState(false)
   const [modelModal, setModelModal] = useState(false)
   const [guideModal, setGuideModal] = useState(false)
   const [userModal, setUserModal] = useState(false)
+  const [kbModal, setKbModal] = useState(false)
+  const [kbDetail, setKbDetail] = useState<KnowledgeDoc | null>(null)
   const [modelForm] = Form.useForm()
   const [guideForm] = Form.useForm()
   const [userForm] = Form.useForm()
+  const [kbForm] = Form.useForm()
 
   const fetchAll = async () => {
     setLoading(true)
     try {
-      const [m, g, u, a] = await Promise.all([
+      const [m, g, u, a, k] = await Promise.all([
         apiFetch<{ items: DeviceModel[] }>('/api/admin/device-models?page_size=100'),
         apiFetch<{ items: Guide[] }>('/api/admin/device-guides?page_size=100'),
         apiFetch<{ items: UserRow[] }>('/api/admin/users?page_size=100'),
         apiFetch<{ items: AuditRow[] }>('/api/admin/audit-logs?page_size=50'),
+        apiFetch<{ items: KnowledgeDoc[] }>('/api/admin/knowledge-documents?page_size=100'),
       ])
       setModels(m.items)
       setGuides(g.items)
       setUsers(u.items)
       setAudits(a.items)
+      setKdocs(k.items)
     } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
   }
 
@@ -122,6 +140,33 @@ export default function AdminPage() {
     try {
       await apiFetch(`/api/admin/users/${u.id}`, { method: 'PATCH', body: JSON.stringify({ status: next }) })
       message.success(next === 'ACTIVE' ? '已启用' : '已停用')
+      fetchAll()
+    } catch (e) { message.error((e as Error).message) }
+  }
+
+  // ---- 知识内容：新建草稿 / 审核 / 发布 / 查看片段 ----
+  const createKb = async (v: { device_model_id: string; title: string; version: string; source_url?: string; text: string }) => {
+    try {
+      await apiFetch('/api/admin/knowledge-documents', { method: 'POST', body: JSON.stringify(v) })
+      message.success('知识草稿已创建（自动分块，供 AI 检索引用）')
+      setKbModal(false); kbForm.resetFields(); fetchAll()
+    } catch (e) { message.error((e as Error).message) }
+  }
+
+  const reviewKb = async (id: string) => {
+    try {
+      await apiFetch(`/api/admin/knowledge-documents/${id}`, {
+        method: 'PATCH', body: JSON.stringify({ review_action: 'APPROVE' }),
+      })
+      message.success('已标记医学审核通过')
+      fetchAll()
+    } catch (e) { message.error((e as Error).message) }
+  }
+
+  const publishKb = async (id: string) => {
+    try {
+      await apiFetch(`/api/admin/knowledge-documents/${id}/publish`, { method: 'POST' })
+      message.success('已发布（AI 助手即刻可引用该资料）')
       fetchAll()
     } catch (e) { message.error((e as Error).message) }
   }
@@ -239,6 +284,39 @@ export default function AdminPage() {
               ),
             },
             {
+              key: 'kb',
+              label: `知识内容（${kdocs.length}）`,
+              children: (
+                <>
+                  <div className="toolbar toolbar-end">
+                    <Button type="primary" onClick={() => setKbModal(true)}>新建知识草稿</Button>
+                  </div>
+                  <p className="muted" style={{ marginTop: 0 }}>
+                    知识文档按型号发布，经「审核 → 发布」后供患者端 AI 助手引用；草稿与未发布内容不可被检索。
+                  </p>
+                  <Table rowKey="id" loading={loading} dataSource={kdocs} pagination={false}
+                    columns={[
+                      { title: '型号', dataIndex: 'device_model_id', render: (v: string) => models.find(m => m.id === v)?.model_name || v },
+                      { title: '标题', dataIndex: 'title', render: (v: string) => <span className="strong">{v}</span> },
+                      { title: '版本', dataIndex: 'version' },
+                      { title: '片段数', render: (_: unknown, r: KnowledgeDoc) => r.chunks?.length || 0 },
+                      { title: '状态', dataIndex: 'review_status', render: (v: string) => statusTag(v) },
+                      {
+                        title: '操作', key: 'action',
+                        render: (_: unknown, r: KnowledgeDoc) => (
+                          <Space size={4}>
+                            <Button size="small" type="link" onClick={() => setKbDetail(r)}>查看</Button>
+                            {r.review_status === 'DRAFT' && <Button size="small" onClick={() => reviewKb(r.id)}>审核通过</Button>}
+                            {r.review_status === 'REVIEWED' && <Button size="small" type="primary" onClick={() => publishKb(r.id)}>发布</Button>}
+                            {r.review_status === 'PUBLISHED' && <span className="muted">已发布（不可改）</span>}
+                          </Space>
+                        ),
+                      },
+                    ]} />
+                </>
+              ),
+            },
+            {
               key: 'audit',
               label: `审计日志（${audits.length}）`,
               children: (
@@ -294,6 +372,45 @@ export default function AdminPage() {
             <Input placeholder="留空自动生成" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 新建知识草稿 */}
+      <Modal title="新建知识草稿" open={kbModal} onCancel={() => setKbModal(false)} onOk={() => kbForm.submit()} destroyOnHidden width={640}>
+        <Form form={kbForm} layout="vertical" onFinish={createKb}>
+          <Form.Item name="device_model_id" label="适用型号" rules={[{ required: true }]}>
+            <Select options={models.map(m => ({ value: m.id, label: m.model_name }))} />
+          </Form.Item>
+          <Form.Item name="title" label="标题" rules={[{ required: true }]}><Input placeholder="如 万托林使用要点（DEMO）" /></Form.Item>
+          <Form.Item name="version" label="版本" rules={[{ required: true }]} initialValue="1.0"><Input /></Form.Item>
+          <Form.Item name="source_url" label="来源链接（可选）"><Input placeholder="https://…" /></Form.Item>
+          <Form.Item name="text" label="正文（系统自动分块，供 AI 检索引用）" rules={[{ required: true }]}>
+            <Input.TextArea rows={7} placeholder={'每段一个要点，建议按段落或换行分隔。\n例如：使用前必须充分摇匀约 5 秒。\n吸入后应屏气约 10 秒。'} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 查看知识文档与片段 */}
+      <Modal title={kbDetail?.title || '知识文档'} open={kbDetail !== null} onCancel={() => setKbDetail(null)} footer={null} width={640}>
+        {kbDetail && (
+          <>
+            <Space size={8} style={{ marginBottom: 12 }}>
+              <span className="muted">{models.find(m => m.id === kbDetail.device_model_id)?.model_name}</span>
+              <span className="muted">v{kbDetail.version}</span>
+              {statusTag(kbDetail.review_status)}
+              <span className="muted">{kbDetail.chunks?.length || 0} 个片段</span>
+            </Space>
+            <ul className="record-list">
+              {(kbDetail.chunks || []).map((c) => (
+                <li key={c.id}>
+                  <div className="record-row">
+                    <span className="muted">片段 {c.chunk_no}</span>
+                  </div>
+                  <div className="record-body">{c.text}</div>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </Modal>
     </div>
   )
