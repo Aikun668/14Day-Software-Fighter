@@ -140,9 +140,13 @@ PLAN_SPECS = [
     ("P-005", 6, ["07:30", "19:30"], 6),    # 12 中覆盖 6  → 50.0%
     ("P-006", 7, ["08:00", "20:00"], 9),    # 14 中覆盖 9  → 64.3%
     ("P-007", 5, ["09:00", "21:00"], 8),    # 10 中覆盖 8  → 80.0%
-    ("P-010", 7, ["08:00", "20:00"], 4),    # 14 中覆盖 4  → 28.6%（低，触发待核查）
-    ("P-011", 7, ["08:00", "20:00"], 3),    # 14 中覆盖 3  → 21.4%（低）
-    ("P-012", 6, ["08:30", "20:30"], 5),    # 12 中覆盖 5  → 41.7%
+    ("P-008", 7, ["08:00", "20:00"], 12),   # 14 中覆盖 12 → 85.7%
+    ("P-009", 7, ["07:00", "19:00"], 10),   # 14 中覆盖 10 → 71.4%
+    ("P-010", 7, ["08:00", "20:00"], 4),    # 14 中覆盖 4  → 28.6%（极低，触发待核查）
+    ("P-011", 7, ["08:00", "20:00"], 3),    # 14 中覆盖 3  → 21.4%（极低）
+    ("P-012", 6, ["08:30", "20:30"], 5),    # 12 中覆盖 5  → 41.7%（低）
+    ("P-013", 7, ["08:00", "20:00"], 6),    # 14 中覆盖 6  → 42.9%（低）
+    ("P-014", 7, ["08:00", "20:00"], 12),   # 14 中覆盖 12 → 85.7%
 ]
 
 DRUG_BY_CATEGORY = {
@@ -398,16 +402,15 @@ def seed() -> None:
                             resource_type="medication_plan", resource_id=v2.id,
                             detail={"old_version": 1}, created_at=NOW - timedelta(days=1)))
 
-        # ===== 7) 训练记录 =====
-        for code in ("P-001", "P-002", "P-005"):
+        # ===== 7) 训练记录（覆盖 8 个患者，含患者自述与医护观察）=====
+        for code in ("P-001", "P-002", "P-004", "P-005", "P-008", "P-012", "P-013", "P-014"):
             p = patients[code]
             cat = dict((c, cc) for c, _, _, _, cc in PATIENTS)[code]
             g = guides[cat]
             steps = db.query(GuideStep).filter(GuideStep.guide_id == g.id).order_by(GuideStep.step_no).all()
             for k in range(2):
-                src = "PATIENT_REPORT"
                 sess = TrainingSession(
-                    patient_id=p.id, device_model_id=models[cat].id, guide_id=g.id, source=src,
+                    patient_id=p.id, device_model_id=models[cat].id, guide_id=g.id, source="PATIENT_REPORT",
                     submit_at=NOW - timedelta(days=k + 1, hours=2),
                     result="自述完成" if k == 0 else "部分步骤有困难",
                 )
@@ -417,17 +420,19 @@ def seed() -> None:
                     state = "DONE" if (i % 3 != 2 or k == 0) else "DIFFICULT"
                     db.add(TrainingStepResult(session_id=sess.id, step_id=st.id, check_state=state,
                                               note="屏气时间不足" if state == "DIFFICULT" else None))
-        # 医护现场观察 1 条
-        p3 = patients["P-003"]
-        g3 = guides["SMI"]
-        st3 = db.query(GuideStep).filter(GuideStep.guide_id == g3.id).order_by(GuideStep.step_no).all()
-        obs = TrainingSession(patient_id=p3.id, device_model_id=models["SMI"].id, guide_id=g3.id,
-                              source="CLINICIAN_OBSERVED", submit_at=NOW - timedelta(days=2, hours=5),
-                              result="操作熟练", evaluator_id=clin["clinician_a"].id)
-        db.add(obs)
-        db.flush()
-        for st in st3:
-            db.add(TrainingStepResult(session_id=obs.id, step_id=st.id, check_state="DONE"))
+        # 医护现场观察（3 个患者）
+        for code, result_txt in [("P-003", "操作熟练"), ("P-006", "按压与吸气不同步，已纠正"), ("P-010", "动作生疏，建议复训")]:
+            p = patients[code]
+            cat = dict((c, cc) for c, _, _, _, cc in PATIENTS)[code]
+            g = guides[cat]
+            steps = db.query(GuideStep).filter(GuideStep.guide_id == g.id).order_by(GuideStep.step_no).all()
+            obs = TrainingSession(patient_id=p.id, device_model_id=models[cat].id, guide_id=g.id,
+                                  source="CLINICIAN_OBSERVED", submit_at=NOW - timedelta(days=2, hours=5),
+                                  result=result_txt, evaluator_id=clin["clinician_a"].id)
+            db.add(obs)
+            db.flush()
+            for st in steps:
+                db.add(TrainingStepResult(session_id=obs.id, step_id=st.id, check_state="DONE"))
 
         # ===== 8) 待核查任务 + 随访 =====
         low = [("P-010", 4), ("P-011", 3), ("P-003", 7)]
@@ -457,6 +462,9 @@ def seed() -> None:
             ("P-001", None, "患者反馈吸入器使用顺畅，无不适。", "肯定依从性，提醒漱口。", "两周后常规随访。"),
             ("P-002", None, "患者主诉晨起气促，已建议门诊复诊。", "记录症状变化，未调整用药。", "门诊复诊后更新随访。"),
             ("P-005", None, "复训后操作明显改善。", "再次强调摇匀与同步按压。", "下次随访观察维持情况。"),
+            ("P-004", None, "登记情况良好，患者能完整复述操作流程。", "确认无明显问题。", "按计划随访。"),
+            ("P-011", tasks_created[1], "多次电话未接通，已发短信提醒。", "待联系上后安排门诊随访。", "继续电话跟进。"),
+            ("P-006", None, "患者反映夜间偶有憋醒，与医生沟通后暂观察。", "已记录症状时间点。", "两周内复诊评估。"),
         ]
         for code, task, fb, act, nxt in followup_specs:
             p = patients[code]
@@ -480,6 +488,11 @@ def seed() -> None:
             ("P-001", "RETRAIN", "请完成一次操作复训"),
             ("P-001", "FOLLOWUP", "请配合完成近期随访"),
             ("P-003", "RETRAIN", "复训后请再次完成操作自检"),
+            ("P-006", "RETRAIN", "上次观察发现按压不同步，请复训"),
+            ("P-008", "FOLLOWUP", "本周请配合完成电话随访"),
+            ("P-010", "RETRAIN", "依从性偏低，建议重新学习操作指导"),
+            ("P-012", "FOLLOWUP", "请配合完成近期随访"),
+            ("P-013", "RETRAIN", "请完成一次操作自检"),
         ]:
             p = patients[code]
             db.add(PatientReminder(
