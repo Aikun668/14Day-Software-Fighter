@@ -1,0 +1,14 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [
+      "控制台错误：Warning: Instance created by `useForm` is not connected to any Form element. Forget to pass `form` prop?",
+      "控制台错误：Warning: [antd: message] Static function can not consume context like dynamic theme. Please use 'App' component instead."
+    ],
+    "lint": []
+  }
+]

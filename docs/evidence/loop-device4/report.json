@@ -1,0 +1,12 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "failed": true,
+    "issues": [
+      "第 19 步「click .ant-picker-body td.is-today」：找不到元素 .ant-picker-body td.is-today；线索：去掉最后一段后 \".ant-picker-body\" 匹配 1 个元素；例如 click .ant-picker-body"
+    ]
+  }
+]

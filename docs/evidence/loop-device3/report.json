@@ -1,0 +1,12 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "failed": true,
+    "issues": [
+      "第 19 步「click .ant-picker-cell-in-view >> nth=10」：.ant-picker-cell-in-view >> nth=10 不是合法的 CSS；支持文字写法 text=\"Send money\" 和 button:has-text(\"Undo\")，例如 click text=\"Send money\""
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [
+      "第 20 步「click button.ant-btn-primary」：中心点被 div.ant-modal-wrap:nth-of-type(2) 挡住，动作仍照常执行"
+    ],
+    "lint": []
+  }
+]

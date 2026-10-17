@@ -90,7 +90,7 @@ def get_patient(
     return PatientDetail.model_validate(patient)
 
 
-@router.patch("/patients/{patient_id}", response_model=PatientBrief)
+@router.patch("/patients/{patient_id}", response_model=PatientDetail)
 def patch_patient(
     body: PatchPatientRequest,
     patient: Patient = Depends(get_patient_for_clinician),
@@ -104,7 +104,7 @@ def patch_patient(
         patient.note = body.note
     db.commit()
     db.refresh(patient)
-    return PatientBrief.model_validate(patient)
+    return PatientDetail.model_validate(patient)
 
 
 @router.get("/me/patient", response_model=PatientWithDevices)

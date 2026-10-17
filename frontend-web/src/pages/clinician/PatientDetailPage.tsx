@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, Card, Empty, Space, Spin, Tabs, Tag, message } from 'antd'
+import { Button, Card, DatePicker, Empty, Form, Input, Modal, Select, Space, Spin, Tabs, Tag, message } from 'antd'
+import dayjs from 'dayjs'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 
@@ -158,6 +159,129 @@ export default function PatientDetailPage() {
     return acc
   }, [])
 
+  // ---- 医护闭环操作（编辑 / 绑账号 / 绑装置 / 撤销登记 / 计划修订）----
+  const [editOpen, setEditOpen] = useState(false)
+  const [bindAcctOpen, setBindAcctOpen] = useState(false)
+  const [bindDevOpen, setBindDevOpen] = useState(false)
+  const [revOpen, setRevOpen] = useState<Plan | null>(null)
+  const [revokeTarget, setRevokeTarget] = useState<Event | null>(null)
+  const [revokeReason, setRevokeReason] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [editForm] = Form.useForm()
+  const [bindAcctForm] = Form.useForm()
+  const [bindDevForm] = Form.useForm()
+  const [revForm] = Form.useForm()
+  const [deviceOptions, setDeviceOptions] = useState<{ value: string; label: string }[]>([])
+
+  const reload = async () => {
+    if (!id) return
+    const [p2, d2, pl2, ev2, tr2, fu2] = await Promise.all([
+      apiFetch<PatientDetail>(`/api/patients/${id}`),
+      apiFetch<{ items: Device[] }>(`/api/patients/${id}/devices`).catch(() => ({ items: [] })),
+      apiFetch<{ items: Plan[] }>(`/api/patients/${id}/medication-plans?include_history=true&page_size=100`).catch(() => ({ items: [] })),
+      apiFetch<{ items: Event[] }>(`/api/patients/${id}/medication-events?page_size=50`).catch(() => ({ items: [] })),
+      apiFetch<{ items: Training[] }>(`/api/patients/${id}/training-sessions?page_size=50`).catch(() => ({ items: [] })),
+      apiFetch<{ items: Followup[] }>(`/api/patients/${id}/followups?page_size=50`).catch(() => ({ items: [] })),
+    ])
+    setPatient(p2); setDevices(d2.items); setPlans(pl2.items)
+    setEvents(ev2.items); setTrainings(tr2.items); setFollowups(fu2.items)
+  }
+
+  const openEdit = () => {
+    editForm.setFieldsValue({
+      display_name: patient?.display_name,
+      diagnosis_label: patient?.diagnosis_label,
+      note: patient?.note,
+    })
+    setEditOpen(true)
+  }
+
+  const submitEdit = async (v: { display_name: string; diagnosis_label?: string; note?: string }) => {
+    setBusy(true)
+    try {
+      await apiFetch(`/api/patients/${id}`, { method: 'PATCH', body: JSON.stringify(v) })
+      message.success('患者信息已更新')
+      setEditOpen(false)
+      await reload()
+    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+  }
+
+  const openBindAcct = () => setBindAcctOpen(true)
+
+  const submitBindAcct = async (v: { account: string; initial_password?: string }) => {
+    setBusy(true)
+    try {
+      const r = await apiFetch<{ temporary_password: string | null }>(`/api/patients/${id}/account`, {
+        method: 'POST', body: JSON.stringify(v),
+      })
+      message.success(r.temporary_password
+        ? `账号已创建，临时密码（一次性展示，请立即转告）：${r.temporary_password}`
+        : '账号绑定成功')
+      setBindAcctOpen(false)
+      bindAcctForm.resetFields()
+      await reload()
+    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+  }
+
+  const openBindDev = async () => {
+    try {
+      const ms = await apiFetch<{ items: { id: string; model_name: string }[] }>('/api/device-models?page_size=100')
+      setDeviceOptions(ms.items.map((m) => ({ value: m.id, label: m.model_name })))
+      setBindDevOpen(true)
+    } catch (e) { message.error((e as Error).message) }
+  }
+
+  const submitBindDev = async (v: { device_model_id: string; effective_from: string }) => {
+    setBusy(true)
+    try {
+      await apiFetch(`/api/patients/${id}/devices`, {
+        method: 'POST',
+        body: JSON.stringify({ device_model_id: v.device_model_id, effective_from: `${v.effective_from}T00:00:00+08:00` }),
+      })
+      message.success('装置已绑定（旧装置生效期自动关闭）')
+      setBindDevOpen(false)
+      bindDevForm.resetFields()
+      await reload()
+    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+  }
+
+  const submitRevision = async (v: { starts_at: string; drug_label?: string; times_text?: string }) => {
+    if (!revOpen) return
+    setBusy(true)
+    try {
+      const daily = (v.times_text || '')
+        .split('\n').map((s) => s.trim()).filter(Boolean)
+        .map((t) => ({ local_time: t }))
+      await apiFetch(`/api/medication-plans/${revOpen.id}/revisions`, {
+        method: 'POST',
+        body: JSON.stringify({
+          starts_at: `${v.starts_at}T00:00:00+08:00`,
+          drug_label: v.drug_label || undefined,
+          daily_times: revOpen.plan_type === 'REGULAR' ? daily : undefined,
+        }),
+      })
+      message.success('计划已修订（旧版本生效期自动关闭）')
+      setRevOpen(null)
+      revForm.resetFields()
+      await reload()
+    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+  }
+
+  const submitRevoke = async () => {
+    if (!revokeTarget) return
+    if (!revokeReason.trim()) { message.warning('请填写撤销原因'); return }
+    setBusy(true)
+    try {
+      await apiFetch(`/api/medication-events/${revokeTarget.id}/revoke`, {
+        method: 'POST', body: JSON.stringify({ reason: revokeReason.trim() }),
+      })
+      message.success('已撤销：该记录不再计入统计，原记录保留留痕')
+      setRevokeTarget(null)
+      setRevokeReason('')
+      await reload()
+    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+  }
+
   if (loading) {
     return <div style={{ padding: 48, textAlign: 'center' }}><Spin /></div>
   }
@@ -172,7 +296,19 @@ export default function PatientDetailPage() {
       <Button type="link" style={{ paddingLeft: 0, marginBottom: 8 }} onClick={() => navigate('/patients')}>← 返回患者列表</Button>
       <PageHeader title={`${patient.display_name} · ${patient.patient_code}`} />
 
-      <Card title="基本信息" style={{ marginBottom: 24 }}>
+      <Card
+        title="基本信息"
+        style={{ marginBottom: 24 }}
+        extra={
+          <Space size={8}>
+            <Button size="small" onClick={openEdit}>编辑信息</Button>
+            {patient.account_user_id
+              ? null
+              : <Button size="small" type="primary" onClick={openBindAcct}>绑定登录账号</Button>}
+            <Button size="small" onClick={openBindDev}>绑定装置</Button>
+          </Space>
+        }
+      >
         <dl className="info-grid">
           <div>
             <dt>患者编号</dt>
@@ -251,9 +387,21 @@ export default function PatientDetailPage() {
                     <li key={p.id}>
                       <div className="record-row">
                         <span className="strong">v{p.version} · {p.drug_label}</span>
-                        <Tag color={p.plan_type === 'REGULAR' ? 'blue' : 'default'}>
-                          {p.plan_type === 'REGULAR' ? '固定计划' : '按需计划'}
-                        </Tag>
+                        <Space size={6}>
+                          <Tag color={p.plan_type === 'REGULAR' ? 'blue' : 'default'}>
+                            {p.plan_type === 'REGULAR' ? '固定计划' : '按需计划'}
+                          </Tag>
+                          {p.ends_at === null && (
+                            <Button size="small" onClick={() => {
+                              revForm.setFieldsValue({
+                                starts_at: dayjs().format('YYYY-MM-DD'),
+                                drug_label: p.drug_label,
+                                times_text: p.daily_times?.map((t) => String(t.local_time).slice(0, 5)).join('\n') || '',
+                              })
+                              setRevOpen(p)
+                            }}>修订此计划</Button>
+                          )}
+                        </Space>
                       </div>
                       <div className="record-body">
                         <span className="record-meta">生效：{d(p.starts_at)} ~ {p.ends_at ? d(p.ends_at) : '至今'}</span>
@@ -282,7 +430,9 @@ export default function PatientDetailPage() {
                       <Space size={6} wrap>
                         <Tag>{e.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}</Tag>
                         {e.slot_id ? <Tag color="blue">固定时点</Tag> : <Tag>按需</Tag>}
-                        {e.status === 'REVOKED' && <Tag color="red">已撤销</Tag>}
+                        {e.status === 'REVOKED'
+                          ? <Tag color="red">已撤销</Tag>
+                          : <Button size="small" onClick={() => { setRevokeTarget(e); setRevokeReason('') }}>撤销</Button>}
                       </Space>
                     </li>
                   ))}
@@ -331,6 +481,84 @@ export default function PatientDetailPage() {
           ]}
         />
       </Card>
+
+      {/* 编辑患者信息 */}
+      <Modal title="编辑患者信息" open={editOpen} onCancel={() => setEditOpen(false)} onOk={() => editForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <Form form={editForm} layout="vertical" onFinish={submitEdit}>
+          <Form.Item name="display_name" label="姓名/别名" rules={[{ required: true, message: '请输入姓名或别名' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="diagnosis_label" label="诊断标签">
+            <Input placeholder="已知档案标签，非系统诊断" />
+          </Form.Item>
+          <Form.Item name="note" label="备注">
+            <Input.TextArea rows={3} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 绑定登录账号 */}
+      <Modal title="绑定登录账号" open={bindAcctOpen} onCancel={() => setBindAcctOpen(false)} onOk={() => bindAcctForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0 }}>
+          账号已存在时将直接绑定（须为未绑定的患者账号）；新账号会生成一次性临时密码。
+        </p>
+        <Form form={bindAcctForm} layout="vertical" onFinish={submitBindAcct}>
+          <Form.Item name="account" label="账号" rules={[{ required: true, min: 2, message: '请输入账号' }]}>
+            <Input placeholder="如 patient_wang" />
+          </Form.Item>
+          <Form.Item name="initial_password" label="初始密码（留空则自动生成临时密码）">
+            <Input.Password placeholder="留空自动生成" autoComplete="new-password" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 绑定装置 */}
+      <Modal title="绑定装置" open={bindDevOpen} onCancel={() => setBindDevOpen(false)} onOk={() => bindDevForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0 }}>
+          绑定新装置后，原装置生效期自动关闭；历史训练记录不改写。
+        </p>
+        <Form form={bindDevForm} layout="vertical" onFinish={submitBindDev}>
+          <Form.Item name="device_model_id" label="装置型号" rules={[{ required: true, message: '请选择型号' }]}>
+            <Select options={deviceOptions} placeholder="选择型号" />
+          </Form.Item>
+          <Form.Item name="effective_from" label="生效日期" rules={[{ required: true, message: '请选择生效日期' }]}>
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 计划修订 */}
+      <Modal title={`修订计划（v${revOpen?.version ?? ''}）`} open={revOpen !== null} onCancel={() => setRevOpen(null)} onOk={() => revForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0 }}>
+          修订会创建新版本：旧版本生效期自动关闭到新版本开始日，历史统计不改写。
+        </p>
+        <Form form={revForm} layout="vertical" onFinish={submitRevision}>
+          <Form.Item name="starts_at" label="新版本生效日期" rules={[{ required: true, message: '请选择生效日期' }]}>
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="drug_label" label="药物名称（可选，留空沿用）">
+            <Input />
+          </Form.Item>
+          {revOpen?.plan_type === 'REGULAR' && (
+            <Form.Item name="times_text" label="每日时点（每行一个，如 08:00）" rules={[{ required: true, message: '请至少填写一个时点' }]}>
+              <Input.TextArea rows={3} placeholder={'08:00\n20:00'} />
+            </Form.Item>
+          )}
+        </Form>
+      </Modal>
+
+      {/* 撤销登记（医护侧，破坏性操作需原因） */}
+      <Modal title="撤销此用药登记？" open={revokeTarget !== null} onCancel={() => { setRevokeTarget(null); setRevokeReason('') }} onOk={submitRevoke} confirmLoading={busy} okText="确认撤销" okButtonProps={{ danger: true }} destroyOnHidden>
+        <p style={{ color: 'var(--muted)', fontSize: 13 }}>
+          撤销后该记录不再计入统计，原记录与撤销留痕保留、不可删除。
+        </p>
+        <Input.TextArea
+          value={revokeReason}
+          onChange={(e) => setRevokeReason(e.target.value)}
+          rows={2}
+          placeholder="撤销原因（必填），如：患者反馈当时未实际使用"
+        />
+      </Modal>
     </div>
   )
 }

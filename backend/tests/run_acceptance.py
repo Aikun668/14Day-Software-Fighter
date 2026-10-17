@@ -35,6 +35,7 @@ STEPS = [
     ("S5 任务随访 AI", [str(PY), str(TESTS / "smoke_s5.py")], True),
     ("S6 越权隔离", [str(PY), str(TESTS / "smoke_s6_security.py")], True),
     ("S6 AI 故障回退", [str(PY), str(TESTS / "smoke_s6_ai.py")], True),
+    ("医护闭环（增补）", [str(PY), str(TESTS / "smoke_clinic_loop.py")], True),
 ]
 
 
