@@ -17,7 +17,7 @@ from app.auth.access_policy import get_patient_for_clinician
 from app.auth.dependencies import get_current_user
 from app.core.database import get_db
 from app.models import MedicationEvent, MedicationPlan, Patient, PlannedSlot, User
-from app.schemas.stats import MissingSlot, StatsResponse
+from app.schemas.stats import MissingSlot, OverviewResponse, PatientCoverageRow, StatsResponse
 
 router = APIRouter(prefix="/api", tags=["stats"])
 
@@ -105,3 +105,57 @@ def get_patient_stats(
     db: Session = Depends(get_db),
 ):
     return _compute_stats(db, patient_id, from_, to)
+
+
+@router.get("/stats/overview", response_model=OverviewResponse)
+def get_overview(
+    from_: str = Query(..., alias="from", pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    to: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """医护工作台概览：聚合负责患者的覆盖率，按缺失数降序（紧急在前）。
+
+    权限：仅 CLINICIAN/ADMIN；数据范围严格限定为本人负责的患者。
+    """
+    if user.role not in ("CLINICIAN", "ADMIN"):
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "仅医护可访问", "details": None})
+
+    patients = (
+        db.query(Patient)
+        .filter(Patient.assigned_clinician_id == user.id)
+        .order_by(Patient.patient_code)
+        .all()
+    )
+
+    rows: list[PatientCoverageRow] = []
+    total_N = 0
+    total_M = 0
+    planned_count = 0
+    for p in patients:
+        s = _compute_stats(db, p.id, from_, to)
+        if s.N > 0:
+            planned_count += 1
+            total_N += s.N
+            total_M += s.M
+        rows.append(PatientCoverageRow(
+            patient_id=str(p.id),
+            patient_code=p.patient_code,
+            display_name=p.display_name or p.patient_code,
+            N=s.N,
+            M=s.M,
+            coverage_rate=s.coverage_rate,
+            missing_count=len(s.missing_slots),
+        ))
+
+    # 紧急排序：缺失多在前；无计划（N=0）垫底
+    rows.sort(key=lambda r: (r.missing_count, r.patient_code), reverse=True)
+    rows.sort(key=lambda r: r.N == 0)  # 稳定排序：N=0 的排后面
+
+    coverage = round(total_M / total_N * 100, 1) if total_N > 0 else None
+    return OverviewResponse(
+        from_=from_, to=to, timezone="Asia/Shanghai",
+        patient_count=len(patients), planned_count=planned_count,
+        total_N=total_N, total_M=total_M, coverage_rate=coverage,
+        rows=rows,
+    )

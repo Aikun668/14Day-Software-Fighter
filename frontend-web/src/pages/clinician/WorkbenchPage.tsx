@@ -10,13 +10,62 @@ interface Task {
 }
 interface Patient { id: string; patient_code: string; display_name: string }
 interface Followup { id: string; patient_id: string; followed_at: string; feedback: string | null }
+interface CoverageRow {
+  patient_id: string; patient_code: string; display_name: string
+  N: number; M: number; coverage_rate: number | null; missing_count: number
+}
+interface Overview {
+  from_: string; to: string; timezone: string
+  patient_count: number; planned_count: number
+  total_N: number; total_M: number; coverage_rate: number | null
+  rows: CoverageRow[]
+}
 
-// M01 工作台（J036）
+/** 聚合覆盖率进度环（132px SVG） */
+function OverviewRing({ rate, M, N }: { rate: number | null; M: number; N: number }) {
+  const size = 128
+  const stroke = 12
+  const r = (size - stroke) / 2
+  const c = 2 * Math.PI * r
+  const ratio = rate === null ? 0 : Math.min(rate, 100) / 100
+  return (
+    <div className="wb-ring" style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }} aria-hidden>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#EFECFE" strokeWidth={stroke} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} fill="none"
+          stroke="#573BF4" strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={c * (1 - ratio)}
+        />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: 24, fontWeight: 600, color: '#573BF4' }}>
+          {rate === null ? '—' : `${rate}%`}
+        </span>
+        <span style={{ fontSize: 12, color: '#6B6E7F' }}>{M} / {N}</span>
+      </div>
+    </div>
+  )
+}
+
+/** 小型进度条（患者行内） */
+function MiniBar({ rate }: { rate: number | null }) {
+  const v = rate === null ? 0 : Math.min(rate, 100)
+  const color = rate === null ? '#C9CDD8' : v >= 80 ? '#14938E' : v >= 60 ? '#573BF4' : '#C7681F'
+  return (
+    <div style={{ width: 96, height: 6, background: '#F0F2F7', borderRadius: 3, overflow: 'hidden' }} aria-hidden>
+      <div style={{ width: `${v}%`, height: '100%', background: color, borderRadius: 3 }} />
+    </div>
+  )
+}
+
+// M01 工作台（J036）：聚合概览 + 紧急任务 + 患者覆盖率排行 + 近期随访
 export default function WorkbenchPage() {
   const navigate = useNavigate()
   const [tasks, setTasks] = useState<Task[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
   const [recentFollowups, setRecentFollowups] = useState<Followup[]>([])
+  const [overview, setOverview] = useState<Overview | null>(null)
   const [selected, setSelected] = useState<Task | null>(null)
   const [loading, setLoading] = useState(true)
   const [today] = useState(() => new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
@@ -24,10 +73,21 @@ export default function WorkbenchPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const t = await apiFetch<{ items: Task[] }>('/api/tasks?status=OPEN&page_size=50')
+        // 统计窗口：过去 7 个完整日（与演示数据 v1 区间一致）
+        const end = new Date()
+        const start = new Date(end.getTime() - 7 * 86400000)
+        const fmt = (d: Date) => d.toISOString().slice(0, 10)
+        const win = `from=${fmt(start)}&to=${fmt(end)}`
+
+        const [t, p, ov] = await Promise.all([
+          apiFetch<{ items: Task[] }>('/api/tasks?status=OPEN&page_size=50'),
+          apiFetch<{ items: Patient[] }>('/api/patients?page_size=100'),
+          apiFetch<Overview>(`/api/stats/overview?${win}`).catch(() => null),
+        ])
         setTasks(t.items)
-        const p = await apiFetch<{ items: Patient[] }>('/api/patients?page_size=100')
         setPatients(p.items)
+        setOverview(ov)
+
         // 聚合所有负责患者的随访，按时间倒序取最近 5 条
         const all = await Promise.all(
           p.items.map((pt) =>
@@ -53,11 +113,28 @@ export default function WorkbenchPage() {
     <div>
       <PageHeader title="工作台" meta={today} />
 
-      {/* 概览：一条白底横条，三格之间用竖线分开；加载中不显示未完成的数字 */}
+      {/* 概览：聚合覆盖率环 + 三格数字 */}
       <section className="overview" aria-label="工作台概览">
+        {overview && overview.total_N > 0 && (
+          <div className="overview-cell" style={{ paddingRight: 20 }}>
+            <span className="overview-label">近 7 日登记覆盖率</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <OverviewRing rate={overview.coverage_rate} M={overview.total_M} N={overview.total_N} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={{ fontSize: 13, color: '#6B6E7F' }}>
+                  负责患者 <b style={{ color: '#24243E' }}>{overview.patient_count}</b> 人
+                </span>
+                <span style={{ fontSize: 13, color: '#6B6E7F' }}>
+                  有计划 <b style={{ color: '#24243E' }}>{overview.planned_count}</b> 人
+                </span>
+                <span style={{ fontSize: 12, color: '#6B6E7F' }}>基于登记记录</span>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="overview-cell">
           <span className="overview-label">负责患者</span>
-          <span className="overview-value">{count(patients.length)}</span>
+          <span className="overview-value">{count(overview?.patient_count ?? patients.length)}</span>
         </div>
         <div className="overview-cell">
           <span className="overview-label">待核查任务</span>
@@ -69,7 +146,7 @@ export default function WorkbenchPage() {
         </div>
       </section>
 
-      {/* 主区：列表；选中任务后右侧出现详情 */}
+      {/* 主区：任务 + 患者覆盖率排行 */}
       <div className={`workbench-main${selected ? ' has-detail' : ''}`}>
         <Card title="待核查任务" loading={loading} styles={{ body: { padding: loading ? undefined : '4px 0' } }}>
           {tasks.length === 0 ? (
@@ -128,6 +205,49 @@ export default function WorkbenchPage() {
           </Card>
         )}
       </div>
+
+      {/* 患者覆盖率排行（紧急在前） */}
+      {overview && overview.rows.length > 0 && (
+        <Card title="患者登记情况（缺失多在前）" styles={{ body: { padding: 0 } }} extra={
+          <span style={{ fontSize: 12, color: '#6B6E7F' }}>近 7 日 · 点击姓名查看详情</span>
+        }>
+          <Table
+            rowKey="patient_id"
+            pagination={false}
+            dataSource={overview.rows}
+            locale={{ emptyText: '暂无数据' }}
+            onRow={(r) => ({ onClick: () => navigate(`/patients/${r.patient_id}`), style: { cursor: 'pointer' } })}
+            columns={[
+              {
+                title: '患者', dataIndex: 'display_name', width: 200,
+                render: (_: string, r: CoverageRow) => (
+                  <span className="task-name">{r.display_name}<span className="task-code">{r.patient_code}</span></span>
+                ),
+              },
+              {
+                title: '应记录 N', dataIndex: 'N', width: 100, align: 'right' as const,
+              },
+              {
+                title: '已登记 M', dataIndex: 'M', width: 100, align: 'right' as const,
+              },
+              {
+                title: '缺失', dataIndex: 'missing_count', width: 90, align: 'right' as const,
+                render: (v: number) => v > 0 ? <span style={{ color: '#B02A2A', fontWeight: 500 }}>{v}</span> : <span style={{ color: '#14938E' }}>0</span>,
+              },
+              {
+                title: '覆盖率', dataIndex: 'coverage_rate', width: 220,
+                render: (v: number | null) => (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                    <MiniBar rate={v} />
+                    <span style={{ fontSize: 13, color: '#24243E', fontWeight: 500 }}>{v === null ? '暂无计划' : `${v}%`}</span>
+                  </span>
+                ),
+                align: 'right' as const,
+              },
+            ]}
+          />
+        </Card>
+      )}
 
       {/* 近期随访 */}
       <Card title="近期随访" styles={{ body: { padding: 0 } }}>
