@@ -463,3 +463,119 @@ body,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* 患者动态时间线：日期分组 + 左侧轴线圆点 */
+.timeline {
+  max-width: 860px;
+}
+
+.tl-group {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 0 16px;
+}
+
+.tl-day {
+  font-size: 13px;
+  color: var(--ink-2);
+  padding-top: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 2px solid var(--line-soft);
+}
+
+.tl-item {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  padding: 12px 0 12px 18px;
+}
+
+.tl-item + .tl-item {
+  border-top: 1px dashed var(--line-soft);
+}
+
+.tl-dot {
+  position: absolute;
+  left: -5px;
+  top: 18px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 3px #fff;
+}
+
+.tl-dot.tone-ok {
+  background: #14938e;
+}
+
+.tl-dot.tone-warn {
+  background: #c7681f;
+}
+
+.tl-dot.tone-bad {
+  background: #b02a2a;
+}
+
+.tl-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.tl-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tl-kind {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--line-soft);
+  color: var(--ink-2);
+}
+
+.tl-kind.kind-event {
+  background: #e6f5f4;
+  color: #0d6e6a;
+}
+
+.tl-kind.kind-followup {
+  background: #fbf0e3;
+  color: #8a4d12;
+}
+
+.tl-kind.kind-training {
+  background: #efecfe;
+  color: #4d3ba7;
+}
+
+.tl-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tl-time {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-detail {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}

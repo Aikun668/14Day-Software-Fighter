@@ -101,6 +101,63 @@ export default function PatientDetailPage() {
   const dt = (s: string) => new Date(s).toLocaleString('zh-CN')
   const d = (s: string) => new Date(s).toLocaleDateString('zh-CN')
 
+  // ---- 动态时间线：把计划/登记/训练/随访合并为一条按时间倒序的轴 ----
+  type TimelineItem = {
+    key: string
+    at: number            // 排序时间戳
+    day: string           // 日期分组
+    time: string
+    kind: 'plan' | 'event' | 'training' | 'followup'
+    title: string
+    detail: string
+    tone: 'plan' | 'ok' | 'warn' | 'bad'
+  }
+  const toneLabel: Record<TimelineItem['kind'], string> = {
+    plan: '计划', event: '登记', training: '训练', followup: '随访',
+  }
+  const timeline: TimelineItem[] = [
+    ...plans.map<TimelineItem>((p) => ({
+      key: `p-${p.id}`, at: new Date(p.starts_at).getTime(),
+      day: d(p.starts_at), time: new Date(p.starts_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+      kind: 'plan',
+      title: `用药计划更新为 v${p.version}（${p.plan_type === 'REGULAR' ? '固定' : '按需'}）`,
+      detail: `${p.drug_label}｜每日时点：${p.daily_times?.length ? p.daily_times.map((t) => String(t.local_time).slice(0, 5)).join(' / ') : '—'}`,
+      tone: 'plan',
+    })),
+    ...events.map<TimelineItem>((e) => ({
+      key: `e-${e.id}`, at: new Date(e.occurred_at).getTime(),
+      day: d(e.occurred_at), time: new Date(e.occurred_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+      kind: 'event',
+      title: e.status === 'REVOKED' ? '用药登记（已撤销）' : '用药登记',
+      detail: `${e.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}${e.slot_id ? ' · 固定时点' : ' · 按需'}${e.note ? ` · ${e.note}` : ''}`,
+      tone: e.status === 'REVOKED' ? 'bad' : 'ok',
+    })),
+    ...trainings.map<TimelineItem>((t) => ({
+      key: `t-${t.id}`, at: new Date(t.submit_at).getTime(),
+      day: d(t.submit_at), time: new Date(t.submit_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+      kind: 'training',
+      title: t.source === 'PATIENT_REPORT' ? '操作自检（患者自述）' : '操作评估（医护观察）',
+      detail: t.result || '—',
+      tone: t.source === 'PATIENT_REPORT' ? 'ok' : 'plan',
+    })),
+    ...followups.map<TimelineItem>((f) => ({
+      key: `f-${f.id}`, at: new Date(f.followed_at).getTime(),
+      day: d(f.followed_at), time: new Date(f.followed_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+      kind: 'followup',
+      title: '随访记录',
+      detail: [f.feedback, f.action_taken, f.next_plan].filter(Boolean).join('｜'),
+      tone: 'warn',
+    })),
+  ].sort((a, b) => b.at - a.at)
+
+  // 按日期分组渲染
+  const timelineGroups = timeline.reduce<{ day: string; items: TimelineItem[] }[]>((acc, it) => {
+    const last = acc[acc.length - 1]
+    if (last && last.day === it.day) last.items.push(it)
+    else acc.push({ day: it.day, items: [it] })
+    return acc
+  }, [])
+
   if (loading) {
     return <div style={{ padding: 48, textAlign: 'center' }}><Spin /></div>
   }
@@ -143,6 +200,34 @@ export default function PatientDetailPage() {
       <Card>
         <Tabs
           items={[
+            {
+              key: 'timeline',
+              label: `动态（${timeline.length}）`,
+              children: timeline.length === 0 ? blank('暂无动态') : (
+                <div className="timeline">
+                  {timelineGroups.map((g) => (
+                    <div key={g.day} className="tl-group">
+                      <div className="tl-day">{g.day}</div>
+                      <ul className="tl-list">
+                        {g.items.map((it) => (
+                          <li key={it.key} className="tl-item">
+                            <span className={`tl-dot tone-${it.tone}`} aria-hidden />
+                            <div className="tl-body">
+                              <div className="tl-head">
+                                <span className={`tl-kind kind-${it.kind}`}>{toneLabel[it.kind]}</span>
+                                <span className="tl-title">{it.title}</span>
+                                <span className="tl-time">{it.time}</span>
+                              </div>
+                              <div className="tl-detail">{it.detail}</div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ),
+            },
             {
               key: 'device',
               label: `装置（${devices.length}）`,
