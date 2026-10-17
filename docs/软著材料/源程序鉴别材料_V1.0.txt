@@ -1,0 +1,3209 @@
+吸入治疗指导与依从性辅助管理软件 V1.0 — 源程序鉴别材料
+提交范围：前 30 页 + 后 30 页（每页 50 行）
+==============================================================================
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 1 页 / 共 60 页
+
+
+"""管理员账号管理 API（J011）。"""
+import secrets
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import require_admin
+from app.auth.security import hash_password
+from app.core.database import get_db
+from app.models import User
+from app.schemas.admin import (
+    CreateUserRequest,
+    CreateUserResponse,
+    PatchUserRequest,
+)
+from app.schemas.auth import UserBrief
+from app.schemas.common import Page
+
+router = APIRouter(prefix="/api/admin", tags=["admin-users"])
+
+
+@router.get("/users", response_model=Page[UserBrief])
+def list_users(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    role: str | None = None,
+    status: str | None = None,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    q = db.query(User)
+    if role:
+        q = q.filter(User.role == role)
+    if status:
+        q = q.filter(User.status == status)
+    total = q.count()
+    items = q.order_by(User.created_at).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[UserBrief](
+        items=[UserBrief.model_validate(u) for u in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/users", response_model=CreateUserResponse, status_code=status.HTTP_201_CREATED)
+def create_user(
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 2 页 / 共 60 页
+    body: CreateUserRequest,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    if body.role not in ("CLINICIAN", "ADMIN"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"code": "INVALID_ROLE", "message": "角色仅支持 CLINICIAN/ADMIN", "details": None},
+        )
+    if db.query(User).filter(User.account == body.account).first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "ACCOUNT_EXISTS", "message": "账号已存在", "details": None},
+        )
+    # 初始密码：传入则用，否则生成一次性临时密码（仅本次响应展示一次）
+    temp = body.initial_password or secrets.token_urlsafe(12)
+    user = User(
+        account=body.account,
+        password_hash=hash_password(temp),
+        role=body.role,
+        status="ACTIVE",
+        must_change_password=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return CreateUserResponse(
+        id=user.id,
+        account=user.account,
+        role=user.role,
+        status=user.status,
+        must_change_password=True,
+        temporary_password=temp if not body.initial_password else None,
+    )
+
+
+@router.patch("/users/{user_id}", response_model=UserBrief)
+def patch_user(
+    user_id: uuid.UUID,
+    body: PatchUserRequest,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "NOT_FOUND", "message": "用户不存在", "details": None},
+        )
+    user.status = body.status
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 3 页 / 共 60 页
+    db.commit()
+    db.refresh(user)
+    return UserBrief.model_validate(user)
+
+"""AI 型号限定问答 API（J041）。"""
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.auth.dependencies import get_current_user
+from app.core.database import get_db
+from app.models import Patient, PatientDevice, User
+from app.rag.service import ask
+from app.schemas.knowledge import AskRequest, AskResponse
+
+router = APIRouter(prefix="/api", tags=["ai"])
+
+
+@router.post("/ai/ask", response_model=AskResponse)
+def ai_ask(
+    body: AskRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # 患者：型号须为本人当前绑定之一
+    if user.role == "PATIENT":
+        patient = db.query(Patient).filter(Patient.account_user_id == user.id).first()
+        if patient is None:
+            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "未绑定患者档案", "details": None})
+        bound = (
+            db.query(PatientDevice)
+            .filter(
+                PatientDevice.patient_id == patient.id,
+                PatientDevice.device_model_id == body.device_model_id,
+            )
+            .first()
+        )
+        if bound is None:
+            raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "该型号未绑定到本人", "details": None})
+
+    try:
+        result = ask(db, body.device_model_id, body.question)
+    except Exception:
+        # LLM 不可用：局部失败，不影响其他功能
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "LLM_UNAVAILABLE", "message": "AI 服务暂不可用，请稍后重试", "details": {"ai_status": "ERROR"}},
+        )
+
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 4 页 / 共 60 页
+    return AskResponse(
+        status=result["status"],
+        answer=result["answer"],
+        citations=result["citations"],
+        device_model_id=body.device_model_id,
+    )
+
+"""审计日志 API（J018 骨架）。"""
+import uuid
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import require_admin
+from app.core.database import get_db
+from app.models import AuditLog, User
+from app.schemas.common import Page
+
+
+class AuditLogBrief(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    actor_id: uuid.UUID | None
+    action: str
+    resource_type: str
+    resource_id: uuid.UUID
+    detail: dict | None
+    created_at: datetime
+
+
+router = APIRouter(prefix="/api/admin", tags=["audit"])
+
+
+@router.get("/audit-logs", response_model=Page[AuditLogBrief])
+def list_audit_logs(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    actor_id: uuid.UUID | None = None,
+    resource_type: str | None = None,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    q = db.query(AuditLog)
+    if actor_id:
+        q = q.filter(AuditLog.actor_id == actor_id)
+    if resource_type:
+        q = q.filter(AuditLog.resource_type == resource_type)
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 5 页 / 共 60 页
+    total = q.count()
+    items = q.order_by(AuditLog.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[AuditLogBrief](
+        items=[AuditLogBrief.model_validate(a) for a in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+"""认证 API：登录/退出/改密/当前身份（J010）。"""
+import uuid
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.auth.dependencies import bearer_scheme, get_current_user
+from app.auth.security import (
+    create_access_token,
+    decode_token,
+    hash_password,
+    new_jti,
+    verify_password,
+)
+from app.core.database import get_db
+from app.models import AuthSession, User
+from app.schemas.auth import (
+    ChangePasswordRequest,
+    ChangePasswordResponse,
+    LoginRequest,
+    LoginResponse,
+    UserBrief,
+)
+
+router = APIRouter(prefix="/api", tags=["auth"])
+
+
+@router.post("/auth/login", response_model=LoginResponse)
+def login(body: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.account == body.account).first()
+    # 统一错误提示：账号不存在与密码错误返回同一 401，避免账号枚举
+    if user is None or not verify_password(body.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "INVALID_CREDENTIALS", "message": "账号或密码错误", "details": None},
+        )
+    if user.status != "ACTIVE":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "ACCOUNT_DISABLED", "message": "账号已停用", "details": None},
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 6 页 / 共 60 页
+        )
+
+    jti = new_jti()
+    token, expires_at = create_access_token(user.id, jti)
+    db.add(
+        AuthSession(
+            user_id=user.id,
+            token_jti=jti,
+            expires_at=expires_at,
+            created_at=datetime.now(timezone.utc),
+        )
+    )
+    db.commit()
+    return LoginResponse(access_token=token, expires_at=expires_at, user=UserBrief.model_validate(user))
+
+
+@router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(
+    credentials=Depends(bearer_scheme),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # 撤销当前会话（从 token 取 jti）
+    if credentials is not None:
+        try:
+            payload = decode_token(credentials.credentials)
+            jti = payload.get("jti")
+            if jti:
+                db.query(AuthSession).filter(AuthSession.token_jti == jti).update(
+                    {"revoked_at": datetime.now(timezone.utc)}
+                )
+                db.commit()
+        except Exception:
+            db.rollback()
+    return None
+
+
+@router.get("/me", response_model=UserBrief)
+def me(user: User = Depends(get_current_user)):
+    return UserBrief.model_validate(user)
+
+
+@router.post("/auth/change-password", response_model=ChangePasswordResponse)
+def change_password(
+    body: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(body.old_password, user.password_hash):
+        raise HTTPException(
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 7 页 / 共 60 页
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "WRONG_PASSWORD", "message": "原密码错误", "details": None},
+        )
+    user.password_hash = hash_password(body.new_password)
+    user.must_change_password = False
+    # 撤销该用户所有会话（改密后需重登）
+    db.query(AuthSession).filter(AuthSession.user_id == user.id).update(
+        {"revoked_at": datetime.now(timezone.utc)}
+    )
+    db.commit()
+    return ChangePasswordResponse(password_changed=True, relogin_required=True)
+
+"""装置目录与指导 API（J019）。"""
+import uuid
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import (
+    get_current_patient,
+    require_admin,
+    require_clinician,
+)
+from app.auth.dependencies import get_current_user
+from app.core.database import get_db
+from app.models import DeviceGuide, DeviceModel, GuideStep, PatientDevice, User
+from app.schemas.common import Page
+from app.schemas.device import (
+    DeviceModelBrief,
+    DeviceModelCreate,
+    GuideCreate,
+    GuideOut,
+    GuidePatch,
+    GuideStepOut,
+)
+from app.services.audit_service import write_audit
+
+router = APIRouter(prefix="/api", tags=["device"])
+
+
+# ---------- 型号目录 ----------
+@router.get("/device-models", response_model=Page[DeviceModelBrief])
+def list_device_models(
+    category: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    _: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 8 页 / 共 60 页
+    """患者/医护查询可用型号（只返回可用型号，不含草稿指导）。"""
+    q = db.query(DeviceModel).filter(DeviceModel.status == "ACTIVE")
+    if category:
+        q = q.filter(DeviceModel.category == category)
+    total = q.count()
+    items = q.order_by(DeviceModel.created_at).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[DeviceModelBrief](
+        items=[DeviceModelBrief.model_validate(m) for m in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/device-models/{model_id}/guide", response_model=GuideOut)
+def get_published_guide(
+    model_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """获取型号当前已发布指导；未发布 404。"""
+    model = db.query(DeviceModel).filter(DeviceModel.id == model_id).first()
+    if model is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "型号不存在", "details": None})
+
+    # 患者：型号须为本人当前绑定之一
+    if user.role == "PATIENT":
+        bound = (
+            db.query(PatientDevice)
+            .filter(
+                PatientDevice.patient_id == user.id,
+                PatientDevice.device_model_id == model_id,
+            )
+            .first()
+        )
+        # 注意：patient_id 是患者表 id，患者用户需通过 account_user_id 关联
+        from app.models import Patient
+
+        patient = db.query(Patient).filter(Patient.account_user_id == user.id).first()
+        if patient is None:
+            raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "无权访问", "details": None})
+        bound = (
+            db.query(PatientDevice)
+            .filter(
+                PatientDevice.patient_id == patient.id,
+                PatientDevice.device_model_id == model_id,
+            )
+            .first()
+        )
+        if bound is None:
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 9 页 / 共 60 页
+            raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "该型号未绑定到本人", "details": None})
+
+    guide = (
+        db.query(DeviceGuide)
+        .filter(
+            DeviceGuide.device_model_id == model_id,
+            DeviceGuide.review_status == "PUBLISHED",
+        )
+        .order_by(DeviceGuide.published_at.desc())
+        .first()
+    )
+    if guide is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "暂无已发布指导", "details": None})
+
+    steps = db.query(GuideStep).filter(GuideStep.guide_id == guide.id).order_by(GuideStep.step_no).all()
+    out = GuideOut.model_validate(guide)
+    out.steps = [GuideStepOut.model_validate(s) for s in steps]
+    return out
+
+
+# ---------- 后台管理（Admin） ----------
+@router.get("/admin/device-models", response_model=Page[DeviceModelBrief])
+def admin_list_device_models(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    search: str | None = None,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    q = db.query(DeviceModel)
+    if search:
+        like = f"%{search}%"
+        q = q.filter((DeviceModel.model_name.ilike(like)) | (DeviceModel.brand.ilike(like)))
+    total = q.count()
+    items = q.order_by(DeviceModel.created_at).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[DeviceModelBrief](
+        items=[DeviceModelBrief.model_validate(m) for m in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/admin/device-models", response_model=DeviceModelBrief, status_code=status.HTTP_201_CREATED)
+def admin_create_device_model(
+    body: DeviceModelCreate,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    model = DeviceModel(
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 10 页 / 共 60 页
+        category=body.category,
+        brand=body.brand,
+        model_name=body.model_name,
+        manufacturer=body.manufacturer,
+        status="ACTIVE",
+    )
+    db.add(model)
+    db.flush()
+    write_audit(db, user.id, "DEVICE_MODEL_CREATE", "device_model", model.id, {"model_name": model.model_name})
+    db.commit()
+    db.refresh(model)
+    return DeviceModelBrief.model_validate(model)
+
+
+# ---------- 指导草稿/发布（Admin / 授权医护） ----------
+@router.get("/admin/device-guides", response_model=Page[GuideOut])
+def admin_list_guides(
+    device_model_id: uuid.UUID | None = None,
+    review_status: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    q = db.query(DeviceGuide)
+    if device_model_id:
+        q = q.filter(DeviceGuide.device_model_id == device_model_id)
+    if review_status:
+        q = q.filter(DeviceGuide.review_status == review_status)
+    total = q.count()
+    items = q.order_by(DeviceGuide.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    result = []
+    for g in items:
+        steps = db.query(GuideStep).filter(GuideStep.guide_id == g.id).order_by(GuideStep.step_no).all()
+        out = GuideOut.model_validate(g)
+        out.steps = [GuideStepOut.model_validate(s) for s in steps]
+        result.append(out)
+    return Page[GuideOut](items=result, total=total, page=page, page_size=page_size)
+
+
+@router.post("/admin/device-guides", response_model=GuideOut, status_code=status.HTTP_201_CREATED)
+def admin_create_guide(
+    body: GuideCreate,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    if db.query(DeviceModel).filter(DeviceModel.id == body.device_model_id).first() is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "型号不存在", "details": None})
+    if (
+        db.query(DeviceGuide)
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 11 页 / 共 60 页
+        .filter(DeviceGuide.device_model_id == body.device_model_id, DeviceGuide.version == body.version)
+        .first()
+    ):
+        raise HTTPException(status_code=409, detail={"code": "VERSION_EXISTS", "message": "该型号此版本已存在", "details": None})
+    guide = DeviceGuide(
+        device_model_id=body.device_model_id,
+        version=body.version,
+        title=body.title,
+        source_title=body.source_title,
+        source_url=body.source_url,
+        review_status="DRAFT",
+    )
+    db.add(guide)
+    db.flush()
+    for s in body.steps:
+        db.add(GuideStep(guide_id=guide.id, step_no=s.step_no, text=s.text, error_notes=s.error_notes, image_path=s.image_path))
+    write_audit(db, user.id, "GUIDE_CREATE", "device_guide", guide.id, {"version": guide.version})
+    db.commit()
+    db.refresh(guide)
+    steps = db.query(GuideStep).filter(GuideStep.guide_id == guide.id).order_by(GuideStep.step_no).all()
+    out = GuideOut.model_validate(guide)
+    out.steps = [GuideStepOut.model_validate(s) for s in steps]
+    return out
+
+
+@router.patch("/admin/device-guides/{guide_id}", response_model=GuideOut)
+def admin_patch_guide(
+    guide_id: uuid.UUID,
+    body: GuidePatch,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    guide = db.query(DeviceGuide).filter(DeviceGuide.id == guide_id).first()
+    if guide is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "指导不存在", "details": None})
+    if guide.review_status != "DRAFT":
+        raise HTTPException(status_code=409, detail={"code": "ALREADY_PUBLISHED", "message": "已发布版本不可修改，请新建版本", "details": None})
+
+    if body.title is not None:
+        guide.title = body.title
+    if body.source_title is not None:
+        guide.source_title = body.source_title
+    if body.source_url is not None:
+        guide.source_url = body.source_url
+    if body.steps is not None:
+        db.query(GuideStep).filter(GuideStep.guide_id == guide.id).delete()
+        for s in body.steps:
+            db.add(GuideStep(guide_id=guide.id, step_no=s.step_no, text=s.text, error_notes=s.error_notes, image_path=s.image_path))
+    # 审核动作：记录真实审核人与时间
+    if body.review_action == "APPROVE":
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 12 页 / 共 60 页
+        guide.review_status = "REVIEWED"
+        guide.reviewed_by = user.id
+        guide.reviewed_at = datetime.now(timezone.utc)
+        write_audit(db, user.id, "GUIDE_REVIEW", "device_guide", guide.id, {"version": guide.version})
+
+    db.commit()
+    db.refresh(guide)
+    steps = db.query(GuideStep).filter(GuideStep.guide_id == guide.id).order_by(GuideStep.step_no).all()
+    out = GuideOut.model_validate(guide)
+    out.steps = [GuideStepOut.model_validate(s) for s in steps]
+    return out
+
+
+@router.post("/admin/device-guides/{guide_id}/publish", response_model=GuideOut)
+def admin_publish_guide(
+    guide_id: uuid.UUID,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    guide = db.query(DeviceGuide).filter(DeviceGuide.id == guide_id).first()
+    if guide is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "指导不存在", "details": None})
+    # 必须已完成医学审核（review_status == REVIEWED）才可发布
+    if guide.review_status != "REVIEWED":
+        raise HTTPException(status_code=409, detail={"code": "NOT_REVIEWED", "message": "须先完成医学审核才能发布", "details": None})
+    guide.review_status = "PUBLISHED"
+    guide.published_by = user.id
+    guide.published_at = datetime.now(timezone.utc)
+    write_audit(db, user.id, "GUIDE_PUBLISH", "device_guide", guide.id, {"version": guide.version})
+    db.commit()
+    db.refresh(guide)
+    steps = db.query(GuideStep).filter(GuideStep.guide_id == guide.id).order_by(GuideStep.step_no).all()
+    out = GuideOut.model_validate(guide)
+    out.steps = [GuideStepOut.model_validate(s) for s in steps]
+    return out
+
+"""随访 API（J037）。
+
+POST /api/followups：保存随访、可选关闭任务、可选创建复训提醒，同事务提交。
+"""
+import uuid
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import get_patient_for_clinician, require_clinician
+from app.core.database import get_db
+from app.models import Followup, Patient, PatientReminder, Task, User
+from app.schemas.common import Page
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 13 页 / 共 60 页
+from app.schemas.followup import FollowupCreate, FollowupOut
+from app.services.audit_service import write_audit
+
+router = APIRouter(prefix="/api", tags=["followups"])
+
+
+@router.post("/followups", status_code=status.HTTP_201_CREATED)
+def create_followup(
+    body: FollowupCreate,
+    user: User = Depends(require_clinician),
+    db: Session = Depends(get_db),
+):
+    # 归属校验
+    patient = db.query(Patient).filter(Patient.id == body.patient_id).first()
+    if patient is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "患者不存在", "details": None})
+    if user.role == "CLINICIAN" and patient.assigned_clinician_id != user.id:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "资源不可访问", "details": None})
+
+    try:
+        # 1) 保存随访
+        followup = Followup(
+            patient_id=patient.id,
+            task_id=body.task_id,
+            clinician_id=user.id,
+            followed_at=body.followed_at,
+            feedback=body.feedback,
+            action_taken=body.action_taken,
+            next_plan=body.next_plan,
+        )
+        db.add(followup)
+        db.flush()
+
+        # 2) 可选关闭任务
+        result_task = None
+        if body.close_task and body.task_id is not None:
+            task = db.query(Task).filter(Task.id == body.task_id).first()
+            if task is None:
+                raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "任务不存在", "details": None})
+            if task.patient_id != patient.id:
+                raise HTTPException(status_code=422, detail={"code": "TASK_MISMATCH", "message": "任务与患者不匹配", "details": None})
+            if task.status == "CLOSED":
+                raise HTTPException(status_code=409, detail={"code": "ALREADY_CLOSED", "message": "任务已关闭", "details": None})
+            task.status = "CLOSED"
+            task.closed_at = datetime.now(timezone.utc)
+            result_task = task
+
+        # 3) 可选创建复训提醒
+        reminder = None
+        if body.create_retraining_reminder:
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 14 页 / 共 60 页
+            reminder = PatientReminder(
+                patient_id=patient.id,
+                kind="RETRAIN",
+                title="请完成一次操作复训",
+                status="PENDING",
+                related_followup_id=followup.id,
+                created_by=user.id,
+            )
+            db.add(reminder)
+
+        write_audit(db, user.id, "FOLLOWUP_CREATE", "followup", followup.id, {"close_task": body.close_task})
+        db.commit()
+        db.refresh(followup)
+        return {
+            "followup": FollowupOut.model_validate(followup).model_dump(),
+            "task": None if result_task is None else {"id": str(result_task.id), "status": result_task.status},
+            "reminder": None if reminder is None else {"id": str(reminder.id), "kind": reminder.kind, "status": reminder.status},
+        }
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.get("/patients/{patient_id}/followups", response_model=Page[FollowupOut])
+def list_followups(
+    patient_id: uuid.UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    q = db.query(Followup).filter(Followup.patient_id == patient_id)
+    total = q.count()
+    items = q.order_by(Followup.followed_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[FollowupOut](
+        items=[FollowupOut.model_validate(f) for f in items],
+        total=total, page=page, page_size=page_size,
+    )
+
+"""知识库 API（J040）。
+
+文本按段落切 chunk；仅 PUBLISHED 进入检索；发布记录审核人/时间。
+"""
+import uuid
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 15 页 / 共 60 页
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import require_admin
+from app.core.database import get_db
+from app.models import DeviceModel, KnowledgeChunk, KnowledgeDocument, User
+from app.schemas.common import Page
+from app.schemas.knowledge import (
+    KnowledgeChunkOut,
+    KnowledgeDocCreate,
+    KnowledgeDocOut,
+    KnowledgeDocPatch,
+)
+from app.services.audit_service import write_audit
+
+router = APIRouter(prefix="/api/admin", tags=["knowledge"])
+
+
+def _split_chunks(text: str) -> list[str]:
+    """按段落切分（空行分段），过滤空白。"""
+    parts = [p.strip() for p in text.replace("\r\n", "\n").split("\n\n")]
+    return [p for p in parts if p]
+
+
+def _build_out(doc: KnowledgeDocument, db: Session) -> KnowledgeDocOut:
+    chunks = (
+        db.query(KnowledgeChunk)
+        .filter(KnowledgeChunk.document_id == doc.id)
+        .order_by(KnowledgeChunk.chunk_no)
+        .all()
+    )
+    out = KnowledgeDocOut.model_validate(doc)
+    out.chunks = [KnowledgeChunkOut.model_validate(c) for c in chunks]
+    return out
+
+
+@router.get("/knowledge-documents", response_model=Page[KnowledgeDocOut])
+def list_docs(
+    device_model_id: uuid.UUID | None = None,
+    review_status: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    q = db.query(KnowledgeDocument)
+    if device_model_id:
+        q = q.filter(KnowledgeDocument.device_model_id == device_model_id)
+    if review_status:
+        q = q.filter(KnowledgeDocument.review_status == review_status)
+    total = q.count()
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 16 页 / 共 60 页
+    items = q.order_by(KnowledgeDocument.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[KnowledgeDocOut](
+        items=[_build_out(d, db) for d in items],
+        total=total, page=page, page_size=page_size,
+    )
+
+
+@router.post("/knowledge-documents", response_model=KnowledgeDocOut, status_code=status.HTTP_201_CREATED)
+def create_doc(
+    body: KnowledgeDocCreate,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    if db.query(DeviceModel).filter(DeviceModel.id == body.device_model_id).first() is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "型号不存在", "details": None})
+    doc = KnowledgeDocument(
+        device_model_id=body.device_model_id,
+        guide_id=body.guide_id,
+        title=body.title,
+        version=body.version,
+        review_status="DRAFT",
+        source_url=body.source_url,
+    )
+    db.add(doc)
+    db.flush()
+    for i, chunk_text in enumerate(_split_chunks(body.text), start=1):
+        db.add(KnowledgeChunk(document_id=doc.id, chunk_no=i, text=chunk_text))
+    write_audit(db, user.id, "KNOWLEDGE_CREATE", "knowledge_document", doc.id, {"version": doc.version})
+    db.commit()
+    db.refresh(doc)
+    return _build_out(doc, db)
+
+
+@router.get("/knowledge-documents/{doc_id}", response_model=KnowledgeDocOut)
+def get_doc(
+    doc_id: uuid.UUID,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    doc = db.query(KnowledgeDocument).filter(KnowledgeDocument.id == doc_id).first()
+    if doc is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "文档不存在", "details": None})
+    return _build_out(doc, db)
+
+
+@router.patch("/knowledge-documents/{doc_id}", response_model=KnowledgeDocOut)
+def patch_doc(
+    doc_id: uuid.UUID,
+    body: KnowledgeDocPatch,
+    user: User = Depends(require_admin),
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 17 页 / 共 60 页
+    db: Session = Depends(get_db),
+):
+    doc = db.query(KnowledgeDocument).filter(KnowledgeDocument.id == doc_id).first()
+    if doc is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "文档不存在", "details": None})
+    if doc.review_status != "DRAFT":
+        raise HTTPException(status_code=409, detail={"code": "ALREADY_PUBLISHED", "message": "已发布文档不可原地修改", "details": None})
+
+    if body.title is not None:
+        doc.title = body.title
+    if body.source_url is not None:
+        doc.source_url = body.source_url
+    if body.text is not None:
+        db.query(KnowledgeChunk).filter(KnowledgeChunk.document_id == doc.id).delete()
+        for i, chunk_text in enumerate(_split_chunks(body.text), start=1):
+            db.add(KnowledgeChunk(document_id=doc.id, chunk_no=i, text=chunk_text))
+    if body.review_action == "APPROVE":
+        doc.review_status = "REVIEWED"
+        doc.reviewed_by = user.id
+        doc.reviewed_at = datetime.now(timezone.utc)
+        write_audit(db, user.id, "KNOWLEDGE_REVIEW", "knowledge_document", doc.id, {"version": doc.version})
+
+    db.commit()
+    db.refresh(doc)
+    return _build_out(doc, db)
+
+
+@router.post("/knowledge-documents/{doc_id}/publish", response_model=KnowledgeDocOut)
+def publish_doc(
+    doc_id: uuid.UUID,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    doc = db.query(KnowledgeDocument).filter(KnowledgeDocument.id == doc_id).first()
+    if doc is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "文档不存在", "details": None})
+    if doc.review_status != "REVIEWED":
+        raise HTTPException(status_code=409, detail={"code": "NOT_REVIEWED", "message": "须先完成医学审核才能发布", "details": None})
+    doc.review_status = "PUBLISHED"
+    doc.published_by = user.id
+    doc.published_at = datetime.now(timezone.utc)
+    write_audit(db, user.id, "KNOWLEDGE_PUBLISH", "knowledge_document", doc.id, {"version": doc.version})
+    db.commit()
+    db.refresh(doc)
+    return _build_out(doc, db)
+
+"""用药登记与撤销 API（J029）。"""
+import uuid
+from datetime import datetime, timezone
+
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 18 页 / 共 60 页
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import get_patient_for_clinician
+from app.auth.dependencies import get_current_user
+from app.core.database import get_db
+from app.models import (
+    MedicationEvent,
+    MedicationPlan,
+    Patient,
+    PlannedSlot,
+    User,
+)
+from app.schemas.common import Page
+from app.schemas.medication import (
+    MedicationEventCreate,
+    MedicationEventCreateResp,
+    MedicationEventOut,
+    RevokeRequest,
+)
+from app.services.audit_service import write_audit
+
+router = APIRouter(prefix="/api", tags=["medication"])
+
+
+@router.post("/medication-events", response_model=MedicationEventCreateResp, status_code=status.HTTP_201_CREATED)
+def create_event(
+    body: MedicationEventCreate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # 确定 patient + source
+    if user.role == "PATIENT":
+        patient = db.query(Patient).filter(Patient.account_user_id == user.id).first()
+        if patient is None:
+            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "未绑定患者档案", "details": None})
+        source = "PATIENT_REPORT"
+    elif user.role in ("CLINICIAN", "ADMIN"):
+        if body.patient_id is None:
+            raise HTTPException(status_code=422, detail={"code": "PATIENT_REQUIRED", "message": "医护登记须指定患者", "details": None})
+        patient = db.query(Patient).filter(Patient.id == body.patient_id).first()
+        if patient is None:
+            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "患者不存在", "details": None})
+        if user.role == "CLINICIAN" and patient.assigned_clinician_id != user.id:
+            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "资源不可访问", "details": None})
+        source = "CLINICIAN_OBSERVED"
+    else:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "无权操作", "details": None})
+
+    if body.source == "DEVICE":
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 19 页 / 共 60 页
+        raise HTTPException(status_code=422, detail={"code": "INVALID_SOURCE", "message": "不支持设备来源", "details": None})
+
+    # 校验计划归属
+    plan = db.query(MedicationPlan).filter(MedicationPlan.id == body.plan_id).first()
+    if plan is None or plan.patient_id != patient.id:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "计划不存在或不属于该患者", "details": None})
+
+    # REGULAR 必须有 slot；PRN 必须 null
+    if plan.plan_type == "REGULAR":
+        if body.slot_id is None:
+            raise HTTPException(status_code=422, detail={"code": "SLOT_REQUIRED", "message": "固定计划须关联时点", "details": None})
+        slot = db.query(PlannedSlot).filter(PlannedSlot.id == body.slot_id).first()
+        if slot is None or slot.plan_id != plan.id or slot.patient_id != patient.id:
+            raise HTTPException(status_code=422, detail={"code": "SLOT_MISMATCH", "message": "时点与计划/患者不一致", "details": None})
+    else:  # PRN
+        if body.slot_id is not None:
+            raise HTTPException(status_code=422, detail={"code": "PRN_NO_SLOT", "message": "按需登记不能关联时点", "details": None})
+
+    # 重复判定：同 slot 已有 ACTIVE 记录
+    is_duplicate = False
+    if body.slot_id is not None:
+        dup = (
+            db.query(MedicationEvent)
+            .filter(
+                MedicationEvent.slot_id == body.slot_id,
+                MedicationEvent.status == "ACTIVE",
+            )
+            .first()
+        )
+        is_duplicate = dup is not None
+
+    event = MedicationEvent(
+        patient_id=patient.id,
+        plan_id=plan.id,
+        slot_id=body.slot_id,
+        source=source,
+        occurred_at=body.occurred_at,
+        recorded_at=datetime.now(timezone.utc),
+        status="ACTIVE",
+        note=body.note,
+    )
+    db.add(event)
+    db.flush()
+    write_audit(db, user.id, "MEDICATION_RECORD", "medication_event", event.id, {"source": source})
+    db.commit()
+    db.refresh(event)
+    return MedicationEventCreateResp(event=MedicationEventOut.model_validate(event), is_duplicate=is_duplicate)
+
+
+@router.get("/me/medication-events", response_model=Page[MedicationEventOut])
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 20 页 / 共 60 页
+def list_my_events(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    patient = db.query(Patient).filter(Patient.account_user_id == user.id).first()
+    if patient is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "未绑定患者档案", "details": None})
+    q = db.query(MedicationEvent).filter(MedicationEvent.patient_id == patient.id)
+    total = q.count()
+    items = q.order_by(MedicationEvent.recorded_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[MedicationEventOut](
+        items=[MedicationEventOut.model_validate(e) for e in items],
+        total=total, page=page, page_size=page_size,
+    )
+
+
+@router.get("/patients/{patient_id}/medication-events", response_model=Page[MedicationEventOut])
+def list_patient_events(
+    patient_id: uuid.UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    status_filter: str | None = Query(None, alias="status"),
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    q = db.query(MedicationEvent).filter(MedicationEvent.patient_id == patient_id)
+    if status_filter:
+        q = q.filter(MedicationEvent.status == status_filter)
+    total = q.count()
+    items = q.order_by(MedicationEvent.recorded_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[MedicationEventOut](
+        items=[MedicationEventOut.model_validate(e) for e in items],
+        total=total, page=page, page_size=page_size,
+    )
+
+
+@router.post("/medication-events/{event_id}/revoke", response_model=MedicationEventOut)
+def revoke_event(
+    event_id: uuid.UUID,
+    body: RevokeRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(MedicationEvent).filter(MedicationEvent.id == event_id).first()
+    if event is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "记录不存在", "details": None})
+    if event.status == "REVOKED":
+        raise HTTPException(status_code=409, detail={"code": "ALREADY_REVOKED", "message": "记录已撤销", "details": None})
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 21 页 / 共 60 页
+    # 权限：记录所属患者或所属医护
+    if user.role == "PATIENT":
+        patient = db.query(Patient).filter(Patient.account_user_id == user.id).first()
+        if patient is None or patient.id != event.patient_id:
+            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "资源不可访问", "details": None})
+    elif user.role == "CLINICIAN":
+        patient = db.query(Patient).filter(Patient.id == event.patient_id).first()
+        if patient is None or patient.assigned_clinician_id != user.id:
+            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "资源不可访问", "details": None})
+
+    event.status = "REVOKED"
+    event.revoked_by = user.id
+    event.revoked_at = datetime.now(timezone.utc)
+    event.revoke_reason = body.reason
+    write_audit(db, user.id, "MEDICATION_REVOKE", "medication_event", event.id, {"reason": body.reason})
+    db.commit()
+    db.refresh(event)
+    return MedicationEventOut.model_validate(event)
+
+"""患者档案 API（J015）。"""
+import secrets
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import (
+    get_current_patient,
+    get_patient_for_clinician,
+    require_clinician,
+)
+from app.auth.dependencies import get_current_user
+from app.auth.security import hash_password
+from app.core.database import get_db
+from app.models import Patient, PatientDevice, User
+from app.services.audit_service import write_audit
+from app.schemas.admin import (
+    CreatePatientRequest,
+    PatchPatientRequest,
+)
+from app.schemas.auth import UserBrief
+from app.schemas.common import Page
+from app.schemas.patient import (
+    BindDeviceRequest,
+    CreatePatientAccountRequest,
+    DeviceSummary,
+    PatientBrief,
+    PatientDetail,
+    PatientWithDevices,
+)
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 22 页 / 共 60 页
+
+router = APIRouter(prefix="/api", tags=["patients"])
+
+
+@router.get("/patients", response_model=Page[PatientBrief])
+def list_patients(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    search: str | None = None,
+    user: User = Depends(require_clinician),
+    db: Session = Depends(get_db),
+):
+    q = db.query(Patient).filter(Patient.assigned_clinician_id == user.id)
+    if search:
+        like = f"%{search}%"
+        q = q.filter(
+            (Patient.patient_code.ilike(like)) | (Patient.display_name.ilike(like))
+        )
+    total = q.count()
+    items = q.order_by(Patient.created_at).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[PatientBrief](
+        items=[PatientBrief.model_validate(p) for p in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/patients", response_model=PatientBrief, status_code=status.HTTP_201_CREATED)
+def create_patient(
+    body: CreatePatientRequest,
+    user: User = Depends(require_clinician),
+    db: Session = Depends(get_db),
+):
+    if db.query(Patient).filter(Patient.patient_code == body.patient_code).first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "PATIENT_CODE_EXISTS", "message": "患者编号已存在", "details": None},
+        )
+    patient = Patient(
+        patient_code=body.patient_code,
+        display_name=body.display_name,
+        diagnosis_label=body.diagnosis_label,
+        note=body.note,
+        assigned_clinician_id=user.id,
+    )
+    db.add(patient)
+    db.flush()
+    write_audit(db, user.id, "PATIENT_CREATE", "patient", patient.id, {"code": patient.patient_code})
+    db.commit()
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 23 页 / 共 60 页
+    db.refresh(patient)
+    return PatientBrief.model_validate(patient)
+
+
+@router.get("/patients/{patient_id}", response_model=PatientDetail)
+def get_patient(
+    patient: Patient = Depends(get_patient_for_clinician),
+):
+    return PatientDetail.model_validate(patient)
+
+
+@router.patch("/patients/{patient_id}", response_model=PatientBrief)
+def patch_patient(
+    body: PatchPatientRequest,
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    if body.display_name is not None:
+        patient.display_name = body.display_name
+    if body.diagnosis_label is not None:
+        patient.diagnosis_label = body.diagnosis_label
+    if body.note is not None:
+        patient.note = body.note
+    db.commit()
+    db.refresh(patient)
+    return PatientBrief.model_validate(patient)
+
+
+@router.get("/me/patient", response_model=PatientWithDevices)
+def get_my_patient(
+    patient: Patient = Depends(get_current_patient),
+    db: Session = Depends(get_db),
+):
+    devices = db.query(PatientDevice).filter(PatientDevice.patient_id == patient.id).all()
+    return PatientWithDevices(
+        **PatientDetail.model_validate(patient).model_dump(),
+        current_devices=[DeviceSummary.model_validate(d) for d in devices],
+    )
+
+
+@router.post("/patients/{patient_id}/account", status_code=status.HTTP_201_CREATED)
+def create_patient_account(
+    body: CreatePatientAccountRequest,
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    if patient.account_user_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "ACCOUNT_ALREADY_BOUND", "message": "患者已绑定账号", "details": None},
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 24 页 / 共 60 页
+        )
+    existing = db.query(User).filter(User.account == body.account).first()
+    if existing:
+        # 复用已存在但未绑定的 PATIENT 账号（如种子数据预置的患者账号）
+        if existing.role != "PATIENT":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"code": "ACCOUNT_EXISTS", "message": "账号已存在且非患者角色", "details": None},
+            )
+        bound = db.query(Patient).filter(Patient.account_user_id == existing.id).first()
+        if bound is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"code": "ACCOUNT_ALREADY_BOUND", "message": "账号已绑定其他患者", "details": None},
+            )
+        patient.account_user_id = existing.id
+        write_audit(db, patient.assigned_clinician_id, "PATIENT_ACCOUNT_BIND", "patient", patient.id, {"account": existing.account})
+        db.commit()
+        return {
+            "patient_id": patient.id,
+            "user": UserBrief.model_validate(existing).model_dump(),
+            "temporary_password": None,
+        }
+    temp = body.initial_password or secrets.token_urlsafe(12)
+    user = User(
+        account=body.account,
+        password_hash=hash_password(temp),
+        role="PATIENT",
+        status="ACTIVE",
+        must_change_password=True,
+    )
+    db.add(user)
+    db.flush()
+    patient.account_user_id = user.id
+    write_audit(db, patient.assigned_clinician_id, "PATIENT_ACCOUNT_BIND", "patient", patient.id, {"account": user.account})
+    db.commit()
+    return {
+        "patient_id": patient.id,
+        "user": UserBrief.model_validate(user).model_dump(),
+        "temporary_password": temp if not body.initial_password else None,
+    }
+
+
+@router.get("/patients/{patient_id}/devices")
+def list_patient_devices(
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    devices = db.query(PatientDevice).filter(PatientDevice.patient_id == patient.id).all()
+    return {
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 25 页 / 共 60 页
+        "items": [DeviceSummary.model_validate(d) for d in devices],
+        "total": len(devices),
+    }
+
+
+@router.post("/patients/{patient_id}/devices", status_code=status.HTTP_201_CREATED)
+def bind_patient_device(
+    body: BindDeviceRequest,
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    # 关闭旧装置生效期（同一患者切换装置，历史训练不改写）
+    db.query(PatientDevice).filter(
+        PatientDevice.patient_id == patient.id,
+        PatientDevice.effective_to.is_(None),
+    ).update({"effective_to": body.effective_from})
+    device = PatientDevice(
+        patient_id=patient.id,
+        device_model_id=body.device_model_id,
+        effective_from=body.effective_from,
+    )
+    db.add(device)
+    db.flush()
+    write_audit(db, patient.assigned_clinician_id, "DEVICE_BIND", "patient_device", device.id, {"model": str(body.device_model_id)})
+    db.commit()
+    db.refresh(device)
+    return DeviceSummary.model_validate(device)
+
+"""用药计划 API（J027）。"""
+import uuid
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from app.auth.access_policy import get_patient_for_clinician
+from app.auth.dependencies import get_current_user
+from app.core.database import get_db
+from app.models import (
+    MedicationEvent,
+    MedicationPlan,
+    Patient,
+    PlanDailyTime,
+    PlannedSlot,
+    User,
+)
+from app.schemas.common import Page
+from app.schemas.plan import (
+    DailyTimeOut,
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 26 页 / 共 60 页
+    PlanCreate,
+    PlanOut,
+    PlanRevision,
+    PlannedSlotOut,
+)
+from app.services.audit_service import write_audit
+from app.services.plan_service import ensure_slots
+
+router = APIRouter(prefix="/api", tags=["plans"])
+
+
+def _build_plan_out(plan: MedicationPlan, db: Session) -> PlanOut:
+    daily_times = db.query(PlanDailyTime).filter(PlanDailyTime.plan_id == plan.id).all()
+    out = PlanOut.model_validate(plan)
+    out.daily_times = [DailyTimeOut.model_validate(d) for d in daily_times]
+    return out
+
+
+@router.get("/patients/{patient_id}/medication-plans", response_model=Page[PlanOut])
+def list_plans(
+    patient_id: uuid.UUID,
+    include_history: bool = False,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    q = db.query(MedicationPlan).filter(MedicationPlan.patient_id == patient_id)
+    if not include_history:
+        now = datetime.now(timezone.utc)
+        q = q.filter(
+            (MedicationPlan.ends_at.is_(None)) | (MedicationPlan.ends_at > now)
+        )
+    total = q.count()
+    items = q.order_by(MedicationPlan.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[PlanOut](
+        items=[_build_plan_out(p, db) for p in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/patients/{patient_id}/medication-plans", response_model=PlanOut, status_code=status.HTTP_201_CREATED)
+def create_plan(
+    body: PlanCreate,
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    # REGULAR 至少一个 daily_times；PRN 不配时点
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 27 页 / 共 60 页
+    if body.plan_type == "REGULAR" and len(body.daily_times) == 0:
+        raise HTTPException(status_code=422, detail={"code": "DAILY_TIMES_REQUIRED", "message": "固定计划至少配置一个每日时点", "details": None})
+    if body.plan_type == "PRN" and len(body.daily_times) > 0:
+        raise HTTPException(status_code=422, detail={"code": "PRN_NO_TIMES", "message": "按需计划不配置时点", "details": None})
+
+    plan = MedicationPlan(
+        patient_id=patient.id,
+        device_model_id=body.device_model_id,
+        plan_group_id=uuid.uuid4(),
+        version=1,
+        drug_label=body.drug_label,
+        plan_type=body.plan_type,
+        timezone=body.timezone,
+        starts_at=body.starts_at,
+        ends_at=body.ends_at,
+    )
+    db.add(plan)
+    db.flush()
+    for dt in body.daily_times:
+        h, m = dt.local_time.split(":")
+        db.add(PlanDailyTime(plan_id=plan.id, local_time=datetime(2000, 1, 1, int(h), int(m)).time(), label=dt.label, is_enabled=True))
+    write_audit(db, patient.assigned_clinician_id, "PLAN_CREATE", "medication_plan", plan.id, {"plan_type": plan.plan_type})
+    db.commit()
+    db.refresh(plan)
+    return _build_plan_out(plan, db)
+
+
+@router.post("/medication-plans/{plan_id}/revisions", response_model=PlanOut, status_code=status.HTTP_201_CREATED)
+def create_revision(
+    plan_id: uuid.UUID,
+    body: PlanRevision,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    old = db.query(MedicationPlan).filter(MedicationPlan.id == plan_id).first()
+    if old is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "计划不存在", "details": None})
+    # 归属校验
+    if user.role == "CLINICIAN":
+        patient = db.query(Patient).filter(Patient.id == old.patient_id).first()
+        if patient is None or patient.assigned_clinician_id != user.id:
+            raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "资源不可访问", "details": None})
+
+    # 同组版本不重叠
+    overlap = (
+        db.query(MedicationPlan)
+        .filter(
+            MedicationPlan.plan_group_id == old.plan_group_id,
+            MedicationPlan.id != old.id,
+            MedicationPlan.ends_at.is_(None) | (MedicationPlan.ends_at > body.starts_at),
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 28 页 / 共 60 页
+        )
+        .first()
+    )
+    if overlap:
+        raise HTTPException(status_code=409, detail={"code": "PLAN_VERSION_CONFLICT", "message": "版本生效区间重叠", "details": None})
+
+    # 旧版 ends_at = 新版本 starts_at
+    old.ends_at = body.starts_at
+
+    new = MedicationPlan(
+        patient_id=old.patient_id,
+        device_model_id=body.device_model_id or old.device_model_id,
+        plan_group_id=old.plan_group_id,
+        version=old.version + 1,
+        drug_label=body.drug_label or old.drug_label,
+        plan_type=old.plan_type,
+        timezone=old.timezone,
+        starts_at=body.starts_at,
+        ends_at=body.ends_at,
+    )
+    db.add(new)
+    db.flush()
+    if body.daily_times is not None:
+        for dt in body.daily_times:
+            h, m = dt.local_time.split(":")
+            db.add(PlanDailyTime(plan_id=new.id, local_time=datetime(2000, 1, 1, int(h), int(m)).time(), label=dt.label, is_enabled=True))
+    # 旧版未来未登记 slot 置 CANCELLED
+    db.query(PlannedSlot).filter(
+        PlannedSlot.plan_id == old.id,
+        PlannedSlot.state == "ACTIVE",
+        PlannedSlot.scheduled_at >= body.starts_at,
+    ).update({"state": "CANCELLED"})
+    write_audit(db, user.id, "PLAN_REVISION", "medication_plan", new.id, {"old_version": old.version})
+    db.commit()
+    db.refresh(new)
+    return _build_plan_out(new, db)
+
+
+@router.get("/me/medication-plans", response_model=Page[PlanOut])
+def get_my_plans(
+    include_history: bool = False,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    patient = db.query(Patient).filter(Patient.account_user_id == user.id).first()
+    if patient is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "未绑定患者档案", "details": None})
+    q = db.query(MedicationPlan).filter(MedicationPlan.patient_id == patient.id)
+    if not include_history:
+        now = datetime.now(timezone.utc)
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 29 页 / 共 60 页
+        q = q.filter((MedicationPlan.ends_at.is_(None)) | (MedicationPlan.ends_at > now))
+    items = q.order_by(MedicationPlan.created_at.desc()).all()
+    return Page[PlanOut](items=[_build_plan_out(p, db) for p in items], total=len(items), page=1, page_size=20)
+
+
+@router.get("/me/daily-slots")
+def get_my_daily_slots(
+    date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    from_: str | None = Query(None, alias="from", pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    to: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    patient = db.query(Patient).filter(Patient.account_user_id == user.id).first()
+    if patient is None:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "未绑定患者档案", "details": None})
+
+    tz = ZoneInfo("Asia/Shanghai")
+    if date:
+        day = datetime.strptime(date, "%Y-%m-%d").date()
+        date_from = datetime.combine(day, time(0, 0), tzinfo=tz)
+        date_to = date_from + timedelta(days=1)
+    elif from_ and to:
+        date_from = datetime.strptime(from_, "%Y-%m-%d").replace(tzinfo=tz)
+        date_to = datetime.strptime(to, "%Y-%m-%d").replace(tzinfo=tz)
+    else:
+        today = datetime.now(tz).date()
+        date_from = datetime.combine(today, time(0, 0), tzinfo=tz)
+        date_to = date_from + timedelta(days=1)
+
+    # 跨度限制 ≤ 31 天
+    if (date_to - date_from).days > 31:
+        raise HTTPException(status_code=422, detail={"code": "RANGE_TOO_LARGE", "message": "日期跨度最多 31 天", "details": None})
+
+    # 为当前有效 REGULAR 计划确保时点
+    plans = db.query(MedicationPlan).filter(
+        MedicationPlan.patient_id == patient.id,
+        MedicationPlan.plan_type == "REGULAR",
+        (MedicationPlan.ends_at.is_(None)) | (MedicationPlan.ends_at > date_from),
+    ).all()
+    for p in plans:
+        ensure_slots(db, p, date_from, date_to)
+    db.commit()
+
+    # 查询区间内 ACTIVE slot，附 has_active_record
+    from_utc = date_from.astimezone(ZoneInfo("UTC"))
+    to_utc = date_to.astimezone(ZoneInfo("UTC"))
+    slots = (
+        db.query(PlannedSlot)
+        .filter(
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 30 页 / 共 60 页
+            PlannedSlot.patient_id == patient.id,
+            PlannedSlot.state == "ACTIVE",
+            PlannedSlot.scheduled_at >= from_utc,
+            PlannedSlot.scheduled_at < to_utc,
+        )
+        .order_by(PlannedSlot.scheduled_at)
+        .all()
+    )
+    result = []
+    for s in slots:
+        has = (
+            db.query(MedicationEvent)
+            .filter(
+                MedicationEvent.slot_id == s.id,
+                MedicationEvent.status == "ACTIVE",
+            )
+            .first()
+            is not None
+        )
+        out = PlannedSlotOut.model_validate(s)
+        out.has_active_record = has
+        result.append(out)
+    return {"items": result, "timezone": "Asia/Shanghai"}
+
+"""患者站内提醒 API（J037/REM-01）。
+
+合并「今日计划动态派生」+「持久复训/随访提醒」，不泄露医护内部 tasks。
+"""
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.auth.dependencies import get_current_user
+from app.core.database import get_db
+from app.models import (
+    MedicationEvent,
+    MedicationPlan,
+    Patient,
+    PatientReminder,
+    PlannedSlot,
+    User,
+)
+from app.schemas.followup import ReminderOut
+
+router = APIRouter(prefix="/api/me", tags=["reminders"])
+
+
+@router.get("/reminders")
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 31 页 / 共 60 页
+  }, [])
+
+  const login = async (account: string, password: string) => {
+    const data = await apiFetch<{ access_token: string; user: User }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ account, password }),
+    })
+    memoryToken = data.access_token
+    setToken(data.access_token)
+    setUser(data.user)
+    return data.user
+  }
+
+  const logout = async () => {
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // 断网退出：本地仍清内存
+    }
+    memoryToken = null
+    setToken(null)
+    setUser(null)
+  }
+
+  const value = useMemo(
+    () => ({ token, user, login, logout, setUser }),
+    [token, user],
+  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
+}
+
+import { Navigate, useLocation } from 'react-router-dom'
+import { useAuth } from './AuthContext'
+
+// 路由守卫：未登录跳登录；首次改密强制跳改密页
+export function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { token, user } = useAuth()
+  const location = useLocation()
+
+  if (!token || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+  if (user.must_change_password && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 32 页 / 共 60 页
+  }
+  return <>{children}</>
+}
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../../api/client'
+import { useAuth } from '../../features/auth/AuthContext'
+
+// G01 首次改密页（J014）：改密后强制重新登录
+export default function ChangePasswordPage() {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
+  const [oldPassword, setOldPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const onSubmit = async () => {
+    if (newPassword !== confirm) {
+      setError('两次输入的新密码不一致')
+      return
+    }
+    setLoading(true)
+    setError('')
+    try {
+      await apiFetch('/api/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+      })
+      await logout()
+      navigate('/login')
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 33 页 / 共 60 页
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%', height: 48, padding: '0 12px', boxSizing: 'border-box',
+    borderRadius: 8, border: '1px solid #E6E9F1', fontSize: 16,
+  }
+
+  return (
+    <div style={{ padding: 32, maxWidth: 400, margin: '0 auto' }}>
+      <h1 style={{ fontSize: 24 }}>首次登录需修改密码</h1>
+      <div style={{ marginTop: 24 }}>
+        <label style={{ display: 'block', marginBottom: 6, fontSize: 14 }}>原密码</label>
+        <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="原密码" style={inputStyle} />
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <label style={{ display: 'block', marginBottom: 6, fontSize: 14 }}>新密码</label>
+        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="至少 8 位" style={inputStyle} />
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <label style={{ display: 'block', marginBottom: 6, fontSize: 14 }}>确认新密码</label>
+        <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="确认新密码" style={inputStyle} />
+      </div>
+      {error && <p style={{ color: '#B02A2A', fontSize: 14, marginTop: 12 }}>{error}</p>}
+      <button onClick={onSubmit} disabled={loading} style={{ width: '100%', height: 52, marginTop: 24, background: '#573BF4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer' }}>
+        {loading ? '提交中…' : '修改并重新登录'}
+      </button>
+    </div>
+  )
+}
+
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../features/auth/AuthContext'
+
+// G01 患者 App 登录页（J014）
+export default function LoginPage() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
+  const [account, setAccount] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const onSubmit = async () => {
+    if (!account || !password) {
+      setError('请输入账号和密码')
+      return
+    }
+    setLoading(true)
+    setError('')
+    try {
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 34 页 / 共 60 页
+      const user = await login(account, password)
+      if (user.must_change_password) {
+        navigate('/change-password')
+      } else {
+        navigate('/today')
+      }
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div style={{ padding: 32, maxWidth: 400, margin: '0 auto' }}>
+      <h1 style={{ fontSize: 24 }}>吸入治疗管理系统</h1>
+      <p style={{ color: '#6B6E7F' }}>患者登录</p>
+
+      <div style={{ marginTop: 24 }}>
+        <label style={{ display: 'block', marginBottom: 6, fontSize: 14 }}>账号</label>
+        <input
+          value={account}
+          onChange={(e) => setAccount(e.target.value)}
+          placeholder="请输入账号"
+          style={{ width: '100%', height: 48, padding: '0 12px', boxSizing: 'border-box', borderRadius: 8, border: '1px solid #E6E9F1', fontSize: 16 }}
+        />
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <label style={{ display: 'block', marginBottom: 6, fontSize: 14 }}>密码</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="请输入密码"
+          style={{ width: '100%', height: 48, padding: '0 12px', boxSizing: 'border-box', borderRadius: 8, border: '1px solid #E6E9F1', fontSize: 16 }}
+        />
+      </div>
+
+      {error && <p style={{ color: '#B02A2A', fontSize: 14, marginTop: 12 }}>{error}</p>}
+
+      <button
+        onClick={onSubmit}
+        disabled={loading}
+        style={{ width: '100%', height: 52, marginTop: 24, background: '#573BF4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}
+      >
+        {loading ? '登录中…' : '登录'}
+      </button>
+
+      <p style={{ color: '#6B6E7F', fontSize: 12, marginTop: 24, textAlign: 'center' }}>
+        本软件辅助学习与记录，不能替代专业诊疗。
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 35 页 / 共 60 页
+      </p>
+    </div>
+  )
+}
+
+import { useEffect, useState } from 'react'
+import { apiFetch } from '../../api/client'
+import AppLayout from '../../components/AppLayout'
+
+interface Device { id: string; device_model_id: string }
+interface PatientInfo { id: string; current_devices: Device[] }
+interface Citation { document_title: string; version: string; step_ref: string }
+interface AskResult { status: string; answer: string; citations: Citation[] }
+
+// P05 AI 指导助手（J042，二级页）
+export default function AssistantPage() {
+  const [deviceModelId, setDeviceModelId] = useState('')
+  const [question, setQuestion] = useState('')
+  const [result, setResult] = useState<AskResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [noDevice, setNoDevice] = useState(false)
+
+  useEffect(() => {
+    apiFetch<PatientInfo>('/api/me/patient')
+      .then((me) => {
+        if (me.current_devices && me.current_devices.length > 0) {
+          setDeviceModelId(me.current_devices[0].device_model_id)
+        } else {
+          setNoDevice(true)
+        }
+      })
+      .catch((e) => setError((e as Error).message))
+  }, [])
+
+  const ask = async () => {
+    if (!question.trim()) { setError('请输入问题'); return }
+    setLoading(true)
+    setError('')
+    setResult(null)
+    try {
+      const r = await apiFetch<AskResult>('/api/ai/ask', {
+        method: 'POST',
+        body: JSON.stringify({ device_model_id: deviceModelId, question: question.trim() }),
+      })
+      setResult(r)
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setLoading(false)
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 36 页 / 共 60 页
+    }
+  }
+
+  return (
+    <AppLayout title="AI 指导助手" showBack showTabBar={false}>
+      <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
+        仅基于本人当前型号的已审核资料回答装置操作问题，不提供诊疗建议。
+      </p>
+
+      {noDevice && <p style={{ color: '#B02A2A', marginTop: 16 }}>暂无绑定装置，无法使用助手</p>}
+
+      {!noDevice && (
+        <>
+          <textarea
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="例如：这个型号使用前需要做哪些准备？（请勿输入姓名、电话等身份信息）"
+            rows={3}
+            style={{ width: '100%', marginTop: 16, padding: 12, boxSizing: 'border-box', borderRadius: 14, border: '1px solid #E6E9F1', fontSize: 16, resize: 'none' }}
+          />
+          <button onClick={ask} disabled={loading}
+            style={{ width: '100%', height: 52, marginTop: 12, background: '#573BF4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}>
+            {loading ? '查询中…' : '提问'}
+          </button>
+        </>
+      )}
+
+      {error && <p style={{ color: '#B02A2A', marginTop: 16 }}>{error}</p>}
+
+      {result && (
+        <div style={{ marginTop: 20, background: '#fff', border: '1px solid #E6E9F1', borderRadius: 14, padding: 16 }}>
+          <div style={{ fontSize: 13, color: result.status === 'ANSWERED' ? '#14938E' : '#6B6E7F', fontWeight: 500 }}>
+            {result.status === 'ANSWERED' ? '已回答（基于已审核资料）'
+              : result.status === 'NO_EVIDENCE' ? '资料不足'
+              : result.status === 'OUT_OF_SCOPE' ? '超出范围'
+              : '服务不可用'}
+          </div>
+          <div style={{ fontSize: 16, color: '#0F0D27', marginTop: 10, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+            {result.answer}
+          </div>
+          {result.citations.length > 0 && (
+            <div style={{ marginTop: 14, borderTop: '1px solid #F0F2F7', paddingTop: 12 }}>
+              <div style={{ fontSize: 13, color: '#6B6E7F', marginBottom: 6 }}>资料出处：</div>
+              {result.citations.map((c, i) => (
+                <div key={i} style={{ fontSize: 13, color: '#4D3BA7' }}>
+                  · {c.document_title}（版本 {c.version}，{c.step_ref}）
+                </div>
+              ))}
+            </div>
+          )}
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 37 页 / 共 60 页
+          {result.status !== 'ANSWERED' && (
+            <p style={{ fontSize: 13, color: '#6B6E7F', marginTop: 12 }}>
+              建议联系您的医护人员获取进一步帮助。
+            </p>
+          )}
+        </div>
+      )}
+
+      <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 24, textAlign: 'center' }}>
+        本软件辅助学习与记录，不能替代专业诊疗。
+      </p>
+    </AppLayout>
+  )
+}
+
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../../api/client'
+import AppLayout from '../../components/AppLayout'
+
+interface Device { id: string; device_model_id: string }
+interface PatientInfo { id: string; current_devices: Device[] }
+interface GuideStep { id: string; step_no: number; text: string; error_notes: string | null }
+interface Guide { id: string; version: string; title: string; steps: GuideStep[]; source_title: string | null }
+
+// P02 型号指导（J021，底部导航根页面之一）
+export default function GuidePage() {
+  const navigate = useNavigate()
+  const [guide, setGuide] = useState<Guide | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const me = await apiFetch<PatientInfo>('/api/me/patient')
+        const devices = me.current_devices
+        if (!devices || devices.length === 0) {
+          setError('暂无绑定装置，请联系医护人员')
+          setLoading(false)
+          return
+        }
+        const deviceModelId = devices[0].device_model_id
+        const g = await apiFetch<Guide>(`/api/device-models/${deviceModelId}/guide`)
+        setGuide(g)
+      } catch (e) {
+        setError((e as Error).message)
+      } finally {
+        setLoading(false)
+      }
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 38 页 / 共 60 页
+    }
+    load()
+  }, [])
+
+  return (
+    <AppLayout title="型号指导">
+      {loading && <p style={{ color: 'var(--muted)', marginTop: 24 }}>加载中…</p>}
+      {error && (
+        <div style={{ marginTop: 24, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 20, textAlign: 'center' }}>
+          <p style={{ color: '#B02A2A' }}>{error}</p>
+          <button onClick={() => window.location.reload()} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', fontSize: 15, marginTop: 8 }}>重试</button>
+        </div>
+      )}
+
+      {guide && !loading && !error && (
+        <>
+          <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 16 }}>
+            <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ink)' }}>{guide.title}</div>
+            <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>版本 {guide.version}</div>
+          </div>
+
+          {guide.steps.map((s) => (
+            <div key={s.id} style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 16 }}>
+              <div style={{ fontSize: 14, color: 'var(--brand-ink)', fontWeight: 600 }}>步骤 {s.step_no}</div>
+              <div style={{ fontSize: 16, color: 'var(--ink)', marginTop: 8 }}>{s.text}</div>
+              {s.error_notes && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>⚠️ {s.error_notes}</div>}
+            </div>
+          ))}
+
+          <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+            <button onClick={() => navigate('/training')} style={{ flex: 1, height: 52, background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, cursor: 'pointer' }}>
+              开始自检
+            </button>
+            <button onClick={() => navigate('/assistant')} style={{ flex: 1, height: 52, background: 'var(--surface)', color: 'var(--brand)', border: '1px solid var(--brand)', borderRadius: 8, fontSize: 16, cursor: 'pointer' }}>
+              AI 助手
+            </button>
+          </div>
+        </>
+      )}
+    </AppLayout>
+  )
+}
+
+import { useEffect, useState } from 'react'
+import { apiFetch } from '../../api/client'
+import AppLayout from '../../components/AppLayout'
+
+interface Slot { id: string; scheduled_at: string; has_active_record: boolean }
+interface Event { id: string; slot_id: string | null; source: string; occurred_at: string; status: string; note: string | null }
+interface Plan { id: string; plan_type: string; drug_label: string; daily_times: { local_time: string }[] }
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 39 页 / 共 60 页
+
+// P04 用药记录（J030，底部导航根页面之一）
+export default function MedicationPage() {
+  const [slots, setSlots] = useState<Slot[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [recording, setRecording] = useState<string | null>(null)
+
+  const load = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      const s = await apiFetch<{ items: Slot[] }>(`/api/me/daily-slots?date=${today}`)
+      setSlots(s.items)
+      const e = await apiFetch<{ items: Event[] }>('/api/me/medication-events?page_size=50')
+      setEvents(e.items)
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load() }, [])
+
+  const record = async (slot: Slot) => {
+    setRecording(slot.id)
+    try {
+      // 需要 plan_id，从 events 或 plans 获取。简化：先取计划
+      const plans = await apiFetch<{ items: Plan[] }>('/api/me/medication-plans')
+      const regular = plans.items.find(p => p.plan_type === 'REGULAR')
+      if (!regular) { setError('暂无固定计划'); return }
+      await apiFetch('/api/medication-events', {
+        method: 'POST',
+        body: JSON.stringify({
+          plan_id: regular.id,
+          slot_id: slot.id,
+          occurred_at: new Date().toISOString(),
+        }),
+      })
+      await load()
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setRecording(null)
+    }
+  }
+
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 40 页 / 共 60 页
+  const timeStr = (iso: string) => new Date(iso).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  const dateStr = (iso: string) => new Date(iso).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+
+  return (
+    <AppLayout title="用药记录">
+      {loading && <p style={{ color: 'var(--muted)', marginTop: 24 }}>加载中…</p>}
+      {error && <p style={{ color: '#B02A2A', marginTop: 24 }}>{error}</p>}
+
+      {!loading && (
+        <>
+          <div style={{ marginTop: 16, fontSize: 15, color: '#3D3D56', fontWeight: 500 }}>今日固定时点</div>
+          {slots.length === 0 && <p style={{ color: '#6B6E7F', marginTop: 8 }}>暂无固定计划</p>}
+          {slots.map((s) => (
+            <div key={s.id} style={{ marginTop: 12, background: '#fff', border: '1px solid #E6E9F1', borderRadius: 14, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 20, color: '#0F0D27', fontWeight: 600 }}>{timeStr(s.scheduled_at)}</div>
+                <div style={{ fontSize: 13, color: s.has_active_record ? '#14938E' : '#6B6E7F', marginTop: 4 }}>
+                  {s.has_active_record ? '已登记' : '未发现登记'}
+                </div>
+              </div>
+              {!s.has_active_record && (
+                <button onClick={() => record(s)} disabled={recording === s.id}
+                  style={{ height: 40, padding: '0 16px', background: '#573BF4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, cursor: 'pointer' }}>
+                  {recording === s.id ? '登记中…' : '登记'}
+                </button>
+              )}
+            </div>
+          ))}
+
+          <div style={{ marginTop: 24, fontSize: 15, color: '#3D3D56', fontWeight: 500 }}>历史记录</div>
+          {events.length === 0 && <p style={{ color: '#6B6E7F', marginTop: 8 }}>暂无记录</p>}
+          {events.map((e) => (
+            <div key={e.id} style={{ marginTop: 12, background: '#fff', border: '1px solid #E6E9F1', borderRadius: 14, padding: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 14, color: '#0F0D27', fontWeight: 500 }}>{dateStr(e.occurred_at)}</span>
+                <span style={{ fontSize: 13, color: e.status === 'REVOKED' ? '#B02A2A' : '#14938E' }}>
+                  {e.status === 'REVOKED' ? '已撤销' : (e.source === 'PATIENT_REPORT' ? '自述' : '医护观察')}
+                </span>
+              </div>
+              {e.note && <div style={{ fontSize: 13, color: '#6B6E7F', marginTop: 4 }}>{e.note}</div>}
+            </div>
+          ))}
+        </>
+      )}
+    </AppLayout>
+  )
+}
+
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 41 页 / 共 60 页
+import { apiFetch } from '../../api/client'
+import AppLayout from '../../components/AppLayout'
+
+interface PatientInfo {
+  id: string
+  patient_code: string
+  display_name: string
+  diagnosis_label: string | null
+  current_devices: { id: string; device_model_id: string }[]
+}
+
+// P01 今日首页（J017，只读承载）
+export default function TodayPage() {
+  const navigate = useNavigate()
+  const [info, setInfo] = useState<PatientInfo | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [stats, setStats] = useState<{ N: number; M: number; coverage_rate: number | null } | null>(null)
+  const [reminders, setReminders] = useState<{ id: string; kind: string; title: string; status: string }[]>([])
+
+  useEffect(() => {
+    apiFetch<PatientInfo>('/api/me/patient')
+      .then((d) => { setInfo(d); setLoading(false) })
+      .catch((e) => { setError((e as Error).message); setLoading(false) })
+    const today = new Date()
+    const from = new Date(today.getTime() - 6 * 86400000).toISOString().slice(0, 10)
+    const to = new Date(today.getTime() + 86400000).toISOString().slice(0, 10)
+    apiFetch<{ N: number; M: number; coverage_rate: number | null }>(`/api/me/stats?from=${from}&to=${to}`)
+      .then(setStats)
+      .catch(() => {})
+    apiFetch<{ items: { id: string; kind: string; title: string; status: string }[] }>('/api/me/reminders')
+      .then((r) => setReminders(r.items))
+      .catch(() => {})
+  }, [])
+
+  return (
+    <AppLayout>
+      {/* 患者身份卡 */}
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)' }}>
+            {info ? `${info.display_name} · ${info.patient_code}` : '加载中…'}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
+            {info?.current_devices?.length ? '已绑定装置' : '暂无装置'}
+            {info?.diagnosis_label ? ` · ${info.diagnosis_label}` : ''}
+          </div>
+        </div>
+      </div>
+
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 42 页 / 共 60 页
+      {/* 页标题 */}
+      <div style={{ marginTop: 20 }}>
+        <div style={{ fontSize: 22, fontWeight: 600, color: 'var(--ink)' }}>今日</div>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>
+          {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}
+        </div>
+      </div>
+
+      {/* 概览统计 */}
+      {stats && (
+        <div style={{ marginTop: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', border: '4px solid var(--brand-soft)', borderTopColor: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--brand)' }}>
+              {stats.coverage_rate === null ? '—' : `${stats.coverage_rate}%`}
+            </span>
+          </div>
+          <div>
+            <div style={{ fontSize: 15, color: 'var(--ink)', fontWeight: 500 }}>近 7 天记录覆盖率</div>
+            <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
+              {stats.N === 0 ? '暂无固定计划' : `已登记 ${stats.M} / 应记录 ${stats.N}`}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>基于登记记录，不等于实际服药依从性</div>
+          </div>
+        </div>
+      )}
+
+      {/* 站内提醒 */}
+      {reminders.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 15, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 8 }}>待办提醒</div>
+          {reminders.map((r) => (
+            <div key={r.id} style={{ marginTop: 8, background: 'var(--brand-tint)', border: '1px solid var(--brand-soft)', borderRadius: 14, padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 15, color: 'var(--ink)' }}>
+                {r.kind === 'MEDICATION_DUE' ? '⏰ ' : r.kind === 'RETRAIN' ? '📚 ' : '📋 '}
+                {r.title}
+              </span>
+              <span style={{ fontSize: 13, color: 'var(--brand)' }}>{r.status === 'PENDING' ? '待完成' : '已完成'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 加载/错误 */}
+      {loading && <p style={{ color: 'var(--muted)', marginTop: 24 }}>加载中…</p>}
+      {error && (
+        <div style={{ marginTop: 24, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 20, textAlign: 'center' }}>
+          <p style={{ color: '#B02A2A' }}>{error}</p>
+          <button onClick={() => window.location.reload()} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', fontSize: 15, marginTop: 8 }}>重试</button>
+        </div>
+      )}
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 43 页 / 共 60 页
+
+      {info && !loading && !error && (
+        <>
+          {/* 学习与帮助入口 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 24 }}>
+            {[
+              { label: '型号指导', path: '/guide', icon: '📖' },
+              { label: '操作自检', path: '/training', icon: '✅' },
+              { label: 'AI 助手', path: '/assistant', icon: '🤖' },
+            ].map((it) => (
+              <button key={it.path} onClick={() => navigate(it.path)}
+                style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: '20px 8px', cursor: 'pointer', textAlign: 'center' }}>
+                <div style={{ fontSize: 24 }}>{it.icon}</div>
+                <div style={{ fontSize: 14, color: 'var(--ink)', marginTop: 6 }}>{it.label}</div>
+              </button>
+            ))}
+          </div>
+
+          {/* 用药记录入口 */}
+          <button onClick={() => navigate('/medication')}
+            style={{ width: '100%', marginTop: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: '16px 12px', cursor: 'pointer', textAlign: 'left' }}>
+            <div style={{ fontSize: 16, color: 'var(--ink)', fontWeight: 500 }}>用药记录</div>
+            <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>查看今日计划与历史登记</div>
+          </button>
+
+          {/* 页脚免责 */}
+          <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 32, textAlign: 'center' }}>
+            本软件辅助学习与记录，不能替代专业诊疗。
+          </p>
+        </>
+      )}
+    </AppLayout>
+  )
+}
+
+import { useEffect, useState } from 'react'
+import { apiFetch } from '../../api/client'
+import AppLayout from '../../components/AppLayout'
+
+interface GuideStep { id: string; step_no: number; text: string; error_notes: string | null }
+interface Guide { id: string; title: string; steps: GuideStep[] }
+interface Device { id: string; device_model_id: string }
+interface PatientInfo { id: string; current_devices: Device[] }
+interface HistoryItem {
+  id: string; source: string; submit_at: string; result: string | null
+  step_results: { step_id: string; check_state: string }[]
+}
+
+// P03 操作自检（J023，二级页）
+export default function TrainingPage() {
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 44 页 / 共 60 页
+  const [guide, setGuide] = useState<Guide | null>(null)
+  const [deviceModelId, setDeviceModelId] = useState('')
+  const [choices, setChoices] = useState<Record<string, string>>({})
+  const [history, setHistory] = useState<HistoryItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const me = await apiFetch<PatientInfo>('/api/me/patient')
+        const devices = me.current_devices
+        if (!devices || devices.length === 0) {
+          setError('暂无绑定装置')
+          setLoading(false)
+          return
+        }
+        const g = await apiFetch<Guide>(`/api/device-models/${devices[0].device_model_id}/guide`)
+        setGuide(g)
+        setDeviceModelId(devices[0].device_model_id)
+        // 加载历史
+        const h = await apiFetch<{ items: HistoryItem[] }>('/api/me/training-sessions?page_size=20')
+        setHistory(h.items)
+      } catch (e) {
+        setError((e as Error).message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  const setChoice = (stepId: string, state: string) => {
+    setChoices((prev) => ({ ...prev, [stepId]: state }))
+  }
+
+  const submit = async () => {
+    if (!guide) return
+    const stepResults = guide.steps.map((s) => ({ step_id: s.id, check_state: choices[s.id] || 'NOT_DONE' }))
+    setSubmitting(true)
+    setError('')
+    try {
+      await apiFetch('/api/training-sessions', {
+        method: 'POST',
+        body: JSON.stringify({ device_model_id: deviceModelId, guide_id: guide.id, step_results: stepResults }),
+      })
+      setChoices({})
+      const h = await apiFetch<{ items: HistoryItem[] }>('/api/me/training-sessions?page_size=20')
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 45 页 / 共 60 页
+      setHistory(h.items)
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const stateLabel = (s: string) => s === 'DONE' ? '完成' : s === 'DIFFICULT' ? '有困难' : '未完成'
+
+  return (
+    <AppLayout title="操作自检" showBack showTabBar={false}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+        <div style={{ fontSize: 15, color: 'var(--muted)' }}>逐步自检</div>
+        <button onClick={() => setShowHistory(!showHistory)} style={{ background: 'none', border: 'none', color: 'var(--brand-ink)', fontSize: 14, cursor: 'pointer' }}>
+          {showHistory ? '返回自检' : '历史记录'}
+        </button>
+      </div>
+
+      {loading && <p style={{ color: '#6B6E7F', marginTop: 24 }}>加载中…</p>}
+      {error && <p style={{ color: '#B02A2A', marginTop: 24 }}>{error}</p>}
+
+      {!showHistory && guide && !loading && (
+        <>
+          <p style={{ color: '#6B6E7F', fontSize: 13, marginTop: 8 }}>请逐条勾选你的自述情况（不代表设备检测通过）</p>
+          {guide.steps.map((s) => (
+            <div key={s.id} style={{ marginTop: 12, background: '#fff', border: '1px solid #E6E9F1', borderRadius: 14, padding: 16 }}>
+              <div style={{ fontSize: 14, color: '#4D3BA7', fontWeight: 600 }}>步骤 {s.step_no}</div>
+              <div style={{ fontSize: 16, color: '#0F0D27', marginTop: 8 }}>{s.text}</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                {['DONE', 'DIFFICULT', 'NOT_DONE'].map((st) => (
+                  <button key={st} onClick={() => setChoice(s.id, st)}
+                    style={{
+                      flex: 1, height: 40, borderRadius: 8, fontSize: 13, cursor: 'pointer',
+                      background: choices[s.id] === st ? '#573BF4' : '#fff',
+                      color: choices[s.id] === st ? '#fff' : '#3D3D56',
+                      border: choices[s.id] === st ? '1px solid #573BF4' : '1px solid #E6E9F1',
+                    }}>
+                    {stateLabel(st)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          <button onClick={submit} disabled={submitting}
+            style={{ width: '100%', height: 52, marginTop: 24, background: '#573BF4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 16, cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.6 : 1 }}>
+            {submitting ? '提交中…' : '提交自检（患者自述）'}
+          </button>
+        </>
+      )}
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 46 页 / 共 60 页
+
+      {showHistory && (
+        <>
+          <p style={{ color: '#6B6E7F', fontSize: 13, marginTop: 8 }}>本人历史自检记录</p>
+          {history.length === 0 && <p style={{ color: '#6B6E7F', marginTop: 16 }}>暂无记录</p>}
+          {history.map((h) => (
+            <div key={h.id} style={{ marginTop: 12, background: '#fff', border: '1px solid #E6E9F1', borderRadius: 14, padding: 16 }}>
+              <div style={{ fontSize: 14, color: '#0F0D27', fontWeight: 500 }}>
+                {h.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}
+              </div>
+              <div style={{ fontSize: 13, color: '#6B6E7F', marginTop: 4 }}>
+                {new Date(h.submit_at).toLocaleString('zh-CN')}
+              </div>
+              <div style={{ fontSize: 13, color: '#3D3D56', marginTop: 8 }}>
+                {h.step_results.map(sr => `${stateLabel(sr.check_state)}`).join(' · ')}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+    </AppLayout>
+  )
+}
+
+
+"""可重复执行的演示种子数据（J005）。
+
+生成 5 个演示账号 + 10+ DEMO 患者 + 2-3 个候选型号（指导/知识保持 DRAFT 未发布）。
+幂等：依赖唯一约束 + 冲突忽略；重复运行不产生重复数据。
+
+用法（从项目根）：
+    backend\\.venv\\Scripts\\python.exe -m seed.demo_data
+"""
+import sys
+from pathlib import Path
+
+# 自动把 backend 加入 sys.path，使 `import app.*` 可用（seed/ 与 backend/ 同级）
+_BACKEND = Path(__file__).resolve().parent.parent / "backend"
+if str(_BACKEND) not in sys.path:
+    sys.path.insert(0, str(_BACKEND))
+
+import bcrypt
+
+from app.core.database import Base, SessionLocal, engine
+from app.models import (
+    DeviceGuide,
+    DeviceModel,
+    GuideStep,
+    Patient,
+    User,
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 47 页 / 共 60 页
+)
+
+
+def _hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def _demo_user(account: str, role: str) -> User:
+    return User(
+        account=account,
+        password_hash=_hash("123"),
+        role=role,
+        status="ACTIVE",
+        must_change_password=False,  # 演示账号不强制改密，简化联调
+    )
+
+
+def seed() -> None:
+    Base.metadata.create_all(bind=engine)  # 兜底：迁移未跑时也能建表
+    db = SessionLocal()
+    try:
+        # 1) 演示账号（幂等：按 account 查重）
+        accounts = {
+            "admin": _demo_user("admin", "ADMIN"),
+            "clinician_a": _demo_user("clinician_a", "CLINICIAN"),
+            "clinician_b": _demo_user("clinician_b", "CLINICIAN"),
+            "patient_x": _demo_user("patient_x", "PATIENT"),
+            "patient_y": _demo_user("patient_y", "PATIENT"),
+        }
+        users = {}
+        for key, u in accounts.items():
+            existing = db.query(User).filter(User.account == u.account).first()
+            if existing:
+                # 强制同步演示账号：密码重置为 123，且不强制改密
+                existing.password_hash = u.password_hash
+                existing.must_change_password = False
+                existing.status = "ACTIVE"
+                users[key] = existing
+            else:
+                db.add(u)
+                db.flush()
+                users[key] = u
+
+        # 2) 候选型号（pMDI/DPI/SMI，指导保持 DRAFT）
+        models_spec = [
+            ("pMDI", "万托林", "吸入气雾剂 pMDI", "阿斯利康", "DEMO-未审核"),
+            ("DPI", "信必可", "都保 DPI", "阿斯利康", "DEMO-未审核"),
+            ("SMI", "思力华", "能倍乐 Respimat", "勃林格殷格翰", "DEMO-未审核"),
+        ]
+        model_ids = {}
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 48 页 / 共 60 页
+        for cat, brand, name, mfr, _tag in models_spec:
+            m = db.query(DeviceModel).filter(DeviceModel.model_name == name).first()
+            if not m:
+                m = DeviceModel(
+                    category=cat, brand=brand, model_name=name, manufacturer=mfr, status="ACTIVE"
+                )
+                db.add(m)
+                db.flush()
+            model_ids[name] = m.id
+            # 每型号一个 DRAFT 指导（含 1 步占位，未发布）
+            g = (
+                db.query(DeviceGuide)
+                .filter(DeviceGuide.device_model_id == m.id, DeviceGuide.version == "1.0-demo")
+                .first()
+            )
+            if not g:
+                g = DeviceGuide(
+                    device_model_id=m.id,
+                    version="1.0-demo",
+                    title=f"{name} 操作指导（DEMO 草稿，未审核）",
+                    review_status="DRAFT",
+                )
+                db.add(g)
+                db.flush()
+                db.add(
+                    GuideStep(
+                        guide_id=g.id,
+                        step_no=1,
+                        text="（待临床审核后填写正式步骤）",
+                        error_notes="本步骤为演示占位，不构成正式操作指导。",
+                    )
+                )
+
+        # 3) 10+ DEMO 患者（责任医护 = clinician_a）
+        patient_spec = [
+            ("P-001", "林女士", "哮喘（DEMO）"),
+            ("P-002", "陈先生", "慢阻肺（DEMO）"),
+            ("P-003", "王女士", "哮喘（DEMO）"),
+            ("P-004", "李先生", "慢阻肺（DEMO）"),
+            ("P-005", "赵女士", "哮喘（DEMO）"),
+            ("P-006", "周先生", "慢阻肺（DEMO）"),
+            ("P-007", "吴女士", "哮喘（DEMO）"),
+            ("P-008", "郑先生", "慢阻肺（DEMO）"),
+            ("P-009", "孙女士", "哮喘（DEMO）"),
+            ("P-010", "胡先生", "慢阻肺（DEMO）"),
+            ("P-011", "何女士", "哮喘（DEMO）"),
+            ("P-012", "郭先生", "慢阻肺（DEMO）"),
+        ]
+        for code, name, diag in patient_spec:
+            p = db.query(Patient).filter(Patient.patient_code == code).first()
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 49 页 / 共 60 页
+            if not p:
+                db.add(
+                    Patient(
+                        patient_code=code,
+                        display_name=name,
+                        diagnosis_label=diag,
+                        note="DEMO 演示数据，非真实患者",
+                        assigned_clinician_id=users["clinician_a"].id,
+                        account_user_id=None,
+                    )
+                )
+
+        db.commit()
+        print("种子数据完成：")
+        print(f"  账号 {len(users)} 个（admin / clinician_a / clinician_b / patient_x / patient_y）")
+        print(f"  患者 {len(patient_spec)} 个（DEMO）")
+        print(f"  型号 {len(model_ids)} 个（指导均为 DRAFT，未审核）")
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+if __name__ == "__main__":
+    seed()
+
+"""丰富演示数据（幂等重建）。
+
+用法（项目根目录）：
+    backend\\.venv\\Scripts\\python.exe -m seed.demo_data_full
+
+设计要点：
+- P-001 林女士：7 天 × 每天 2 次 = N=14，10 个不同时点有 ACTIVE 登记 → M=10，覆盖率 71.4%
+  （PRD T06 标杆；另含 1 次重复登记、1 条撤销记录用于演示）
+- 14 个患者覆盖哮喘/慢阻肺，分属 clinician_a / clinician_b
+- 每个患者绑定装置型号；多数配有用药计划，覆盖率各不相同
+- 3 个型号各有 1 份已发布指导（含真实吸入器操作步骤，标注 DEMO 未临床审核）
+- 含训练记录、待核查任务、随访、患者提醒、知识库、审计日志
+
+安全声明：全部为虚构 DEMO 数据，无真实身份/病历信息；指导内容为演示素材，未经临床审核。
+"""
+import hashlib
+import sys
+import uuid
+from datetime import date, datetime, time, timedelta, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+# 自动定位 backend，使 `import app.*` 可用
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 50 页 / 共 60 页
+_BACKEND = Path(__file__).resolve().parent.parent / "backend"
+if str(_BACKEND) not in sys.path:
+    sys.path.insert(0, str(_BACKEND))
+
+import bcrypt
+from sqlalchemy import text
+
+from app.core.database import Base, SessionLocal, engine
+from app.models import (
+    AuditLog,
+    DeviceGuide,
+    DeviceModel,
+    Followup,
+    GuideStep,
+    KnowledgeChunk,
+    KnowledgeDocument,
+    MedicationEvent,
+    MedicationPlan,
+    Patient,
+    PatientDevice,
+    PatientReminder,
+    PlanDailyTime,
+    PlannedSlot,
+    Task,
+    TrainingSession,
+    TrainingStepResult,
+    User,
+)
+
+SH = ZoneInfo("Asia/Shanghai")
+UTC = ZoneInfo("UTC")
+NOW = datetime.now(timezone.utc)
+
+
+def _hash(pw: str) -> str:
+    return bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()
+
+
+def utc_at(d: date, t: time) -> datetime:
+    """按 Asia/Shanghai 的本地日期时间，转成 UTC。"""
+    return datetime.combine(d, t, tzinfo=SH).astimezone(UTC)
+
+
+def trigger_key(patient_id, task_type: str, slot_id) -> str:
+    return hashlib.sha256(f"{patient_id}:{task_type}:{slot_id}".encode()).hexdigest()
+
+
+# ---------- 患者定义 ----------
+# (code, 姓名, 诊断, 归属, 型号 category)
+PATIENTS = [
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 51 页 / 共 60 页
+    ("P-001", "林女士", "支气管哮喘（DEMO）", "clinician_a", "pMDI"),
+    ("P-002", "陈先生", "慢性阻塞性肺疾病（DEMO）", "clinician_a", "DPI"),
+    ("P-003", "王女士", "支气管哮喘（DEMO）", "clinician_a", "SMI"),
+    ("P-004", "李先生", "慢性阻塞性肺疾病（DEMO）", "clinician_a", "pMDI"),
+    ("P-005", "赵女士", "支气管哮喘（DEMO）", "clinician_a", "DPI"),
+    ("P-006", "周先生", "慢性阻塞性肺疾病（DEMO）", "clinician_a", "SMI"),
+    ("P-007", "吴女士", "支气管哮喘（DEMO）", "clinician_a", "pMDI"),
+    ("P-008", "郑先生", "慢性阻塞性肺疾病（DEMO）", "clinician_a", "DPI"),
+    ("P-009", "孙女士", "支气管哮喘（DEMO）", "clinician_a", "SMI"),
+    ("P-010", "胡先生", "慢性阻塞性肺疾病（DEMO）", "clinician_b", "pMDI"),
+    ("P-011", "何女士", "支气管哮喘（DEMO）", "clinician_b", "DPI"),
+    ("P-012", "郭先生", "慢性阻塞性肺疾病（DEMO）", "clinician_b", "SMI"),
+    ("P-013", "刘女士", "支气管哮喘（DEMO）", "clinician_b", "pMDI"),
+    ("P-014", "杨先生", "慢性阻塞性肺疾病（DEMO）", "clinician_a", "DPI"),
+]
+
+# 账号绑定：patient_x → P-001，patient_y → P-002
+ACCOUNT_BINDING = {"P-001": "patient_x", "P-002": "patient_y"}
+
+# ---------- 指导步骤（DEMO 演示素材，未临床审核）----------
+GUIDES = {
+    "pMDI": {
+        "title": "压力定量气雾剂（pMDI）操作指导（DEMO 演示素材）",
+        "source": "药品说明书要点（DEMO 演示素材，未经临床审核）",
+        "steps": [
+            ("使用前取下吸嘴盖，检查吸嘴内有无异物。", "吸嘴内有异物时不要使用，请联系医护更换。"),
+            ("充分摇匀吸入器约 5 秒，使药液混合均匀。", "未摇匀会导致每次喷出的药量不均匀。"),
+            ("保持直立，先缓慢呼气至舒适位置。", "不要对着吸嘴呼气，以免潮气影响药物。"),
+            ("含住吸嘴，在按压罐体的同时缓慢深吸气。", "按压与吸气不同步是最常见的错误。"),
+            ("屏气约 10 秒，然后缓慢呼气。", "屏气不足会降低药物在肺部的沉积。"),
+            ("使用后盖上吸嘴盖，并用清水漱口。", "使用含激素药物后不漱口易引起口腔不适。"),
+        ],
+    },
+    "DPI": {
+        "title": "干粉吸入剂（DPI）操作指导（DEMO 演示素材）",
+        "source": "药品说明书要点（DEMO 演示素材，未经临床审核）",
+        "steps": [
+            ("旋松并拔出瓶盖，确认吸嘴干净。", "瓶盖未旋松会导致吸嘴无法拔出。"),
+            ("一手握住瓶身保持直立，另一手旋转底座上药，听到「咔哒」声即可。", "反复旋转会造成药物浪费。"),
+            ("先完全呼气，注意不要对着吸嘴呼气。", "对着吸嘴呼气会使药粉受潮结块。"),
+            ("快速有力地深吸气，一次吸足。", "吸气力度不足会导致药物残留。"),
+            ("屏气约 10 秒后缓慢呼气。", ""),
+            ("用干布擦拭吸嘴，盖回瓶盖，并清水漱口。", "不要用水冲洗吸入器本体。"),
+        ],
+    },
+    "SMI": {
+        "title": "软雾吸入剂（SMI）操作指导（DEMO 演示素材）",
+        "source": "药品说明书要点（DEMO 演示素材，未经临床审核）",
+        "steps": [
+            ("保持瓶盖关闭，按压药瓶将其插入吸入器直至卡紧。", ""),
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 52 页 / 共 60 页
+            ("首次使用需排气：打开瓶盖，按压剂量释放按钮至出现药雾后盖上。", "未排气会导致首次吸入剂量不足。"),
+            ("完全呼气后，将吸嘴含入口中。", "不要对着吸嘴呼气。"),
+            ("缓慢深吸气的同时按压剂量释放按钮。", "喷雾与吸气需同步。"),
+            ("屏气约 10 秒后缓慢呼气，再盖回瓶盖。", ""),
+            ("用清水漱口。", ""),
+        ],
+    },
+}
+
+# ---------- 计划与登记覆盖情况 ----------
+# (patient_code, 天数, 每日时点, 覆盖时点数) —— 覆盖率 = 覆盖/总数
+PLAN_SPECS = [
+    ("P-001", 7, ["08:00", "20:00"], 10),   # 14 中覆盖 10 → 71.4%（PRD 标杆）
+    ("P-002", 7, ["08:00", "20:00"], 11),   # 14 中覆盖 11 → 78.6%
+    ("P-003", 7, ["08:00", "20:00"], 7),    # 14 中覆盖 7  → 50.0%
+    ("P-004", 7, ["08:00", "20:00"], 13),   # 14 中覆盖 13 → 92.9%
+    ("P-005", 6, ["07:30", "19:30"], 6),    # 12 中覆盖 6  → 50.0%
+    ("P-006", 7, ["08:00", "20:00"], 9),    # 14 中覆盖 9  → 64.3%
+    ("P-007", 5, ["09:00", "21:00"], 8),    # 10 中覆盖 8  → 80.0%
+    ("P-010", 7, ["08:00", "20:00"], 4),    # 14 中覆盖 4  → 28.6%（低，触发待核查）
+    ("P-011", 7, ["08:00", "20:00"], 3),    # 14 中覆盖 3  → 21.4%（低）
+    ("P-012", 6, ["08:30", "20:30"], 5),    # 12 中覆盖 5  → 41.7%
+]
+
+DRUG_BY_CATEGORY = {
+    "pMDI": "硫酸沙丁胺醇吸入气雾剂（DEMO）",
+    "DPI": "布地奈德福莫特罗粉吸入剂（DEMO）",
+    "SMI": "噻托溴铵吸入喷雾剂（DEMO）",
+}
+
+PLAN_START = date(2026, 10, 8)
+PLAN_END = date(2026, 10, 15)
+
+
+def _clear_business_data(db) -> None:
+    """按外键顺序清空演示业务数据（保留 users）。"""
+    order = [
+        "patient_reminders", "followups", "tasks",
+        "training_step_results", "training_sessions",
+        "medication_events", "planned_slots", "plan_daily_times", "medication_plans",
+        "knowledge_chunks", "knowledge_documents",
+        "guide_steps", "device_guides",
+        "patient_devices", "audit_logs",
+    ]
+    for t in order:
+        db.execute(text(f"DELETE FROM {t}"))
+    db.flush()
+
+
+def seed() -> None:
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 53 页 / 共 60 页
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        # ===== 1) 账号（幂等，保留并统一密码）=====
+        users: dict[str, User] = {}
+        for account, role in [
+            ("admin", "ADMIN"),
+            ("clinician_a", "CLINICIAN"),
+            ("clinician_b", "CLINICIAN"),
+            ("patient_x", "PATIENT"),
+            ("patient_y", "PATIENT"),
+        ]:
+            u = db.query(User).filter(User.account == account).first()
+            if u is None:
+                u = User(account=account, role=role, status="ACTIVE", must_change_password=False,
+                         password_hash=_hash("123"))
+                db.add(u)
+                db.flush()
+            else:
+                u.password_hash = _hash("123")
+                u.must_change_password = False
+                u.status = "ACTIVE"
+            users[account] = u
+
+        admin = users["admin"]
+        clin = {k: users[k] for k in ("clinician_a", "clinician_b")}
+
+        # ===== 2) 清空业务数据 =====
+        _clear_business_data(db)
+
+        # ===== 3) 装置型号（幂等）=====
+        models: dict[str, DeviceModel] = {}
+        for cat, brand, name, mfr in [
+            ("pMDI", "万托林", "吸入气雾剂 pMDI", "阿斯利康（DEMO）"),
+            ("DPI", "信必可", "都保 DPI", "阿斯利康（DEMO）"),
+            ("SMI", "思力华", "能倍乐 Respimat", "勃林格殷格翰（DEMO）"),
+        ]:
+            m = db.query(DeviceModel).filter(DeviceModel.model_name == name).first()
+            if m is None:
+                m = DeviceModel(category=cat, brand=brand, model_name=name, manufacturer=mfr, status="ACTIVE")
+                db.add(m)
+                db.flush()
+            models[cat] = m
+
+        # ===== 4) 已发布指导 + 步骤 =====
+        guides: dict[str, DeviceGuide] = {}
+        for cat, spec in GUIDES.items():
+            model = models[cat]
+            g = DeviceGuide(
+                device_model_id=model.id,
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 54 页 / 共 60 页
+                version="1.0",
+                title=spec["title"],
+                source_title=spec["source"],
+                review_status="PUBLISHED",
+                reviewed_by=admin.id,
+                reviewed_at=NOW - timedelta(days=3),
+                published_by=admin.id,
+                published_at=NOW - timedelta(days=2),
+            )
+            db.add(g)
+            db.flush()
+            for i, (txt, err) in enumerate(spec["steps"], start=1):
+                db.add(GuideStep(guide_id=g.id, step_no=i, text=txt, error_notes=err or None))
+            guides[cat] = g
+            db.add(AuditLog(actor_id=admin.id, action="GUIDE_PUBLISH", resource_type="device_guide",
+                            resource_id=g.id, detail={"version": "1.0", "model": model.model_name},
+                            created_at=NOW - timedelta(days=2)))
+
+        # 保留一份 DEMO 草稿（演示「草稿不可见」）
+        draft = DeviceGuide(
+            device_model_id=models["pMDI"].id, version="1.1-demo",
+            title="万托林吸入气雾剂操作指导（DEMO 草稿，未审核）",
+            review_status="DRAFT",
+        )
+        db.add(draft)
+        db.flush()
+        db.add(GuideStep(guide_id=draft.id, step_no=1, text="（待临床审核后填写正式步骤）",
+                         error_notes="本步骤为演示占位，不构成正式操作指导。"))
+
+        # ===== 5) 患者 + 装置绑定 =====
+        patients: dict[str, Patient] = {}
+        for code, name, diag, owner, cat in PATIENTS:
+            p = db.query(Patient).filter(Patient.patient_code == code).first()
+            if p is None:
+                p = Patient(
+                    patient_code=code,
+                    display_name=name,
+                    diagnosis_label=diag,
+                    note="DEMO 演示数据，非真实患者",
+                    assigned_clinician_id=clin[owner].id,
+                    account_user_id=users[ACCOUNT_BINDING[code]].id if code in ACCOUNT_BINDING else None,
+                )
+                db.add(p)
+                db.flush()
+            else:
+                p.display_name = name
+                p.diagnosis_label = diag
+                p.note = "DEMO 演示数据，非真实患者"
+                p.assigned_clinician_id = clin[owner].id
+                p.account_user_id = users[ACCOUNT_BINDING[code]].id if code in ACCOUNT_BINDING else None
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 55 页 / 共 60 页
+            patients[code] = p
+            db.add(PatientDevice(patient_id=p.id, device_model_id=models[cat].id,
+                                 effective_from=utc_at(PLAN_START - timedelta(days=30), time(0, 0))))
+            db.add(AuditLog(actor_id=clin[owner].id, action="PATIENT_CREATE", resource_type="patient",
+                            resource_id=p.id, detail={"code": code}, created_at=NOW - timedelta(days=9)))
+        db.flush()
+
+        # ===== 6) 计划 / 时点 / 登记 =====
+        events_created = 0
+        for code, days, times, covered in PLAN_SPECS:
+            p = patients[code]
+            cat = dict((c, cc) for c, _, _, _, cc in PATIENTS)[code]
+            model = models[cat]
+            start_d = PLAN_START
+            end_d = PLAN_START + timedelta(days=days)
+            plan = MedicationPlan(
+                patient_id=p.id, device_model_id=model.id, plan_group_id=uuid.uuid4(),
+                version=1, drug_label=DRUG_BY_CATEGORY[cat], plan_type="REGULAR",
+                timezone="Asia/Shanghai",
+                starts_at=utc_at(start_d, time(0, 0)), ends_at=utc_at(end_d, time(0, 0)),
+            )
+            db.add(plan)
+            db.flush()
+            local_times = []
+            for i, hm in enumerate(times, start=1):
+                h, m = hm.split(":")
+                lt = time(int(h), int(m))
+                local_times.append(lt)
+                db.add(PlanDailyTime(plan_id=plan.id, local_time=lt, label=f"时点{i}", is_enabled=True))
+
+            # 生成时点
+            slots = []
+            d = start_d
+            while d < end_d:
+                for lt in local_times:
+                    s = PlannedSlot(plan_id=plan.id, patient_id=p.id, scheduled_at=utc_at(d, lt), state="ACTIVE")
+                    db.add(s)
+                    db.flush()
+                    slots.append(s)
+                d += timedelta(days=1)
+            slots.sort(key=lambda s: s.scheduled_at)
+
+            # 登记：前 covered 个时点（对 P-001 特意跳过中间两个以更真实）
+            if code == "P-001":
+                covered_idx = list(range(0, 5)) + list(range(6, 8)) + list(range(9, 12))
+            else:
+                covered_idx = list(range(min(covered, len(slots))))
+            for idx in covered_idx[:covered]:
+                slot = slots[idx]
+                occ = slot.scheduled_at + timedelta(minutes=5)
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 56 页 / 共 60 页
+                db.add(MedicationEvent(
+                    patient_id=p.id, plan_id=plan.id, slot_id=slot.id, source="PATIENT_REPORT",
+                    occurred_at=occ, recorded_at=occ + timedelta(minutes=2), status="ACTIVE",
+                    note="按计划登记",
+                ))
+                events_created += 1
+
+            # P-001 专属演示：1 次重复登记 + 1 条撤销
+            if code == "P-001" and len(slots) > 12:
+                dup = slots[0]
+                db.add(MedicationEvent(
+                    patient_id=p.id, plan_id=plan.id, slot_id=dup.id, source="PATIENT_REPORT",
+                    occurred_at=dup.scheduled_at + timedelta(minutes=45),
+                    recorded_at=dup.scheduled_at + timedelta(minutes=47), status="ACTIVE",
+                    note="重复登记（演示重复提示）",
+                ))
+                events_created += 1
+                rev = slots[12]
+                db.add(MedicationEvent(
+                    patient_id=p.id, plan_id=plan.id, slot_id=rev.id, source="PATIENT_REPORT",
+                    occurred_at=rev.scheduled_at + timedelta(minutes=3),
+                    recorded_at=rev.scheduled_at + timedelta(minutes=4), status="REVOKED",
+                    note="误登记", revoked_by=p.account_user_id, revoked_at=NOW - timedelta(days=1),
+                    revoke_reason="患者反馈当时未实际使用",
+                ))
+                events_created += 1
+
+        # P-002 追加 PRN 计划（演示按需不计入分母）
+        p2 = patients["P-002"]
+        prn = MedicationPlan(
+            patient_id=p2.id, device_model_id=models["DPI"].id,
+            plan_group_id=uuid.uuid4(), version=1,
+            drug_label="按需缓解用药（DEMO）", plan_type="PRN", timezone="Asia/Shanghai",
+            starts_at=utc_at(PLAN_START, time(0, 0)), ends_at=None,
+        )
+        db.add(prn)
+        db.flush()
+        for i in range(3):
+            occ = utc_at(PLAN_START + timedelta(days=i + 1), time(15, 30))
+            db.add(MedicationEvent(patient_id=p2.id, plan_id=prn.id, slot_id=None,
+                                   source="PATIENT_REPORT", occurred_at=occ,
+                                   recorded_at=occ + timedelta(minutes=3), status="ACTIVE",
+                                   note="症状发作时按需使用"))
+            events_created += 1
+
+        # P-001 计划版本修订（演示历史版本）
+        p1 = patients["P-001"]
+        old_plan = db.query(MedicationPlan).filter(
+            MedicationPlan.patient_id == p1.id, MedicationPlan.plan_type == "REGULAR"
+        ).first()
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 57 页 / 共 60 页
+        if old_plan:
+            rev_start = utc_at(date(2026, 10, 15), time(0, 0))
+            old_plan.ends_at = rev_start
+            v2 = MedicationPlan(
+                patient_id=p1.id, device_model_id=old_plan.device_model_id,
+                plan_group_id=old_plan.plan_group_id, version=2,
+                drug_label=old_plan.drug_label, plan_type="REGULAR", timezone="Asia/Shanghai",
+                starts_at=rev_start, ends_at=None,
+            )
+            db.add(v2)
+            db.flush()
+            for i, hm in enumerate(["09:00", "21:00"], start=1):
+                h, m = hm.split(":")
+                db.add(PlanDailyTime(plan_id=v2.id, local_time=time(int(h), int(m)),
+                                     label=f"时点{i}", is_enabled=True))
+            db.add(AuditLog(actor_id=clin["clinician_a"].id, action="PLAN_REVISION",
+                            resource_type="medication_plan", resource_id=v2.id,
+                            detail={"old_version": 1}, created_at=NOW - timedelta(days=1)))
+
+        # ===== 7) 训练记录 =====
+        for code in ("P-001", "P-002", "P-005"):
+            p = patients[code]
+            cat = dict((c, cc) for c, _, _, _, cc in PATIENTS)[code]
+            g = guides[cat]
+            steps = db.query(GuideStep).filter(GuideStep.guide_id == g.id).order_by(GuideStep.step_no).all()
+            for k in range(2):
+                src = "PATIENT_REPORT"
+                sess = TrainingSession(
+                    patient_id=p.id, device_model_id=models[cat].id, guide_id=g.id, source=src,
+                    submit_at=NOW - timedelta(days=k + 1, hours=2),
+                    result="自述完成" if k == 0 else "部分步骤有困难",
+                )
+                db.add(sess)
+                db.flush()
+                for i, st in enumerate(steps):
+                    state = "DONE" if (i % 3 != 2 or k == 0) else "DIFFICULT"
+                    db.add(TrainingStepResult(session_id=sess.id, step_id=st.id, check_state=state,
+                                              note="屏气时间不足" if state == "DIFFICULT" else None))
+        # 医护现场观察 1 条
+        p3 = patients["P-003"]
+        g3 = guides["SMI"]
+        st3 = db.query(GuideStep).filter(GuideStep.guide_id == g3.id).order_by(GuideStep.step_no).all()
+        obs = TrainingSession(patient_id=p3.id, device_model_id=models["SMI"].id, guide_id=g3.id,
+                              source="CLINICIAN_OBSERVED", submit_at=NOW - timedelta(days=2, hours=5),
+                              result="操作熟练", evaluator_id=clin["clinician_a"].id)
+        db.add(obs)
+        db.flush()
+        for st in st3:
+            db.add(TrainingStepResult(session_id=obs.id, step_id=st.id, check_state="DONE"))
+
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 58 页 / 共 60 页
+        # ===== 8) 待核查任务 + 随访 =====
+        low = [("P-010", 4), ("P-011", 3), ("P-003", 7)]
+        tasks_created = []
+        for i, (code, _) in enumerate(low):
+            p = patients[code]
+            slot = db.query(PlannedSlot).filter(PlannedSlot.patient_id == p.id).order_by(
+                PlannedSlot.scheduled_at.desc()).first()
+            status = ["OPEN", "IN_PROGRESS", "CLOSED"][i]
+            t = Task(
+                patient_id=p.id, task_type="MISSED_MEDICATION",
+                trigger_key=trigger_key(p.id, "MISSED_MEDICATION", slot.id if slot else p.id),
+                status=status, assigned_to=p.assigned_clinician_id,
+                closed_at=NOW - timedelta(hours=6) if status == "CLOSED" else None,
+                created_at=NOW - timedelta(days=2, hours=i),
+            )
+            db.add(t)
+            db.flush()
+            tasks_created.append(t)
+            db.add(AuditLog(actor_id=None, action="TASK_CREATE", resource_type="task",
+                            resource_id=t.id, detail={"task_type": "MISSED_MEDICATION"},
+                            created_at=NOW - timedelta(days=2, hours=i)))
+
+        followup_specs = [
+            ("P-010", tasks_created[0], "已电话联系患者，患者表示近期外出忘记登记。", "提醒按计划登记，并演示吸入步骤。", "一周后电话复查。"),
+            ("P-003", tasks_created[2], "随访时发现患者未正确屏气。", "现场演示并让患者复述操作要点。", "安排一次操作复训。"),
+            ("P-001", None, "患者反馈吸入器使用顺畅，无不适。", "肯定依从性，提醒漱口。", "两周后常规随访。"),
+            ("P-002", None, "患者主诉晨起气促，已建议门诊复诊。", "记录症状变化，未调整用药。", "门诊复诊后更新随访。"),
+            ("P-005", None, "复训后操作明显改善。", "再次强调摇匀与同步按压。", "下次随访观察维持情况。"),
+        ]
+        for code, task, fb, act, nxt in followup_specs:
+            p = patients[code]
+            f = Followup(
+                patient_id=p.id, task_id=task.id if task else None,
+                clinician_id=p.assigned_clinician_id,
+                followed_at=NOW - timedelta(days=1, hours=len(fb)),
+                feedback=fb, action_taken=act, next_plan=nxt,
+            )
+            db.add(f)
+            db.flush()
+            if task is not None:
+                task.status = "CLOSED"
+                task.closed_at = f.followed_at
+            db.add(AuditLog(actor_id=p.assigned_clinician_id, action="FOLLOWUP_CREATE",
+                            resource_type="followup", resource_id=f.id,
+                            detail={"close_task": task is not None}, created_at=f.followed_at))
+
+        # ===== 9) 患者提醒 =====
+        for code, kind, title in [
+            ("P-001", "RETRAIN", "请完成一次操作复训"),
+            ("P-001", "FOLLOWUP", "请配合完成近期随访"),
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 59 页 / 共 60 页
+            ("P-003", "RETRAIN", "复训后请再次完成操作自检"),
+        ]:
+            p = patients[code]
+            db.add(PatientReminder(
+                patient_id=p.id, kind=kind, title=title, status="PENDING",
+                created_by=p.assigned_clinician_id, created_at=NOW - timedelta(days=1),
+            ))
+
+        # ===== 10) 知识库（已发布，供 AI 检索）=====
+        kb_texts = {
+            "pMDI": [
+                "压力定量气雾剂使用前必须充分摇匀，使药液与抛射剂混合均匀，通常摇匀约 5 秒。",
+                "吸入时应在按压罐体的同时缓慢深吸气，按压与吸气不同步是最常见的操作错误。",
+                "吸入后屏气约 10 秒可以让药物更好地沉积在气道，屏气不足会降低疗效。",
+                "使用含糖皮质激素的吸入剂后应清水漱口，减少口腔不适的发生。",
+            ],
+            "DPI": [
+                "干粉吸入剂需先旋松并拔出瓶盖，再旋转底座完成上药，听到咔哒声表示上药到位。",
+                "上药后应先完全呼气，注意不要对着吸嘴呼气，潮气会使药粉结块。",
+                "吸入干粉时需要快速有力地一次吸足，吸气力度不足会造成药物残留。",
+            ],
+            "SMI": [
+                "软雾吸入剂首次使用前需要排气，按压剂量释放按钮至出现均匀药雾。",
+                "吸入时应缓慢深吸气，同时按压剂量释放按钮，保证喷雾与吸气同步。",
+            ],
+        }
+        for cat, texts in kb_texts.items():
+            doc = KnowledgeDocument(
+                device_model_id=models[cat].id, guide_id=guides[cat].id,
+                title=f"{models[cat].model_name} 使用要点知识库（DEMO）",
+                version="1.0", review_status="PUBLISHED",
+                source_url=None, reviewed_by=admin.id, reviewed_at=NOW - timedelta(days=3),
+                published_by=admin.id, published_at=NOW - timedelta(days=2),
+            )
+            db.add(doc)
+            db.flush()
+            for i, txt in enumerate(texts, start=1):
+                db.add(KnowledgeChunk(document_id=doc.id, chunk_no=i, text=txt))
+            db.add(AuditLog(actor_id=admin.id, action="KNOWLEDGE_PUBLISH",
+                            resource_type="knowledge_document", resource_id=doc.id,
+                            detail={"version": "1.0"}, created_at=NOW - timedelta(days=2)))
+
+        db.commit()
+
+        # ===== 统计输出 =====
+        counts = {}
+        for t in ["users", "patients", "device_models", "device_guides", "guide_steps",
+                  "patient_devices", "medication_plans", "plan_daily_times", "planned_slots",
+                  "medication_events", "training_sessions", "training_step_results",
+                  "tasks", "followups", "patient_reminders",
+
+------------------------------------------------------------------------------
+
+吸入治疗指导与依从性辅助管理软件 V1.0                    第 60 页 / 共 60 页
+                  "knowledge_documents", "knowledge_chunks", "audit_logs"]:
+            counts[t] = db.execute(text(f"SELECT count(*) FROM {t}")).scalar()
+        print("演示数据重建完成：")
+        for k, v in counts.items():
+            print(f"  {k:24} {v}")
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+if __name__ == "__main__":
+    seed()
+
+
+------------------------------------------------------------------------------
+

@@ -1,0 +1,16 @@
+- generic [ref=f1e1109]:
+  - heading "吸入治疗指导与依从性辅助管理软件" [level=4] [ref=f1e1110]
+  - generic [ref=f1e1111]: 医护端登录
+  - generic [ref=f1e1112]:
+    - generic [ref=f1e1114]:
+      - generic "账号" [ref=f1e1116]: "* 账号"
+      - textbox "* 账号" [active] [ref=f1e1120]:
+        - /placeholder: 账号
+    - generic [ref=f1e1122]:
+      - generic "密码" [ref=f1e1124]: "* 密码"
+      - generic [ref=f1e1128]:
+        - textbox "* 密码" [ref=f1e1129]:
+          - /placeholder: 密码
+        - button "显示" [ref=f1e1131] [cursor=pointer]:
+          - img "eye-invisible" [ref=f1e1132]
+    - button "登 录" [ref=f1e1136] [cursor=pointer]

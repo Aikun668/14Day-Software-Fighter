@@ -1,0 +1,13 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 427,
+    "issues": [
+      "控制台错误：Warning: [antd: List] The `List` component is deprecated and will be removed in the next major version. If you're using version 6.6.0 or later, please use `Listy` instead."
+    ],
+    "lint": []
+  }
+]

@@ -1,0 +1,465 @@
+/* 医护 Web 全局样式：与 UI_DESIGN §2 视觉变量对齐 */
+:root {
+  --bg: #F8F9FC;
+  --surface: #FFFFFF;
+  --line: #E6E9F1;
+  --line-soft: #F0F2F7;
+  --ink: #0F0D27;
+  --ink-2: #3D3D56;
+  --muted: #6B6E7F;
+  --brand: #573BF4;
+  --brand-hover: #4A2FE0;
+  --brand-ink: #4D3BA7;
+  --brand-soft: #EFECFE;
+  --brand-tint: #F8F5FF;
+  --progress: #14938E;
+  --missed: #24243E;
+  --missed-soft: #EEEFF5;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* 页标题：24px 墨色，右侧放日期或页面级操作（UI_DESIGN §5） */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.page-header-side {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-meta,
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.card-empty {
+  margin: 0;
+  padding: 16px 20px;
+  color: var(--muted);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.toolbar-end {
+  justify-content: flex-end;
+}
+
+.field-label {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* 待核查、已绑定等标签：浅紫底紫字，与“已登记”同色系（UI_DESIGN §3） */
+.ant-tag.tag-brand {
+  border-color: transparent;
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+/* 表单两列并排（开始/结束日期） */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+/* 不进 antd 表单字段的控件：与表单标签、间距保持一致 */
+.form-field {
+  margin-bottom: 24px;
+}
+
+.form-field > label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+
+/* 区块之间 24px（UI_DESIGN §7） */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 登录与改密：居中单卡 */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.auth-card {
+  width: 400px;
+  max-width: 100%;
+}
+
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.auth-sub {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* 工作台概览：一条白底横条，三格之间用竖线分开，不做三张卡 */
+.overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.overview-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 24px;
+}
+
+.overview-cell + .overview-cell {
+  border-left: 1px solid var(--line-soft);
+}
+
+.overview-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.overview-value {
+  color: var(--ink);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.overview-value.is-brand {
+  color: var(--brand);
+}
+
+/* 主区：选中患者后右侧出现 340px 详情，否则列表占满整行 */
+.workbench-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+.workbench-main.has-detail {
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+/* 待核查列表：整行可点；选中行浅紫底加左侧 3px 线（UI_DESIGN §5） */
+.task-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-list > li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.task-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  box-shadow: inset 3px 0 0 transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.task-row:hover {
+  background: #FAFBFD;
+}
+
+.task-row:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
+.task-row.is-selected {
+  background: var(--brand-tint);
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+
+.task-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.task-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.task-name {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.task-code {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.task-basis {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.task-time {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 键值列表：详情卡、患者基本信息 */
+.detail-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.detail-list > div {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.detail-list dt,
+.info-grid dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.detail-list dd,
+.info-grid dd {
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+/* 依据说明：不做成灰框，用一条细线与上方信息分开，避免卡中卡 */
+.basis-block {
+  margin: 16px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px 24px;
+  margin: 0;
+}
+
+.info-grid > div {
+  min-width: 0;
+}
+
+.info-grid dt {
+  margin-bottom: 4px;
+}
+
+.info-grid dd {
+  font-size: 15px;
+}
+
+.info-grid .span-2 {
+  grid-column: span 2;
+}
+
+/* 记录列表：行与行之间一条细线，不再套卡片 */
+.record-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.record-list > li {
+  padding: 14px 0;
+}
+
+.record-list > li:first-child {
+  padding-top: 0;
+}
+
+.record-list > li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.record-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.record-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.record-meta {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.record-body {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--ink-2);
+}
+
+/* 统计与核查 */
+.stats-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.stats-numbers {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  min-width: 320px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+/* 随访中心：左侧任务与历史，右侧记录表单常驻 */
+.followup-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 24px;
+  align-items: start;
+}
+
+.followup-form-card {
+  position: sticky;
+  top: 24px;
+}
+
+@media (max-width: 1200px) {
+  .workbench-main.has-detail,
+  .stats-grid,
+  .followup-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .followup-form-card {
+    position: static;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

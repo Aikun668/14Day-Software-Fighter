@@ -1,0 +1,286 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-@2x.png",
+    "state": null,
+    "size": "390x844",
+    "zoom": 2,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "motion-probe-unconfirmed",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "unconfirmed",
+    "motion": {
+      "load": {
+        "elements": 1,
+        "loops": 0,
+        "maxMove": 5,
+        "maxSize": 0,
+        "maxOpacity": 0.84,
+        "top": [
+          {
+            "el": "div.fade-in",
+            "move": 5,
+            "size": 0,
+            "opacity": 0.84,
+            "loop": false,
+            "sources": [
+              "css:enter"
+            ]
+          }
+        ]
+      },
+      "steps": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": []
+      },
+      "hero": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "layers": 0
+      },
+      "scroll": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "scrollable": true
+      }
+    },
+    "issues": [
+      "--steps 动作：没有检测到动画",
+      "滚动：没有检测到随滚动出现的变化；落地页、品牌页、发布页和展览页需要一段滚动叙事"
+    ]
+  },
+  {
+    "file": "motion-probe-reconciled",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "reconciled",
+    "motion": {
+      "load": {
+        "elements": 1,
+        "loops": 0,
+        "maxMove": 5,
+        "maxSize": 0,
+        "maxOpacity": 0.84,
+        "top": [
+          {
+            "el": "div.fade-in",
+            "move": 5,
+            "size": 0,
+            "opacity": 0.84,
+            "loop": false,
+            "sources": [
+              "css:enter"
+            ]
+          }
+        ]
+      },
+      "steps": {
+        "elements": 3,
+        "loops": 0,
+        "maxMove": 609,
+        "maxSize": 1,
+        "maxOpacity": 0.35,
+        "top": [
+          {
+            "el": "button.button",
+            "move": 609,
+            "size": 1,
+            "opacity": 0.35,
+            "loop": false,
+            "sources": [
+              "transition:background-color",
+              "transition:transform"
+            ]
+          },
+          {
+            "el": "button.button.secondary",
+            "move": 607,
+            "size": 1,
+            "opacity": 0,
+            "loop": false,
+            "sources": [
+              "js:style",
+              "transition:background-color",
+              "transition:transform"
+            ]
+          },
+          {
+            "el": "div.alert",
+            "move": 532,
+            "size": 1,
+            "opacity": 0,
+            "loop": false,
+            "sources": [
+              "js:style"
+            ]
+          }
+        ]
+      },
+      "hero": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "layers": 0
+      },
+      "scroll": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "scrollable": true
+      }
+    },
+    "issues": [
+      "滚动：没有检测到随滚动出现的变化；落地页、品牌页、发布页和展览页需要一段滚动叙事"
+    ]
+  },
+  {
+    "file": "motion-entry-end.jpg",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "entry",
+    "issues": [],
+    "frames": {
+      "start": {
+        "file": "motion-entry-start.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 220
+      },
+      "mid": {
+        "file": "motion-entry-mid.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 377
+      },
+      "end": {
+        "file": "motion-entry-end.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 1814
+      }
+    },
+    "sampling": {
+      "mode": "entry"
+    },
+    "durationMs": 1814,
+    "consistency": {
+      "status": "matched",
+      "reference": "motion-entry-end.jpg",
+      "different": false,
+      "changedPixels": 0,
+      "maxTilePixels": 0,
+      "pixelRatio": 0
+    }
+  },
+  {
+    "file": "motion-unconfirmed-end.jpg",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "unconfirmed",
+    "issues": [],
+    "frames": {
+      "start": {
+        "file": "motion-unconfirmed-start.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 1009
+      },
+      "mid": {
+        "file": "motion-unconfirmed-mid.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 1552
+      },
+      "end": {
+        "file": "motion-unconfirmed-end.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 2720
+      }
+    },
+    "sampling": {
+      "mode": "action",
+      "step": 3,
+      "action": "click",
+      "raw": "click dialog[open] button[type=submit]"
+    },
+    "durationMs": 2720,
+    "consistency": {
+      "status": "matched",
+      "reference": "motion-unconfirmed-end.jpg",
+      "different": false,
+      "changedPixels": 0,
+      "maxTilePixels": 0,
+      "pixelRatio": 0
+    }
+  },
+  {
+    "file": "motion-reconciled-end.jpg",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "reconciled",
+    "issues": [],
+    "frames": {
+      "start": {
+        "file": "motion-reconciled-start.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 1827
+      },
+      "mid": {
+        "file": "motion-reconciled-mid.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 2000
+      },
+      "end": {
+        "file": "motion-reconciled-end.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 3621
+      }
+    },
+    "sampling": {
+      "mode": "action",
+      "step": 7,
+      "action": "click",
+      "raw": "click dialog[open] button[type=submit]"
+    },
+    "durationMs": 3621,
+    "consistency": {
+      "status": "matched",
+      "reference": "motion-reconciled-end.jpg",
+      "different": false,
+      "changedPixels": 0,
+      "maxTilePixels": 0,
+      "pixelRatio": 0
+    }
+  }
+]

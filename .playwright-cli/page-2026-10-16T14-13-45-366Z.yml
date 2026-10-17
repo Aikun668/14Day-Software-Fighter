@@ -1,0 +1,165 @@
+- generic [ref=f1e660]:
+  - banner [ref=f1e661]:
+    - strong [ref=f1e663]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=f1e664] [cursor=pointer]:
+      - generic [ref=f1e665]: A
+      - generic [ref=f1e668]: admin
+  - generic [ref=f1e669]:
+    - complementary [ref=f1e670]:
+      - menu [ref=f1e672]:
+        - menuitem "内容与账号管理" [ref=f1e673] [cursor=pointer]
+    - main [ref=f1e675]:
+      - generic [ref=f1e677]:
+        - heading "内容与账号管理" [level=4] [ref=f1e678]
+        - generic [ref=f1e679]:
+          - tablist [ref=f1e680]:
+            - generic [ref=f1e682]:
+              - tab "装置型号（3）" [ref=f1e684] [cursor=pointer]
+              - tab "指导版本（4）" [ref=f1e686] [cursor=pointer]
+              - tab "账号（19）" [active] [selected] [ref=f1e688] [cursor=pointer]
+              - tab "审计日志（30）" [ref=f1e690] [cursor=pointer]
+          - tabpanel "账号（19）" [ref=f1e799]:
+            - generic [ref=f1e800]:
+              - button "新建账号" [ref=f1e804] [cursor=pointer]
+              - table [ref=f1e813]:
+                - rowgroup [ref=f1e814]:
+                  - row [ref=f1e815]:
+                    - columnheader "账号" [ref=f1e816]
+                    - columnheader "角色" [ref=f1e817]
+                    - columnheader "状态" [ref=f1e818]
+                    - columnheader "需改密" [ref=f1e819]
+                    - columnheader "操作" [ref=f1e820]
+                - rowgroup [ref=f1e821]:
+                  - row [ref=f1e822]:
+                    - cell "clinician_b" [ref=f1e823]
+                    - cell "医护" [ref=f1e824]
+                    - cell "启用" [ref=f1e825]
+                    - cell "否" [ref=f1e827]
+                    - cell [ref=f1e828]:
+                      - button "停 用" [ref=f1e829] [cursor=pointer]
+                  - row [ref=f1e831]:
+                    - cell "admin" [ref=f1e832]
+                    - cell "管理员" [ref=f1e833]
+                    - cell "启用" [ref=f1e834]
+                    - cell "否" [ref=f1e836]
+                    - cell [ref=f1e837]:
+                      - button "停 用" [ref=f1e838] [cursor=pointer]
+                  - row [ref=f1e840]:
+                    - cell "clinician_a" [ref=f1e841]
+                    - cell "医护" [ref=f1e842]
+                    - cell "启用" [ref=f1e843]
+                    - cell "否" [ref=f1e845]
+                    - cell [ref=f1e846]:
+                      - button "停 用" [ref=f1e847] [cursor=pointer]
+                  - row [ref=f1e849]:
+                    - cell "patient_y" [ref=f1e850]
+                    - cell "患者" [ref=f1e851]
+                    - cell "启用" [ref=f1e852]
+                    - cell "否" [ref=f1e854]
+                    - cell [ref=f1e855]:
+                      - button "停 用" [ref=f1e856] [cursor=pointer]
+                  - row [ref=f1e858]:
+                    - cell "patient_x" [ref=f1e859]
+                    - cell "患者" [ref=f1e860]
+                    - cell "启用" [ref=f1e861]
+                    - cell "否" [ref=f1e863]
+                    - cell [ref=f1e864]:
+                      - button "停 用" [ref=f1e865] [cursor=pointer]
+                  - row [ref=f1e867]:
+                    - cell "clinician_c" [ref=f1e868]
+                    - cell "医护" [ref=f1e869]
+                    - cell "启用" [ref=f1e870]
+                    - cell "是" [ref=f1e872]
+                    - cell [ref=f1e873]:
+                      - button "停 用" [ref=f1e874] [cursor=pointer]
+                  - row [ref=f1e876]:
+                    - cell "temp_doc" [ref=f1e877]
+                    - cell "医护" [ref=f1e878]
+                    - cell "停用" [ref=f1e879]
+                    - cell "是" [ref=f1e881]
+                    - cell [ref=f1e882]:
+                      - button "启 用" [ref=f1e883] [cursor=pointer]
+                  - row [ref=f1e885]:
+                    - cell "clinician_t125882" [ref=f1e886]
+                    - cell "医护" [ref=f1e887]
+                    - cell "启用" [ref=f1e888]
+                    - cell "是" [ref=f1e890]
+                    - cell [ref=f1e891]:
+                      - button "停 用" [ref=f1e892] [cursor=pointer]
+                  - row [ref=f1e894]:
+                    - cell "temp_doc_125973" [ref=f1e895]
+                    - cell "医护" [ref=f1e896]
+                    - cell "停用" [ref=f1e897]
+                    - cell "是" [ref=f1e899]
+                    - cell [ref=f1e900]:
+                      - button "启 用" [ref=f1e901] [cursor=pointer]
+                  - row [ref=f1e903]:
+                    - cell "clinician_t126014" [ref=f1e904]
+                    - cell "医护" [ref=f1e905]
+                    - cell "启用" [ref=f1e906]
+                    - cell "是" [ref=f1e908]
+                    - cell [ref=f1e909]:
+                      - button "停 用" [ref=f1e910] [cursor=pointer]
+                  - row [ref=f1e912]:
+                    - cell "temp_doc_126050" [ref=f1e913]
+                    - cell "医护" [ref=f1e914]
+                    - cell "停用" [ref=f1e915]
+                    - cell "是" [ref=f1e917]
+                    - cell [ref=f1e918]:
+                      - button "启 用" [ref=f1e919] [cursor=pointer]
+                  - row [ref=f1e921]:
+                    - cell "clinician_t126193" [ref=f1e922]
+                    - cell "医护" [ref=f1e923]
+                    - cell "启用" [ref=f1e924]
+                    - cell "是" [ref=f1e926]
+                    - cell [ref=f1e927]:
+                      - button "停 用" [ref=f1e928] [cursor=pointer]
+                  - row [ref=f1e930]:
+                    - cell "temp_doc_126228" [ref=f1e931]
+                    - cell "医护" [ref=f1e932]
+                    - cell "停用" [ref=f1e933]
+                    - cell "是" [ref=f1e935]
+                    - cell [ref=f1e936]:
+                      - button "启 用" [ref=f1e937] [cursor=pointer]
+                  - row [ref=f1e939]:
+                    - cell "clinician_t126285" [ref=f1e940]
+                    - cell "医护" [ref=f1e941]
+                    - cell "启用" [ref=f1e942]
+                    - cell "是" [ref=f1e944]
+                    - cell [ref=f1e945]:
+                      - button "停 用" [ref=f1e946] [cursor=pointer]
+                  - row [ref=f1e948]:
+                    - cell "temp_doc_126350" [ref=f1e949]
+                    - cell "医护" [ref=f1e950]
+                    - cell "停用" [ref=f1e951]
+                    - cell "是" [ref=f1e953]
+                    - cell [ref=f1e954]:
+                      - button "启 用" [ref=f1e955] [cursor=pointer]
+                  - row [ref=f1e957]:
+                    - cell "clinician_t127275" [ref=f1e958]
+                    - cell "医护" [ref=f1e959]
+                    - cell "启用" [ref=f1e960]
+                    - cell "是" [ref=f1e962]
+                    - cell [ref=f1e963]:
+                      - button "停 用" [ref=f1e964] [cursor=pointer]
+                  - row [ref=f1e966]:
+                    - cell "temp_doc_127313" [ref=f1e967]
+                    - cell "医护" [ref=f1e968]
+                    - cell "停用" [ref=f1e969]
+                    - cell "是" [ref=f1e971]
+                    - cell [ref=f1e972]:
+                      - button "启 用" [ref=f1e973] [cursor=pointer]
+                  - row [ref=f1e975]:
+                    - cell "clinician_t127362" [ref=f1e976]
+                    - cell "医护" [ref=f1e977]
+                    - cell "启用" [ref=f1e978]
+                    - cell "是" [ref=f1e980]
+                    - cell [ref=f1e981]:
+                      - button "停 用" [ref=f1e982] [cursor=pointer]
+                  - row [ref=f1e984]:
+                    - cell "temp_doc_127391" [ref=f1e985]
+                    - cell "医护" [ref=f1e986]
+                    - cell "停用" [ref=f1e987]
+                    - cell "是" [ref=f1e989]
+                    - cell [ref=f1e990]:
+                      - button "启 用" [ref=f1e991] [cursor=pointer]

@@ -1,0 +1,13 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "failed": true,
+    "issues": [
+      "控制台错误：Warning: [antd: List] The `List` component is deprecated and will be removed in the next major version. If you're using version 6.6.0 or later, please use `Listy` instead.",
+      "第 11 步「click text=今天」：找不到元素 text=今天；线索：可见文字 \"C\"；可见文字 \"Su\"；可见文字 \"Mo\"；可见文字 \"Tu\"；可见文字 \"We\"；例如 click text=\"C\""
+    ]
+  }
+]

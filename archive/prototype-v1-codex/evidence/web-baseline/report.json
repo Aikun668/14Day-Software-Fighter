@@ -1,0 +1,38 @@
+[
+  {
+    "file": "page-1440x900.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "longMeasure",
+        "label": "正文行太长",
+        "count": 1,
+        "examples": [
+          "p.queue-note「“未发现登记”仅表示记录待核查，不代表确定漏用药」（每行约 61 字）"
+        ]
+      }
+    ]
+  },
+  {
+    "file": "page-1280x900.png",
+    "state": null,
+    "size": "1280x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "longMeasure",
+        "label": "正文行太长",
+        "count": 1,
+        "examples": [
+          "p.queue-note「“未发现登记”仅表示记录待核查，不代表确定漏用药」（每行约 73 字）"
+        ]
+      }
+    ]
+  }
+]

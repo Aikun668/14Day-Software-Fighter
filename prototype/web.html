@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工作台 · 吸入治疗指导与依从性辅助管理软件 V1.0</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles.css">
+<style>
+.app{display:grid;grid-template-rows:56px minmax(0,1fr);grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.topbar{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;min-width:232px;margin-left:-20px;padding-left:20px;height:56px;border-right:1px solid var(--line);margin-right:0}
+.logo{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--brand);color:#fff;font-size:14px;font-weight:700}
+.search{flex:1;max-width:420px;height:36px;display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg);color:var(--muted);font-size:13px}
+.topbar .spacer{flex:1}
+.icon-btn{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:var(--r-sm);background:none;color:var(--ink-2)}
+.icon-btn:hover{background:var(--bg)}
+.icon-btn .i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.user{display:flex;align-items:center;gap:10px;font-size:13px}
+.user strong{display:block;font-size:13px}
+.user .muted{font-size:12px}
+.sidebar{padding:20px 16px;border-right:1px solid var(--line);background:var(--surface)}
+.sidebar .nav{display:grid;gap:4px}
+.sidebar .foot{margin-top:auto;padding:14px 12px 0;border-top:1px solid var(--line-soft);font-size:12px;color:var(--muted)}
+.sidebar-wrap{display:flex;flex-direction:column;min-height:calc(100vh - 56px);}
+.content{padding:24px 28px 48px;min-width:0}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:20px}
+.page-head p{margin-top:4px;color:var(--muted)}
+.overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:20px}
+.coverage{display:flex;align-items:center;gap:18px}
+.coverage .ring{width:76px;height:76px}
+.coverage .ring-text strong{font-size:15px}
+.coverage .ring-text span{font-size:10px;margin-top:0}
+.work{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.work>.card:first-child{display:flex;flex-direction:column}
+.detail{position:sticky;top:20px;align-self:start;padding:18px}
+.detail .detail-id{padding-bottom:12px}
+.detail-line{margin:10px 0 0;font-size:13px;color:var(--ink-2)}
+.detail .section-label{margin:14px 0 8px}
+.detail .legend{margin-top:8px}
+.detail .evidence{margin-top:12px;padding:10px 12px}
+.detail .detail-actions{margin-top:14px}
+.work.solo{grid-template-columns:minmax(0,1fr)}
+.queue-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.queue-foot{padding:14px 20px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--muted)}
+.task-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;padding:16px 20px;border:0;border-bottom:1px solid var(--line-soft);background:var(--surface);text-align:left}
+.task-row:hover{background:#FAFAFD}
+.task-row.is-selected{background:var(--brand-tint);box-shadow:inset 3px 0 0 var(--brand)}
+.task-row strong{font-size:14px}
+.task-row .sub{margin-top:2px;font-size:12px;color:var(--muted)}
+.task-inline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:0 20px 16px 66px;background:var(--brand-tint);border-bottom:1px solid var(--line-soft)}
+.task-inline .actions{display:flex;gap:8px}
+.detail-id{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line-soft)}
+.detail-id .avatar{width:44px;height:44px;font-size:16px}
+.detail-id .meta{font-size:12px;color:var(--muted)}
+.section-label{margin:18px 0 10px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.facts .fact{padding:10px 0}
+.scale{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.scale .day{display:grid;justify-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.scale .col{display:grid;gap:4px;width:100%}
+.scale .cell{height:18px;border-radius:5px;background:var(--brand-soft)}
+.scale .cell.logged{background:var(--brand)}
+.scale .cell.missed{background:#FFFFFF;box-shadow:inset 0 0 0 1px var(--missed)}
+.scale .cell.future{background:#FFFFFF;box-shadow:inset 0 0 0 1px #AEB3C4;border-style:dashed}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.evidence{margin-top:16px;padding:12px 14px;border-radius:var(--r-sm);background:var(--missed-soft);border-left:3px solid var(--missed);font-size:13px;color:var(--ink-2)}
+.evidence strong{display:block;color:var(--ink);margin-bottom:2px}
+.detail-actions{display:grid;gap:8px;margin-top:18px}
+.recent{margin-top:20px;overflow:hidden}
+.rec{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line-soft)}
+.rec:last-child{border-bottom:0}
+.rec p{font-size:13px;color:var(--muted)}
+.rec time{font-size:12px;color:var(--muted);white-space:nowrap}
+.fu{max-width:680px}
+.fu .card{padding:24px}
+.fu-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--line-soft)}
+.fu-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.fu-note{margin-top:14px;font-size:12px;color:var(--muted)}
+.back{margin-bottom:14px}
+.toast{position:fixed;right:24px;bottom:24px}
+@media(max-width:1399px){.work{grid-template-columns:minmax(0,1fr)}.detail{position:static}}
+@media(max-width:1000px){.app{grid-template-columns:200px minmax(0,1fr)}.overview{grid-template-columns:1fr 1fr}.search{display:none}}
+</style>
+<script defer src="vendor/alpine.min.js"></script>
+</head>
+<body x-data="workbench()" @resize.window="isNarrow=window.innerWidth<1400" x-cloak>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="logo" aria-hidden="true">吸</span>吸入治疗管理</div>
+    <div class="search" role="search"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>搜索患者编号或姓名</div>
+    <div class="spacer"></div>
+    <button class="icon-btn" aria-label="通知"><svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></button>
+    <div class="user"><span class="avatar" aria-hidden="true">陈</span><div><strong>陈医护</strong><span class="muted">责任医护</span></div></div>
+  </header>
+
+  <aside class="sidebar sidebar-wrap">
+    <nav class="nav" aria-label="主要导航">
+      <button class="nav-item" :aria-current="view==='dashboard'?'page':null" @click="view='dashboard'">
+        <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        工作台
+        <span class="tag tag-plain num" style="margin-left:auto;height:20px;min-width:22px;justify-content:center;padding:0 6px;background:var(--brand);color:#fff" x-show="pending.length" x-text="pending.length"></span>
+      </button>
+      <button class="nav-item" @click="openOverview()">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.3-5 6.5-5s5.7 1.8 6.5 5"/></svg>
+        患者管理
+      </button>
+      <button class="nav-item" @click="$refs.stats.showModal()">
+        <svg class="i" viewBox="0 0 24 24"><path d="M5 20v-6M12 20V5M19 20v-9"/></svg>
+        统计与核查
+      </button>
+      <button class="nav-item" :aria-current="view==='followup'?'page':null" @click="startFollowup()">
+        <svg class="i" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>
+        随访中心
+      </button>
+    </nav>
+    <div class="foot">医护工作区<br>仅管理所负责患者</div>
+  </aside>
+
+  <main class="content">
+    <section x-show="view==='dashboard'" class="fade-in">
+      <div class="page-head">
+        <div>
+          <h1>工作台</h1>
+          <p class="num">2026 年 10 月 14 日 周三</p>
+        </div>
+      </div>
+
+      <div class="overview" x-show="state==='normal'||state==='empty'">
+        <div class="card card-pad">
+          <div class="stat-label">负责患者</div>
+          <div class="stat-value num">12</div>
+        </div>
+        <div class="card card-pad">
+          <div class="stat-label">待核查工作</div>
+          <div class="stat-value num" style="color:var(--brand-ink)" x-text="pending.length"></div>
+        </div>
+        <div class="card card-pad coverage">
+          <div class="ring" aria-label="近 7 天记录覆盖率 80%">
+            <svg viewBox="0 0 96 96"><circle class="ring-track" cx="48" cy="48" r="40"/><circle class="ring-fill" cx="48" cy="48" r="40" stroke-dasharray="251.3" stroke-dashoffset="50.3"/></svg>
+            <div class="ring-text"><strong class="num">80%</strong><span>覆盖率</span></div>
+          </div>
+          <div>
+            <div class="stat-label">近 7 天记录覆盖率</div>
+            <div class="small" style="margin-top:4px">已记录 / 已到期固定时点，不代表依从性</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert" x-show="state==='error'" role="alert">
+        <strong>工作台暂时无法读取</strong>
+        <span>请检查网络后重试，尚未读取的数据不会显示为零。</span>
+        <div><button class="btn btn-secondary btn-sm" @click="retry()">重新读取</button></div>
+      </div>
+      <div class="loading" x-show="state==='loading'" role="status" style="display:grid;gap:12px;margin-bottom:20px">
+        <span class="small">正在读取工作台…</span>
+        <div class="skeleton" style="width:100%"></div>
+        <div class="skeleton" style="width:70%"></div>
+      </div>
+
+      <div x-show="state==='normal'||state==='empty'">
+        <div class="work" :class="selected&&!isNarrow?'':'solo'">
+          <section class="card" style="overflow:hidden">
+            <div class="card-head">
+              <div>
+                <h2>待核查任务</h2>
+                <p class="small">先看登记依据，再联系患者核实</p>
+              </div>
+              <div class="seg" role="group" aria-label="筛选任务状态">
+                <button :aria-pressed="filter==='pending'" @click="setFilter('pending')">待处理</button>
+                <button :aria-pressed="filter==='OPEN'" @click="setFilter('OPEN')">待核查</button>
+                <button :aria-pressed="filter==='IN_PROGRESS'" @click="setFilter('IN_PROGRESS')">处理中</button>
+              </div>
+            </div>
+
+            <template x-for="task in visible" :key="task.id">
+              <div>
+                <button class="task-row" :class="selectedId===task.id?'is-selected':''" :aria-pressed="selectedId===task.id" @click="selectedId=task.id">
+                  <span class="avatar" aria-hidden="true" x-text="task.name.slice(0,1)"></span>
+                  <span style="min-width:0">
+                    <strong x-text="task.name+' · '+task.patient"></strong>
+                    <span class="sub" style="display:block">连续 3 个已到期时点未发现登记 · 需处理 <span class="num" x-text="task.due"></span></span>
+                  </span>
+                  <span class="tag" :class="task.status==='IN_PROGRESS'?'tag-progress':'tag-logged'" x-text="task.status==='OPEN'?'待核查':'处理中'"></span>
+                </button>
+                <div class="task-inline" x-show="isNarrow&&selectedId===task.id">
+                  <div>
+                    <strong style="font-size:13px" x-text="task.name+' · 患者摘要'"></strong>
+                    <div class="small">当前装置：信必可都保 · DPI　固定计划 08:00 / 20:00　患者自述，未由设备验证</div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn btn-ghost btn-sm" @click="openOverview()">患者详情</button>
+                    <button class="btn btn-sm" @click="startFollowup()">记录随访</button>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <div class="empty" x-show="!visible.length">
+              <h2 style="color:var(--ink)" x-text="filter==='pending'?'暂无待核查事项':'此状态下暂无任务'"></h2>
+              <span>可以继续查看负责患者与近期随访记录。</span>
+              <button class="btn btn-secondary btn-sm" style="margin-top:6px" @click="openOverview()">查看患者信息</button>
+            </div>
+            <div class="queue-foot">未发现登记不代表确定漏用药；任务生成可能延迟一个扫描周期。</div>
+          </section>
+
+          <template x-if="selected&&!isNarrow">
+            <aside class="card detail" aria-label="选中患者摘要">
+              <div class="detail-id">
+                <span class="avatar" aria-hidden="true" x-text="selected.name.slice(0,1)"></span>
+                <div>
+                  <h3 x-text="selected.name"></h3>
+                  <div class="meta num" x-text="selected.patient"></div>
+                </div>
+              </div>
+
+              <p class="detail-line">信必可都保 · DPI<span aria-hidden="true"> · </span><span class="num">固定计划 08:00 / 20:00</span></p>
+
+              <div class="section-label">近 7 天固定时点</div>
+              <div class="scale" aria-label="近 7 天固定时点登记情况">
+                <div class="day"><span>10/8</span><div class="col"><i class="cell logged"></i><i class="cell logged"></i></div></div>
+                <div class="day"><span>10/9</span><div class="col"><i class="cell logged"></i><i class="cell logged"></i></div></div>
+                <div class="day"><span>10/10</span><div class="col"><i class="cell logged"></i><i class="cell logged"></i></div></div>
+                <div class="day"><span>10/11</span><div class="col"><i class="cell logged"></i><i class="cell logged"></i></div></div>
+                <div class="day"><span>10/12</span><div class="col"><i class="cell logged"></i><i class="cell logged"></i></div></div>
+                <div class="day"><span>10/13</span><div class="col"><i class="cell missed"></i><i class="cell missed"></i></div></div>
+                <div class="day"><span>10/14</span><div class="col"><i class="cell missed"></i><i class="cell future"></i></div></div>
+              </div>
+              <div class="legend">
+                <span><i style="background:var(--brand)"></i>已登记</span>
+                <span><i style="background:#fff;box-shadow:inset 0 0 0 1px var(--missed)"></i>未发现登记</span>
+                <span><i style="background:#fff;box-shadow:inset 0 0 0 1px #D6D9E3"></i>未到期</span>
+              </div>
+
+              <div class="evidence">
+                <strong>本次核查依据</strong>
+                关联的 3 个已到期时点尚未发现有效登记，需联系患者了解实际情况。登记均为患者自述，未由设备验证。
+              </div>
+
+              <div class="detail-actions">
+                <button class="btn btn-block" @click="startFollowup()">记录随访</button>
+                <button class="btn btn-ghost btn-block" @click="openOverview()">查看患者详情</button>
+              </div>
+            </aside>
+          </template>
+        </div>
+
+        <section class="card recent">
+          <div class="card-head">
+            <h2>近期随访</h2>
+            <span class="small">记录与处理过程可追溯</span>
+          </div>
+          <template x-for="entry in recent" :key="entry.id">
+            <div class="rec">
+              <span class="avatar" style="width:32px;height:32px;font-size:13px" aria-hidden="true" x-text="entry.name.slice(0,1)"></span>
+              <div>
+                <strong style="font-size:14px" x-text="entry.name+' · '+entry.patient"></strong>
+                <p x-text="entry.note"></p>
+              </div>
+              <time class="num" x-text="entry.time"></time>
+            </div>
+          </template>
+        </section>
+      </div>
+    </section>
+
+    <section x-show="view==='followup'" class="fade-in fu">
+      <button class="btn btn-ghost back" @click="view='dashboard'">← 返回工作台</button>
+      <div class="card">
+        <div class="fu-head">
+          <span class="avatar" aria-hidden="true" x-text="followupTask?followupTask.name.slice(0,1):'随'"></span>
+          <div>
+            <h2 x-text="followupTask?followupTask.name+' · '+followupTask.patient:'随访记录'"></h2>
+            <p class="small">关联核查任务 · 连续 3 个已到期时点未发现登记</p>
+          </div>
+        </div>
+        <form @submit.prevent="saveFollowup()">
+          <div class="field">
+            <label for="followed-date">随访日期</label>
+            <input class="input" id="followed-date" type="date" required x-model="form.date">
+          </div>
+          <div class="field">
+            <label for="feedback">联系反馈</label>
+            <textarea class="input" id="feedback" required x-model="form.feedback" placeholder="记录实际联系情况与患者反馈"></textarea>
+          </div>
+          <div class="field">
+            <label for="action-taken">本次处理措施</label>
+            <textarea class="input" id="action-taken" required x-model="form.action" placeholder="记录已完成的核实或指导"></textarea>
+          </div>
+          <div class="field">
+            <label for="next-plan">后续安排 <span class="small">（选填）</span></label>
+            <input class="input" id="next-plan" x-model="form.next">
+          </div>
+          <div class="alert" x-show="saveError" role="alert" x-text="saveError"></div>
+          <div class="fu-actions">
+            <button class="btn" type="submit" :disabled="saving" x-text="saving?'保存中…':'保存随访并处理任务'"></button>
+            <button class="btn btn-secondary" type="button" @click="view='dashboard'">返回</button>
+          </div>
+          <p class="fu-note">保存后保留处理人、日期与关联任务；已有登记记录不会被改写。</p>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog x-ref="overview">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div>
+        <h2 x-text="(selected||tasks[0]).name+' · '+(selected||tasks[0]).patient"></h2>
+        <p class="small">当前装置：信必可都保 · DPI</p>
+      </div>
+      <button class="x" aria-label="关闭详情" @click="$refs.overview.close()">×</button>
+    </div>
+    <dl class="facts">
+      <div class="fact"><span>医护录入的固定计划</span><strong>每日 08:00 / 20:00</strong></div>
+      <div class="fact"><span>计划版本</span><strong>历史登记保持原关联版本</strong></div>
+    </dl>
+    <p class="small">患者自述与医护观察分别标注，当前信息为只读摘要。</p>
+  </div>
+</dialog>
+
+<dialog x-ref="stats">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2>统计口径</h2>
+      <button class="x" aria-label="关闭统计说明" @click="$refs.stats.close()">×</button>
+    </div>
+    <p>记录覆盖率基于已到期有效固定计划时点及其登记记录计算，不代表实际用药依从性。</p>
+    <p class="small" style="margin-top:10px">按需记录单独呈现，重复登记对同一时点最多计一次；未配置固定计划时显示“暂无固定计划”。</p>
+  </div>
+</dialog>
+
+<div class="toast" x-show="toast" x-text="toast" role="status"></div>
+
+<script>
+function workbench(){return {isNarrow:window.innerWidth<1400,state:new URLSearchParams(location.search).get('state')||'normal',filter:'pending',selectedId:'t1',view:'dashboard',saving:false,saveError:'',savedCount:0,toast:'',failNext:new URLSearchParams(location.search).get('submit')==='fail',followupTask:null,form:{date:'2026-10-14',feedback:'',action:'',next:''},tasks:[{id:'t1',patient:'P-024',name:'林女士',status:'OPEN',due:'10-14 16:00'},{id:'t2',patient:'P-031',name:'周先生',status:'IN_PROGRESS',due:'10-14 18:00'},{id:'t3',patient:'P-046',name:'许女士',status:'OPEN',due:'10-15 10:00'}],recent:[{id:'r1',name:'吴先生',patient:'P-018',note:'已核实登记情况，保留随访反馈。',time:'10-14 10:20'},{id:'r2',name:'赵女士',patient:'P-009',note:'已完成操作观察评价，安排复训。',time:'10-13 15:40'}],get pending(){return this.state==='empty'?[]:this.tasks.filter(t=>t.status!=='CLOSED')},get visible(){return this.pending.filter(t=>this.filter==='pending'||t.status===this.filter)},get selected(){return this.visible.find(t=>t.id===this.selectedId)||null},setFilter(v){this.filter=v;this.selectedId=this.visible[0]?.id||null},async retry(){this.state='loading';await new Promise(r=>setTimeout(r,350));this.state='normal';this.selectedId=this.visible[0]?.id||null},openOverview(){this.$refs.overview.showModal()},startFollowup(){const t=this.selected||this.pending[0];if(!t){this.toast='当前没有关联的待处理任务';setTimeout(()=>this.toast='',2400);return}this.followupTask={...t};this.form={date:'2026-10-14',feedback:'',action:'',next:''};this.saveError='';this.view='followup'},async saveFollowup(){if(this.saving)return;this.saving=true;this.saveError='';await new Promise(r=>setTimeout(r,400));this.saving=false;if(this.failNext){this.failNext=false;this.saveError='随访尚未保存，输入已保留，请重试。';return}const t=this.tasks.find(t=>t.id===this.followupTask.id);t.status='CLOSED';this.savedCount++;this.recent.unshift({id:'saved'+this.savedCount,name:t.name,patient:t.patient,note:this.form.feedback,time:'10-14 · 刚刚'});this.selectedId=this.visible[0]?.id||null;this.view='dashboard';this.toast='随访已保存，关联任务已处理';setTimeout(()=>this.toast='',2800)}}}
+</script>
+</body>
+</html>

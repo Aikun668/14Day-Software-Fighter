@@ -1,0 +1,58 @@
+- generic [ref=e37]:
+  - banner [ref=e38]:
+    - strong [ref=e40]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=e41] [cursor=pointer]:
+      - generic [ref=e42]: C
+      - generic [ref=e45]: clinician_a
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - menu [ref=e49]:
+        - menuitem "工作台" [ref=e50] [cursor=pointer]
+        - menuitem "患者管理" [ref=e52] [cursor=pointer]
+        - menuitem "统计与核查" [ref=e54] [cursor=pointer]
+        - menuitem "随访中心" [ref=e56] [cursor=pointer]
+    - main [ref=e58]:
+      - generic [ref=e422]:
+        - button "← 返回患者列表" [ref=e425] [cursor=pointer]
+        - heading "郑先生 · P-008" [level=4] [ref=e427]
+        - generic [ref=e428]:
+          - generic [ref=e429]: 基本信息
+          - table [ref=e435]:
+            - rowgroup [ref=e436]:
+              - row [ref=e437]:
+                - 'cell "患者编号 : P-008" [ref=e438]':
+                  - generic [ref=e439]:
+                    - generic [ref=e440]: "患者编号 :"
+                    - generic [ref=e441]: P-008
+                - 'cell "姓名/别名 : 郑先生" [ref=e442]':
+                  - generic [ref=e443]:
+                    - generic [ref=e444]: "姓名/别名 :"
+                    - generic [ref=e445]: 郑先生
+              - row [ref=e446]:
+                - 'cell "诊断标签 : 慢性阻塞性肺疾病（DEMO）" [ref=e447]':
+                  - generic [ref=e448]:
+                    - generic [ref=e449]: "诊断标签 :"
+                    - generic [ref=e450]: 慢性阻塞性肺疾病（DEMO）
+                - 'cell "登录账号 : 未绑定" [ref=e451]':
+                  - generic [ref=e452]:
+                    - generic [ref=e453]: "登录账号 :"
+                    - generic [ref=e454]: 未绑定
+              - row [ref=e456]:
+                - 'cell "备注 : DEMO 演示数据，非真实患者" [ref=e457]':
+                  - generic [ref=e458]:
+                    - generic [ref=e459]: "备注 :"
+                    - generic [ref=e460]: DEMO 演示数据，非真实患者
+        - generic [ref=e461]:
+          - tablist [ref=e462]:
+            - generic [ref=e464]:
+              - tab "装置（1）" [selected] [ref=e466] [cursor=pointer]
+              - tab "用药计划（0）" [ref=e468] [cursor=pointer]
+              - tab "用药登记（0）" [ref=e470] [cursor=pointer]
+              - tab "训练记录（0）" [ref=e472] [cursor=pointer]
+              - tab "随访（0）" [ref=e474] [cursor=pointer]
+          - tabpanel "装置（1）" [ref=e477]:
+            - table [ref=e482]:
+              - rowgroup [ref=e483]:
+                - row [ref=e484]:
+                  - rowheader "都保 DPI" [ref=e485]
+                  - cell "生效 2026/9/9 ~ 至今" [ref=e486]

@@ -1,0 +1,13 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "failed": true,
+    "issues": [
+      "控制台错误：Warning: [antd: List] The `List` component is deprecated and will be removed in the next major version. If you're using version 6.6.0 or later, please use `Listy` instead.",
+      "第 7 步「click button:has-text('查看详情') >> nth=0」：button:has-text('查看详情') >> nth=0 不是合法的 CSS；支持文字写法 text=\"Send money\" 和 button:has-text(\"Undo\")，例如 click text=\"Send money\""
+    ]
+  }
+]

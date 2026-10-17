@@ -1,0 +1,32 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [
+      "控制台错误：Warning: [antd: List] The `List` component is deprecated and will be removed in the next major version. If you're using version 6.6.0 or later, please use `Listy` instead.",
+      "控制台错误：Warning: [antd: Space] `direction` is deprecated. Please use `orientation` instead."
+    ],
+    "lint": [
+      {
+        "rule": "nestedCards",
+        "label": "卡片里套卡片",
+        "count": 2,
+        "examples": [
+          "div.ant-card.ant-card-bordered「v1 · 硫酸沙丁胺醇吸入气雾剂（DEMO） 固」（外层 div.ant-card.ant-card-bordered）",
+          "div.ant-card.ant-card-bordered「v2 · 硫酸沙丁胺醇吸入气雾剂（DEMO） 固」（外层 div.ant-card.ant-card-bordered）"
+        ]
+      },
+      {
+        "rule": "contrastLow",
+        "label": "文字对比度不达标（正文低于 4.5:1，大字低于 3:1）",
+        "count": 1,
+        "examples": [
+          "span.ant-tag.ant-tag-filled「已绑定」（3.37:1）"
+        ]
+      }
+    ]
+  }
+]

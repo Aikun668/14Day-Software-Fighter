@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工作台 · 吸入治疗指导与依从性辅助管理软件 V1.0</title>
+<link rel="stylesheet" href="styles.css">
+<script defer src="vendor/alpine.min.js"></script>
+</head>
+<body x-data="workbench()" @resize.window="isNarrow=window.innerWidth<1400" x-cloak>
+<div class="web">
+  <aside class="side">
+    <div class="brand-mark">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 9.5c2.4-2 5.1-2 7.5 0s5.1 2 7.5 0 3-1.4 3-1.4M3.5 15c2.4-2 5.1-2 7.5 0s5.1 2 7.5 0 3-1.4 3-1.4"/></svg></div>
+      <div class="brand-name">吸入治疗指导与<br>依从性辅助管理软件<small>医护工作区 · V1.0</small></div>
+    </div>
+    <nav class="nav" aria-label="主要导航">
+      <button :aria-current="view==='dashboard'?'page':null" @click="view='dashboard'">
+        <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        工作台
+        <span class="count num" x-show="pending.length" x-text="pending.length"></span>
+      </button>
+      <button @click="openOverview()">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.3-5 6.5-5s5.7 1.8 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 15c1.6.6 2.6 2.2 3 5"/></svg>
+        患者管理
+      </button>
+      <button @click="$refs.stats.showModal()">
+        <svg class="i" viewBox="0 0 24 24"><path d="M5 20v-6M12 20V5M19 20v-9"/></svg>
+        统计与核查
+      </button>
+      <button :aria-current="view==='followup'?'page':null" @click="startFollowup()">
+        <svg class="i" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>
+        随访中心
+      </button>
+    </nav>
+    <div class="side-foot">
+      <div class="avatar sm" aria-hidden="true">陈</div>
+      <div><strong>陈医护</strong><span class="small">责任医护</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <h1 x-text="view==='dashboard'?'工作台':'随访中心'"></h1>
+      <p x-text="view==='dashboard'?'2026 年 10 月 14 日 周三 · 待核查 '+pending.length+' 项':'工作台 / 关联任务随访'"></p>
+    </header>
+
+    <section x-show="view==='dashboard'" class="fade-in">
+      <div class="stats" x-show="state==='normal'||state==='empty'">
+        <div class="stat"><span>负责患者</span><strong class="num">12</strong></div>
+        <div class="stat"><span>待核查工作</span><strong class="num attn" x-text="pending.length"></strong></div>
+        <div class="stat"><span>本周随访记录</span><strong class="num" x-text="5+savedCount"></strong></div>
+      </div>
+
+      <div class="alert" x-show="state==='error'" role="alert">
+        <strong>工作台暂时无法读取</strong>
+        <p>请检查网络后重试，尚未读取的数据不会显示为零。</p>
+        <div><button class="btn btn-ghost" @click="retry()">重新读取</button></div>
+      </div>
+      <div class="loading" x-show="state==='loading'" role="status">
+        <p class="small">正在读取工作台…</p>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+
+      <div x-show="state==='normal'||state==='empty'">
+        <div class="work" :class="selected&&!isNarrow?'':'solo'">
+          <section class="panel queue">
+            <div class="panel-head">
+              <div>
+                <h2>待核查任务</h2>
+                <p class="small">先看登记依据，再联系患者核实</p>
+              </div>
+              <div class="seg" role="group" aria-label="筛选任务状态">
+                <button :aria-pressed="filter==='pending'" @click="setFilter('pending')">待处理</button>
+                <button :aria-pressed="filter==='OPEN'" @click="setFilter('OPEN')">待核查</button>
+                <button :aria-pressed="filter==='IN_PROGRESS'" @click="setFilter('IN_PROGRESS')">处理中</button>
+              </div>
+            </div>
+
+            <template x-for="task in visible" :key="task.id">
+              <article class="task" :class="selectedId===task.id?'sel':''">
+                <button class="task-btn" :aria-pressed="selectedId===task.id" @click="selectedId=task.id">
+                  <span class="avatar" aria-hidden="true" x-text="task.name.slice(0,1)"></span>
+                  <span>
+                    <span class="task-name"><span x-text="task.name"></span><small class="num" x-text="task.patient"></small></span>
+                    <span class="task-reason">连续 3 个已到期时点未发现登记</span>
+                    <span class="task-due num">需处理 <span x-text="task.due"></span></span>
+                  </span>
+                  <span class="tag" :class="task.status==='IN_PROGRESS'?'info':'warn'" x-text="task.status==='OPEN'?'待核查':'处理中'"></span>
+                  <svg class="i chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+                <div class="task-inline" x-show="isNarrow&&selectedId===task.id">
+                  <div>
+                    <p><strong x-text="task.name+' · 患者摘要'"></strong></p>
+                    <p>当前装置：信必可都保 · DPI　固定计划：08:00 / 20:00</p>
+                    <p class="small">患者自述，未由设备验证</p>
+                  </div>
+                  <div class="actions">
+                    <button class="btn btn-link" @click="openOverview()">患者详情</button>
+                    <button class="btn btn-sm" @click="startFollowup()">记录随访</button>
+                  </div>
+                </div>
+              </article>
+            </template>
+
+            <div class="empty" x-show="!visible.length">
+              <h2 x-text="filter==='pending'?'暂无待核查事项':'此状态下暂无任务'"></h2>
+              <p>可以继续查看负责患者与近期随访记录。</p>
+              <button class="btn btn-ghost" @click="openOverview()">查看患者信息</button>
+            </div>
+            <p class="queue-note">未发现登记不代表确定漏用药；任务生成可能延迟一个扫描周期。</p>
+          </section>
+
+          <template x-if="selected&&!isNarrow">
+            <aside class="panel detail" aria-label="选中患者摘要">
+              <div class="detail-id">
+                <div class="avatar lg" aria-hidden="true" x-text="selected.name.slice(0,1)"></div>
+                <div>
+                  <h3 x-text="selected.name"></h3>
+                  <p class="small num" x-text="selected.patient"></p>
+                </div>
+              </div>
+
+              <dl class="facts">
+                <div class="fact"><span>当前装置</span><strong>信必可都保 · DPI</strong></div>
+                <div class="fact"><span>医护录入计划</span><strong class="num">每日 08:00 / 20:00</strong></div>
+                <div class="fact"><span>记录来源</span><strong>患者自述</strong></div>
+              </dl>
+
+              <h3 class="detail-sub">近 7 天固定时点</h3>
+              <div class="week" aria-label="近 7 天固定时点登记情况">
+                <div class="day"><span>10/8</span><div class="dots"><i class="dot ok"></i><i class="dot ok"></i></div></div>
+                <div class="day"><span>10/9</span><div class="dots"><i class="dot ok"></i><i class="dot ok"></i></div></div>
+                <div class="day"><span>10/10</span><div class="dots"><i class="dot ok"></i><i class="dot ok"></i></div></div>
+                <div class="day"><span>10/11</span><div class="dots"><i class="dot ok"></i><i class="dot ok"></i></div></div>
+                <div class="day"><span>10/12</span><div class="dots"><i class="dot ok"></i><i class="dot ok"></i></div></div>
+                <div class="day"><span>10/13</span><div class="dots"><i class="dot miss"></i><i class="dot miss"></i></div></div>
+                <div class="day"><span>10/14</span><div class="dots"><i class="dot miss"></i><i class="dot future"></i></div></div>
+              </div>
+              <div class="legend">
+                <span><i class="dot ok"></i>已登记</span>
+                <span><i class="dot miss"></i>未发现登记</span>
+                <span><i class="dot future"></i>未到期</span>
+              </div>
+
+              <div class="evidence">
+                <strong>本次核查依据</strong>
+                <p>关联的 3 个已到期时点尚未发现有效登记，需联系患者了解实际情况。</p>
+              </div>
+
+              <div class="detail-actions">
+                <button class="btn btn-block" @click="startFollowup()">记录随访</button>
+                <button class="btn btn-link" @click="openOverview()">查看患者详情 →</button>
+              </div>
+            </aside>
+          </template>
+        </div>
+
+        <section class="panel recent">
+          <div class="panel-head">
+            <h2>近期随访</h2>
+            <span class="small">记录与处理过程可追溯</span>
+          </div>
+          <template x-for="entry in recent" :key="entry.id">
+            <div class="rec">
+              <span class="avatar sm" aria-hidden="true" x-text="entry.name.slice(0,1)"></span>
+              <div>
+                <strong x-text="entry.name+' · '+entry.patient"></strong>
+                <p x-text="entry.note"></p>
+              </div>
+              <time class="num" x-text="entry.time"></time>
+            </div>
+          </template>
+        </section>
+      </div>
+    </section>
+
+    <section x-show="view==='followup'" class="fade-in fu">
+      <button class="btn btn-link back" @click="view='dashboard'">← 返回工作台</button>
+      <div class="panel">
+        <div class="fu-ctx">
+          <div class="avatar lg" aria-hidden="true" x-text="followupTask?followupTask.name.slice(0,1):'随'"></div>
+          <div>
+            <h2 x-text="followupTask?followupTask.name+' · '+followupTask.patient:'随访记录'"></h2>
+            <p class="small">关联核查任务 · 连续 3 个已到期时点未发现登记</p>
+          </div>
+        </div>
+        <form class="fu-form" @submit.prevent="saveFollowup()">
+          <div class="field">
+            <label for="followed-date">随访日期</label>
+            <input class="input" id="followed-date" type="date" required x-model="form.date">
+          </div>
+          <div class="field">
+            <label for="feedback">联系反馈</label>
+            <textarea class="input" id="feedback" required x-model="form.feedback" placeholder="记录实际联系情况与患者反馈"></textarea>
+          </div>
+          <div class="field">
+            <label for="action-taken">本次处理措施</label>
+            <textarea class="input" id="action-taken" required x-model="form.action" placeholder="记录已完成的核实或指导"></textarea>
+          </div>
+          <div class="field">
+            <label for="next-plan">后续安排 <span class="hint">（选填）</span></label>
+            <input class="input" id="next-plan" x-model="form.next">
+          </div>
+          <div class="alert" x-show="saveError" role="alert" x-text="saveError"></div>
+          <div class="fu-actions">
+            <button class="btn" type="submit" :disabled="saving" x-text="saving?'保存中…':'保存随访并处理任务'"></button>
+            <button class="btn btn-ghost" type="button" @click="view='dashboard'">返回</button>
+          </div>
+          <p class="hint">保存后保留处理人、日期与关联任务；已有登记记录不会被改写。</p>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog x-ref="overview">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div>
+        <h2 x-text="(selected||tasks[0]).name+' · '+(selected||tasks[0]).patient"></h2>
+        <p class="small">当前装置：信必可都保 · DPI</p>
+      </div>
+      <button class="x" aria-label="关闭详情" @click="$refs.overview.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <dl class="facts">
+      <div class="fact"><span>医护录入的固定计划</span><strong>每日 08:00 / 20:00</strong></div>
+      <div class="fact"><span>计划版本</span><strong>历史登记保持原关联版本</strong></div>
+    </dl>
+    <p class="hint">患者自述与医护观察分别标注，当前信息为只读摘要。</p>
+  </div>
+</dialog>
+
+<dialog x-ref="stats">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2>统计口径</h2>
+      <button class="x" aria-label="关闭统计说明" @click="$refs.stats.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <p>记录覆盖率基于已到期有效固定计划时点及其登记记录计算，不代表实际用药依从性。</p>
+    <p class="hint" style="margin-top:12px">按需记录单独呈现，重复登记对同一时点最多计一次；未配置固定计划时显示“暂无固定计划”。</p>
+  </div>
+</dialog>
+
+<div class="notice toast" x-show="toast" x-text="toast" role="status"></div>
+
+<script>
+function workbench(){return {isNarrow:window.innerWidth<1400,state:new URLSearchParams(location.search).get('state')||'normal',filter:'pending',selectedId:'t1',view:'dashboard',saving:false,saveError:'',savedCount:0,toast:'',failNext:new URLSearchParams(location.search).get('submit')==='fail',followupTask:null,form:{date:'2026-10-14',feedback:'',action:'',next:''},tasks:[{id:'t1',patient:'P-024',name:'林女士',status:'OPEN',due:'10-14 16:00'},{id:'t2',patient:'P-031',name:'周先生',status:'IN_PROGRESS',due:'10-14 18:00'},{id:'t3',patient:'P-046',name:'许女士',status:'OPEN',due:'10-15 10:00'}],recent:[{id:'r1',name:'吴先生',patient:'P-018',note:'已核实登记情况，保留随访反馈。',time:'10-14 10:20'},{id:'r2',name:'赵女士',patient:'P-009',note:'已完成操作观察评价，安排复训。',time:'10-13 15:40'}],get pending(){return this.state==='empty'?[]:this.tasks.filter(t=>t.status!=='CLOSED')},get visible(){return this.pending.filter(t=>this.filter==='pending'||t.status===this.filter)},get selected(){return this.visible.find(t=>t.id===this.selectedId)||null},setFilter(v){this.filter=v;this.selectedId=this.visible[0]?.id||null},async retry(){this.state='loading';await new Promise(r=>setTimeout(r,350));this.state='normal';this.selectedId=this.visible[0]?.id||null},openOverview(){this.$refs.overview.showModal()},startFollowup(){const t=this.selected||this.pending[0];if(!t){this.toast='当前没有关联的待处理任务';setTimeout(()=>this.toast='',2400);return}this.followupTask={...t};this.form={date:'2026-10-14',feedback:'',action:'',next:''};this.saveError='';this.view='followup'},async saveFollowup(){if(this.saving)return;this.saving=true;this.saveError='';await new Promise(r=>setTimeout(r,400));this.saving=false;if(this.failNext){this.failNext=false;this.saveError='随访尚未保存，输入已保留，请重试。';return}const t=this.tasks.find(t=>t.id===this.followupTask.id);t.status='CLOSED';this.savedCount++;this.recent.unshift({id:'saved'+this.savedCount,name:t.name,patient:t.patient,note:this.form.feedback,time:'10-14 · 刚刚'});this.selectedId=this.visible[0]?.id||null;this.view='dashboard';this.toast='随访已保存，关联任务已处理';setTimeout(()=>this.toast='',2800)}}}
+</script>
+</body>
+</html>

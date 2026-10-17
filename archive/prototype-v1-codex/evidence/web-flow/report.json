@@ -1,0 +1,319 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-@2x.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 2,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "motion-probe-failed",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "failed",
+    "motion": {
+      "load": {
+        "elements": 1,
+        "loops": 0,
+        "maxMove": 5,
+        "maxSize": 0,
+        "maxOpacity": 0.84,
+        "top": [
+          {
+            "el": "section.fade-in",
+            "move": 5,
+            "size": 0,
+            "opacity": 0.84,
+            "loop": false,
+            "sources": [
+              "css:enter"
+            ]
+          }
+        ]
+      },
+      "steps": {
+        "elements": 2,
+        "loops": 0,
+        "maxMove": 70,
+        "maxSize": 0.435,
+        "maxOpacity": 0.84,
+        "top": [
+          {
+            "el": "button.button",
+            "move": 70,
+            "size": 0.435,
+            "opacity": 0.35,
+            "loop": false,
+            "sources": [
+              "transition:background-color",
+              "transition:transform"
+            ]
+          },
+          {
+            "el": "section.fade-in",
+            "move": 5,
+            "size": 0.091,
+            "opacity": 0.84,
+            "loop": false,
+            "sources": [
+              "js:style",
+              "css:enter"
+            ]
+          }
+        ]
+      },
+      "hero": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "layers": 0
+      },
+      "scroll": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "scrollable": true
+      }
+    },
+    "issues": [
+      "滚动：没有检测到随滚动出现的变化；落地页、品牌页、发布页和展览页需要一段滚动叙事"
+    ]
+  },
+  {
+    "file": "motion-probe-recovered",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "recovered",
+    "motion": {
+      "load": {
+        "elements": 1,
+        "loops": 0,
+        "maxMove": 5,
+        "maxSize": 0,
+        "maxOpacity": 0.84,
+        "top": [
+          {
+            "el": "section.fade-in",
+            "move": 5,
+            "size": 0,
+            "opacity": 0.84,
+            "loop": false,
+            "sources": [
+              "css:enter"
+            ]
+          }
+        ]
+      },
+      "steps": {
+        "elements": 4,
+        "loops": 0,
+        "maxMove": 1329,
+        "maxSize": 1172,
+        "maxOpacity": 0.84,
+        "top": [
+          {
+            "el": "section.fade-in",
+            "move": 268,
+            "size": 1172,
+            "opacity": 0.84,
+            "loop": false,
+            "sources": [
+              "js:style",
+              "css:enter"
+            ]
+          },
+          {
+            "el": "button.button",
+            "move": 1329,
+            "size": 1,
+            "opacity": 0,
+            "loop": false,
+            "sources": [
+              "transition:background-color",
+              "transition:transform"
+            ]
+          },
+          {
+            "el": "button.button",
+            "move": 832,
+            "size": 1,
+            "opacity": 0.35,
+            "loop": false,
+            "sources": [
+              "transition:background-color",
+              "transition:transform"
+            ]
+          },
+          {
+            "el": "section.fade-in",
+            "move": 268,
+            "size": 1,
+            "opacity": 0.84,
+            "loop": false,
+            "sources": [
+              "js:style",
+              "css:enter"
+            ]
+          }
+        ]
+      },
+      "hero": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "layers": 0
+      },
+      "scroll": {
+        "elements": 0,
+        "loops": 0,
+        "maxMove": 0,
+        "maxSize": 0,
+        "maxOpacity": 0,
+        "top": [],
+        "scrollable": true
+      }
+    },
+    "issues": [
+      "滚动：没有检测到随滚动出现的变化；落地页、品牌页、发布页和展览页需要一段滚动叙事"
+    ]
+  },
+  {
+    "file": "motion-entry-end.jpg",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "entry",
+    "issues": [],
+    "frames": {
+      "start": {
+        "file": "motion-entry-start.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 243
+      },
+      "mid": {
+        "file": "motion-entry-mid.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 381
+      },
+      "end": {
+        "file": "motion-entry-end.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 1840
+      }
+    },
+    "sampling": {
+      "mode": "entry"
+    },
+    "durationMs": 1840,
+    "consistency": {
+      "status": "matched",
+      "reference": "motion-entry-end.jpg",
+      "different": false,
+      "changedPixels": 0,
+      "maxTilePixels": 0,
+      "pixelRatio": 0
+    }
+  },
+  {
+    "file": "motion-failed-end.jpg",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "failed",
+    "issues": [],
+    "frames": {
+      "start": {
+        "file": "motion-failed-start.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 1077
+      },
+      "mid": {
+        "file": "motion-failed-mid.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 1607
+      },
+      "end": {
+        "file": "motion-failed-end.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 2787
+      }
+    },
+    "sampling": {
+      "mode": "action",
+      "step": 4,
+      "action": "click",
+      "raw": "click .followup-area button[type=submit]"
+    },
+    "durationMs": 2787,
+    "consistency": {
+      "status": "matched",
+      "reference": "motion-failed-end.jpg",
+      "different": false,
+      "changedPixels": 0,
+      "maxTilePixels": 0,
+      "pixelRatio": 0
+    }
+  },
+  {
+    "file": "motion-recovered-end.jpg",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "recovered",
+    "issues": [],
+    "frames": {
+      "start": {
+        "file": "motion-recovered-start.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 1629
+      },
+      "mid": {
+        "file": "motion-recovered-mid.jpg",
+        "source": "Page.screencastFrame",
+        "timeMs": 2100
+      },
+      "end": {
+        "file": "motion-recovered-end.jpg",
+        "source": "Page.captureScreenshot",
+        "timeMs": 3326
+      }
+    },
+    "sampling": {
+      "mode": "action",
+      "step": 6,
+      "action": "click",
+      "raw": "click .followup-area button[type=submit]"
+    },
+    "durationMs": 3326,
+    "consistency": {
+      "status": "matched",
+      "reference": "motion-recovered-end.jpg",
+      "different": false,
+      "changedPixels": 0,
+      "maxTilePixels": 0,
+      "pixelRatio": 0
+    }
+  }
+]

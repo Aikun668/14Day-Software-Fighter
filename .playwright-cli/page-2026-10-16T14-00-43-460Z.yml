@@ -1,0 +1,74 @@
+- generic [ref=e37]:
+  - banner [ref=e38]:
+    - strong [ref=e40]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=e41] [cursor=pointer]:
+      - generic [ref=e42]: C
+      - generic [ref=e45]: clinician_a
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - menu [ref=e49]:
+        - menuitem "工作台" [ref=e50] [cursor=pointer]
+        - menuitem "患者管理" [ref=e52] [cursor=pointer]
+        - menuitem "统计与核查" [ref=e54] [cursor=pointer]
+        - menuitem "随访中心" [ref=e56] [cursor=pointer]
+    - main [ref=e58]:
+      - generic [ref=e751]:
+        - button "← 返回患者列表" [ref=e754] [cursor=pointer]
+        - heading "林女士 · P-001" [level=4] [ref=e756]
+        - generic [ref=e757]:
+          - generic [ref=e758]: 基本信息
+          - table [ref=e764]:
+            - rowgroup [ref=e765]:
+              - row [ref=e766]:
+                - 'cell "患者编号 : P-001" [ref=e767]':
+                  - generic [ref=e768]:
+                    - generic [ref=e769]: "患者编号 :"
+                    - generic [ref=e770]: P-001
+                - 'cell "姓名/别名 : 林女士" [ref=e771]':
+                  - generic [ref=e772]:
+                    - generic [ref=e773]: "姓名/别名 :"
+                    - generic [ref=e774]: 林女士
+              - row [ref=e775]:
+                - 'cell "诊断标签 : 支气管哮喘（DEMO）" [ref=e776]':
+                  - generic [ref=e777]:
+                    - generic [ref=e778]: "诊断标签 :"
+                    - generic [ref=e779]: 支气管哮喘（DEMO）
+                - 'cell "登录账号 : 已绑定" [ref=e780]':
+                  - generic [ref=e781]:
+                    - generic [ref=e782]: "登录账号 :"
+                    - generic [ref=e783]: 已绑定
+              - row [ref=e785]:
+                - 'cell "备注 : DEMO 演示数据，非真实患者" [ref=e786]':
+                  - generic [ref=e787]:
+                    - generic [ref=e788]: "备注 :"
+                    - generic [ref=e789]: DEMO 演示数据，非真实患者
+        - generic [ref=e790]:
+          - tablist [ref=e791]:
+            - generic [ref=e793]:
+              - tab "装置（1）" [ref=e795] [cursor=pointer]
+              - tab "用药计划（2）" [active] [selected] [ref=e797] [cursor=pointer]
+              - tab "用药登记（12）" [ref=e799] [cursor=pointer]
+              - tab "训练记录（2）" [ref=e801] [cursor=pointer]
+              - tab "随访（1）" [ref=e803] [cursor=pointer]
+          - tabpanel "用药计划（2）" [ref=e817]:
+            - generic [ref=e820]:
+              - generic [ref=e822]:
+                - generic [ref=e826]:
+                  - generic [ref=e827]: v1 · 硫酸沙丁胺醇吸入气雾剂（DEMO）
+                  - generic [ref=e829]: 固定计划
+                - generic [ref=e831]:
+                  - generic [ref=e832]: 生效：2026/10/9 ~ 2026/10/16
+                  - generic [ref=e833]:
+                    - text: 每日时点：
+                    - generic [ref=e834]: 08:00
+                    - generic [ref=e835]: 20:00
+              - generic [ref=e837]:
+                - generic [ref=e841]:
+                  - generic [ref=e842]: v2 · 硫酸沙丁胺醇吸入气雾剂（DEMO）
+                  - generic [ref=e844]: 固定计划
+                - generic [ref=e846]:
+                  - generic [ref=e847]: 生效：2026/10/16 ~ 至今
+                  - generic [ref=e848]:
+                    - text: 每日时点：
+                    - generic [ref=e849]: 09:00
+                    - generic [ref=e850]: 21:00

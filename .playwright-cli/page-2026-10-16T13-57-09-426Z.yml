@@ -1,0 +1,194 @@
+- generic [ref=e37]:
+  - banner [ref=e38]:
+    - strong [ref=e40]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=e41] [cursor=pointer]:
+      - generic [ref=e42]: C
+      - generic [ref=e45]: clinician_a
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - menu [ref=e49]:
+        - menuitem "工作台" [ref=e50] [cursor=pointer]
+        - menuitem "患者管理" [ref=e52] [cursor=pointer]
+        - menuitem "统计与核查" [ref=e54] [cursor=pointer]
+        - menuitem "随访中心" [ref=e56] [cursor=pointer]
+    - main [ref=e58]:
+      - generic [ref=e488]:
+        - heading "患者管理" [level=4] [ref=e489]
+        - generic [ref=e491]:
+          - generic [ref=e492]:
+            - generic [ref=e493]:
+              - searchbox "搜索编号或姓名" [ref=e494]
+              - button [ref=e495] [cursor=pointer]:
+                - img "search" [ref=e497]
+            - button "新建患者" [ref=e500] [cursor=pointer]
+          - generic [ref=e504]:
+            - table [ref=e508]:
+              - rowgroup [ref=e509]:
+                - row [ref=e510]:
+                  - columnheader "患者编号" [ref=e511]
+                  - columnheader "姓名/别名" [ref=e512]
+                  - columnheader "诊断标签" [ref=e513]
+                  - columnheader "账号" [ref=e514]
+                  - columnheader "操作" [ref=e515]
+              - rowgroup [ref=e516]:
+                - row [ref=e517]:
+                  - cell "P-008" [ref=e518]
+                  - cell "郑先生" [ref=e519]
+                  - cell "慢性阻塞性肺疾病（DEMO）" [ref=e520]
+                  - cell "未绑定" [ref=e521]
+                  - cell [ref=e522]:
+                    - generic [ref=e523]:
+                      - button "查看详情" [ref=e525] [cursor=pointer]
+                      - button "现场评估" [ref=e528] [cursor=pointer]
+                - row [ref=e530]:
+                  - cell "P-004" [ref=e531]
+                  - cell "李先生" [ref=e532]
+                  - cell "慢性阻塞性肺疾病（DEMO）" [ref=e533]
+                  - cell "未绑定" [ref=e534]
+                  - cell [ref=e535]:
+                    - generic [ref=e536]:
+                      - button "查看详情" [ref=e538] [cursor=pointer]
+                      - button "现场评估" [ref=e541] [cursor=pointer]
+                - row [ref=e543]:
+                  - cell "P-003" [ref=e544]
+                  - cell "王女士" [ref=e545]
+                  - cell "支气管哮喘（DEMO）" [ref=e546]
+                  - cell "未绑定" [ref=e547]
+                  - cell [ref=e548]:
+                    - generic [ref=e549]:
+                      - button "查看详情" [ref=e551] [cursor=pointer]
+                      - button "现场评估" [ref=e554] [cursor=pointer]
+                - row [ref=e556]:
+                  - cell "P-006" [ref=e557]
+                  - cell "周先生" [ref=e558]
+                  - cell "慢性阻塞性肺疾病（DEMO）" [ref=e559]
+                  - cell "未绑定" [ref=e560]
+                  - cell [ref=e561]:
+                    - generic [ref=e562]:
+                      - button "查看详情" [ref=e564] [cursor=pointer]
+                      - button "现场评估" [ref=e567] [cursor=pointer]
+                - row [ref=e569]:
+                  - cell "P-002" [ref=e570]
+                  - cell "陈先生" [ref=e571]
+                  - cell "慢性阻塞性肺疾病（DEMO）" [ref=e572]
+                  - cell "已绑定" [ref=e573]
+                  - cell [ref=e574]:
+                    - generic [ref=e575]:
+                      - button "查看详情" [ref=e577] [cursor=pointer]
+                      - button "现场评估" [ref=e580] [cursor=pointer]
+                - row [ref=e582]:
+                  - cell "P-007" [ref=e583]
+                  - cell "吴女士" [ref=e584]
+                  - cell "支气管哮喘（DEMO）" [ref=e585]
+                  - cell "未绑定" [ref=e586]
+                  - cell [ref=e587]:
+                    - generic [ref=e588]:
+                      - button "查看详情" [ref=e590] [cursor=pointer]
+                      - button "现场评估" [ref=e593] [cursor=pointer]
+                - row [ref=e595]:
+                  - cell "P-009" [ref=e596]
+                  - cell "孙女士" [ref=e597]
+                  - cell "支气管哮喘（DEMO）" [ref=e598]
+                  - cell "未绑定" [ref=e599]
+                  - cell [ref=e600]:
+                    - generic [ref=e601]:
+                      - button "查看详情" [ref=e603] [cursor=pointer]
+                      - button "现场评估" [ref=e606] [cursor=pointer]
+                - row [ref=e608]:
+                  - cell "P-001" [ref=e609]
+                  - cell "林女士" [ref=e610]
+                  - cell "支气管哮喘（DEMO）" [ref=e611]
+                  - cell "已绑定" [ref=e612]
+                  - cell [ref=e613]:
+                    - generic [ref=e614]:
+                      - button "查看详情" [ref=e616] [cursor=pointer]
+                      - button "现场评估" [ref=e619] [cursor=pointer]
+                - row [ref=e621]:
+                  - cell "P-005" [ref=e622]
+                  - cell "赵女士" [ref=e623]
+                  - cell "支气管哮喘（DEMO）" [ref=e624]
+                  - cell "未绑定" [ref=e625]
+                  - cell [ref=e626]:
+                    - generic [ref=e627]:
+                      - button "查看详情" [ref=e629] [cursor=pointer]
+                      - button "现场评估" [ref=e632] [cursor=pointer]
+                - row [ref=e634]:
+                  - cell "P-100" [ref=e635]
+                  - cell "测试患者100" [ref=e636]
+                  - cell "哮喘" [ref=e637]
+                  - cell "未绑定" [ref=e638]
+                  - cell [ref=e639]:
+                    - generic [ref=e640]:
+                      - button "查看详情" [ref=e642] [cursor=pointer]
+                      - button "现场评估" [ref=e645] [cursor=pointer]
+                - row [ref=e647]:
+                  - cell "P-014" [ref=e648]
+                  - cell "杨先生" [ref=e649]
+                  - cell "慢性阻塞性肺疾病（DEMO）" [ref=e650]
+                  - cell "未绑定" [ref=e651]
+                  - cell [ref=e652]:
+                    - generic [ref=e653]:
+                      - button "查看详情" [ref=e655] [cursor=pointer]
+                      - button "现场评估" [ref=e658] [cursor=pointer]
+                - row [ref=e660]:
+                  - cell "P-T125882" [ref=e661]
+                  - cell "测试患者T" [ref=e662]
+                  - cell "哮喘" [ref=e663]
+                  - cell "未绑定" [ref=e664]
+                  - cell [ref=e665]:
+                    - generic [ref=e666]:
+                      - button "查看详情" [ref=e668] [cursor=pointer]
+                      - button "现场评估" [ref=e671] [cursor=pointer]
+                - row [ref=e673]:
+                  - cell "P-T126014" [ref=e674]
+                  - cell "测试患者T" [ref=e675]
+                  - cell "哮喘" [ref=e676]
+                  - cell "未绑定" [ref=e677]
+                  - cell [ref=e678]:
+                    - generic [ref=e679]:
+                      - button "查看详情" [ref=e681] [cursor=pointer]
+                      - button "现场评估" [ref=e684] [cursor=pointer]
+                - row [ref=e686]:
+                  - cell "P-T126193" [ref=e687]
+                  - cell "测试患者T" [ref=e688]
+                  - cell "哮喘" [ref=e689]
+                  - cell "未绑定" [ref=e690]
+                  - cell [ref=e691]:
+                    - generic [ref=e692]:
+                      - button "查看详情" [ref=e694] [cursor=pointer]
+                      - button "现场评估" [ref=e697] [cursor=pointer]
+                - row [ref=e699]:
+                  - cell "P-T126285" [ref=e700]
+                  - cell "测试患者T" [ref=e701]
+                  - cell "哮喘" [ref=e702]
+                  - cell "未绑定" [ref=e703]
+                  - cell [ref=e704]:
+                    - generic [ref=e705]:
+                      - button "查看详情" [ref=e707] [cursor=pointer]
+                      - button "现场评估" [ref=e710] [cursor=pointer]
+                - row [ref=e712]:
+                  - cell "P-T127275" [ref=e713]
+                  - cell "测试患者T" [ref=e714]
+                  - cell "哮喘" [ref=e715]
+                  - cell "未绑定" [ref=e716]
+                  - cell [ref=e717]:
+                    - generic [ref=e718]:
+                      - button "查看详情" [ref=e720] [cursor=pointer]
+                      - button "现场评估" [ref=e723] [cursor=pointer]
+                - row [ref=e725]:
+                  - cell "P-T127362" [ref=e726]
+                  - cell "测试患者T" [ref=e727]
+                  - cell "哮喘" [ref=e728]
+                  - cell "未绑定" [ref=e729]
+                  - cell [ref=e730]:
+                    - generic [ref=e731]:
+                      - button "查看详情" [ref=e733] [cursor=pointer]
+                      - button "现场评估" [ref=e736] [cursor=pointer]
+            - list [ref=e738]:
+              - listitem "上一页" [ref=e739]:
+                - button [disabled] [ref=e740]:
+                  - img "left" [ref=e741]
+              - listitem "1" [ref=e744] [cursor=pointer]
+              - listitem "下一页" [ref=e746]:
+                - button [disabled] [ref=e747]:
+                  - img "right" [ref=e748]

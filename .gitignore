@@ -1,0 +1,44 @@
+# 依赖
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# 环境与密钥（严禁提交）
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.keystore
+*.jks
+*.p12
+secrets/
+credentials/
+
+# 构建产物
+dist/
+build/
+*.apk
+frontend-web/dist/
+patient-app/dist/
+patient-app/android/.gradle/
+patient-app/android/build/
+patient-app/android/app/build/
+patient-app/android/app/release/
+patient-app/android/local.properties
+
+# 本地 SDK / IDE 路径
+local.properties
+*.iml
+.idea/
+.vscode/
+.DS_Store
+
+# 日志与临时
+*.log
+tmp/
+temp/

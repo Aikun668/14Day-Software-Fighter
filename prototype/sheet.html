@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>组件样张 · 设计系统 v4</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.sheet{max-width:1080px;margin:0 auto;padding:40px 28px 64px;display:grid;gap:28px}
+.sheet>header p{margin-top:6px;color:var(--muted)}
+.group{display:grid;gap:14px}
+.group>h2{padding-bottom:10px;border-bottom:1px solid var(--line)}
+.row-inline{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sw{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.sw i{display:block;height:56px}
+.sw div{padding:8px 10px;font-size:12px;line-height:1.5}
+.sw strong{display:block;font-size:13px}
+.sw span{color:var(--muted);font-variant-numeric:tabular-nums}
+.demo-card{padding:20px}
+.ring-demo{display:flex;gap:28px;align-items:center}
+.bar-wrap{display:grid;gap:8px;flex:1;min-width:200px}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <header>
+    <h1>组件样张</h1>
+    <p>第 1 步：色值、按钮、标签、表单和卡片。只用于检查控件，不代表页面。</p>
+  </header>
+
+  <section class="group">
+    <h2>色彩</h2>
+    <div class="swatches">
+      <div class="sw"><i style="background:#FFFFFF"></i><div><strong>纯白</strong><span>#FFFFFF 卡片</span></div></div>
+      <div class="sw"><i style="background:#F8F9FC"></i><div><strong>雾白</strong><span>#F8F9FC 页面底</span></div></div>
+      <div class="sw"><i style="background:#573BF4"></i><div><strong>蓝紫 主色</strong><span>#573BF4 主按钮</span></div></div>
+      <div class="sw"><i style="background:#EFECFE"></i><div><strong>浅紫</strong><span>#EFECFE 选中底</span></div></div>
+      <div class="sw"><i style="background:#0F0D27"></i><div><strong>墨色</strong><span>#0F0D27 标题</span></div></div>
+      <div class="sw"><i style="background:#24243E"></i><div><strong>深蓝灰 警示</strong><span>#24243E 未发现登记</span></div></div>
+      <div class="sw"><i style="background:#DCF946"></i><div><strong>黄绿 仅装饰</strong><span>#DCF946 不承载信息</span></div></div>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>按钮</h2>
+    <div class="row-inline">
+      <button class="btn">登记实际情况</button>
+      <button class="btn btn-secondary">查看历史</button>
+      <button class="btn btn-ghost">患者详情</button>
+      <button class="btn" disabled>提交中</button>
+      <button class="btn btn-sm">记录随访</button>
+      <button class="btn btn-secondary btn-sm">返回</button>
+    </div>
+    <div class="row-inline">
+      <button class="btn btn-lg btn-block" style="max-width:360px">下一步：登记 08:00 用药</button>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>状态标签（颜色之外必须有文字）</h2>
+    <div class="row-inline">
+      <span class="tag tag-logged">已登记</span>
+      <span class="tag tag-missed">未发现登记</span>
+      <span class="tag">未到期</span>
+      <span class="tag tag-plain">按需记录（不计入覆盖率）</span>
+      <span class="tag tag-plain">患者自述</span>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>分段与导航</h2>
+    <div class="row-inline">
+      <div class="seg" role="group" aria-label="筛选">
+        <button aria-pressed="true">待处理</button>
+        <button aria-pressed="false">待核查</button>
+        <button aria-pressed="false">处理中</button>
+      </div>
+    </div>
+    <div style="max-width:220px;display:grid;gap:4px">
+      <button class="nav-item" aria-current="page">
+        <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        工作台
+      </button>
+      <button class="nav-item">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.3-5 6.5-5s5.7 1.8 6.5 5"/></svg>
+        患者管理
+      </button>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>表单</h2>
+    <div class="card card-pad" style="max-width:420px">
+      <div class="field">
+        <label for="d1">实际发生时间</label>
+        <input class="input" id="d1" type="datetime-local" value="2026-10-14T08:05">
+      </div>
+      <div class="field">
+        <label for="d2">备注（选填）</label>
+        <input class="input" id="d2" placeholder="补充与本次记录有关的信息">
+      </div>
+      <div class="field">
+        <label for="d3">联系反馈</label>
+        <input class="input input-error" id="d3" value="">
+        <span class="field-msg">请填写联系反馈</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>卡片与指标</h2>
+    <div class="row-inline" style="align-items:stretch">
+      <div class="card" style="width:240px">
+        <div class="card-pad">
+          <div class="stat-label">负责患者</div>
+          <div class="stat-value num">12</div>
+        </div>
+      </div>
+      <div class="card" style="width:240px">
+        <div class="card-pad">
+          <div class="stat-label">待核查工作</div>
+          <div class="stat-value num" style="color:var(--missed)">3</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>环形与进度</h2>
+    <div class="card demo-card ring-demo">
+      <div class="ring" aria-label="覆盖率 80%">
+        <svg viewBox="0 0 96 96"><circle class="ring-track" cx="48" cy="48" r="40"/><circle class="ring-fill" cx="48" cy="48" r="40" stroke-dasharray="251.3" stroke-dashoffset="50.3"/></svg>
+        <div class="ring-text"><strong class="num">80%</strong><span>记录覆盖率</span></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="small">08:00 时点 · 已登记</div>
+        <div class="bar"><i style="width:100%"></i></div>
+        <div class="small">20:00 时点 · 未到期</div>
+        <div class="bar"><i style="width:0%"></i></div>
+        <div class="small">已到期未发现登记 · 3 个时点</div>
+        <div class="bar missed"><i style="width:40%"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>列表行与头像</h2>
+    <div class="card">
+      <div class="row">
+        <span class="avatar">林</span>
+        <div style="flex:1;min-width:0"><strong>林女士 · P-024</strong><div class="small">连续 3 个已到期时点未发现登记</div></div>
+        <span class="tag tag-missed">待核查</span>
+      </div>
+      <div class="row is-selected">
+        <span class="avatar">周</span>
+        <div style="flex:1;min-width:0"><strong>周先生 · P-031</strong><div class="small">选中行：浅紫底 + 左侧主色线</div></div>
+        <span class="tag tag-logged">已登记</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="group">
+    <h2>提示与空状态</h2>
+    <div class="alert" role="alert">
+      <strong>随访尚未保存</strong>
+      <span>输入已保留，请重试。</span>
+    </div>
+    <div class="card">
+      <div class="empty">
+        <h3 style="color:var(--ink)">暂无待核查事项</h3>
+        <span>可以继续查看负责患者与近期随访记录。</span>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

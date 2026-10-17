@@ -1,0 +1,16 @@
+# 吸入治疗管理系统 后端依赖（J001/J002 基线）
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.29
+pydantic>=2.6
+pydantic-settings>=2.2
+sqlalchemy>=2.0
+alembic>=1.13
+psycopg2-binary>=2.9
+# 认证（J010 起用；S1 仅安装）
+python-jose[cryptography]>=3.3
+bcrypt>=4.1
+python-multipart>=0.0.9
+# 测试（J044 起用）
+pytest>=8.0
+# 时区数据库（Windows Python zoneinfo 必需）
+tzdata>=2024.1

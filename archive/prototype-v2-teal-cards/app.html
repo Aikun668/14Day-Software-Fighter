@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>今日 · 吸入治疗指导与依从性辅助管理软件 V1.0</title>
+<link rel="stylesheet" href="styles.css">
+<script defer src="vendor/alpine.min.js"></script>
+</head>
+<body x-data="patientHome()" x-cloak>
+<div class="app">
+  <header class="app-bar">
+    <div class="who">
+      <div class="avatar" aria-hidden="true">林</div>
+      <div>
+        <strong>林女士 · P-024</strong>
+        <span class="small">当前装置：信必可都保</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" @click="$refs.profile.showModal()">本人信息</button>
+  </header>
+
+  <main class="app-main">
+    <div class="alert" x-show="state==='error'" role="alert">
+      <strong>今日信息暂时无法读取</strong>
+      <p>请检查网络后重新读取。</p>
+      <div><button class="btn btn-ghost" @click="retry()">重新读取</button></div>
+    </div>
+    <div class="loading" x-show="state==='loading'" role="status">
+      <p class="small">正在读取今日信息…</p>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+
+    <div x-show="state==='normal'" class="fade-in">
+      <div class="today-head">
+        <h2>今日</h2>
+        <span class="small num">10 月 14 日 · 周三</span>
+      </div>
+
+      <section class="focus" :class="recorded?'done':''">
+        <div class="focus-top">
+          <span class="focus-label" x-text="recorded?'08:00 时点 · 已登记':'下一步 · 08:00 时点'"></span>
+          <span class="tag" x-text="recorded?'已登记':'待登记'"></span>
+        </div>
+        <h2 x-text="recorded?'08:00 用药已有登记':'补充今日用药记录'"></h2>
+        <p x-text="recorded?'可在用药记录中查看发生时间与来源。':'该时点尚未发现登记，请确认实际情况后填写记录。'"></p>
+        <button class="btn" @click="recorded?openHistory():openRecord()" x-text="recorded?'查看用药记录':'登记实际情况'"></button>
+      </section>
+
+      <section class="app-section">
+        <div class="section-head">
+          <h2>今日计划</h2>
+          <span class="small">固定计划 · 2 个时点</span>
+        </div>
+        <div class="timeline">
+          <div class="slot">
+            <i class="node" :class="recorded?'ok':'miss'" aria-hidden="true"></i>
+            <span class="slot-time num">08:00</span>
+            <div>
+              <p class="slot-title">医护录入计划</p>
+              <p class="small" x-text="recorded?'已有登记 · 患者自述':'未发现登记'"></p>
+            </div>
+            <button class="btn btn-link" @click="recorded?openHistory():openRecord()" x-text="recorded?'查看':'登记'"></button>
+          </div>
+          <div class="slot">
+            <i class="node future" aria-hidden="true"></i>
+            <span class="slot-time num">20:00</span>
+            <div>
+              <p class="slot-title">医护录入计划</p>
+              <p class="small">未到时点</p>
+            </div>
+            <span class="tag plain">待登记</span>
+          </div>
+        </div>
+        <button class="btn btn-link" style="margin-top:14px" @click="openHistory()">查看历史与按需记录 →</button>
+      </section>
+    </div>
+
+    <div class="empty empty-app" x-show="state==='empty'">
+      <h2>暂无固定计划</h2>
+      <p>当前没有医护录入的有效固定计划；按需用药可单独记录。</p>
+      <button class="btn btn-ghost btn-block" @click="openRecord('prn')">登记按需用药</button>
+    </div>
+
+    <section class="app-section">
+      <div class="section-head"><h2>学习与帮助</h2></div>
+      <div class="menu">
+        <button class="menu-item" @click="openGuide()">
+          <span class="ico-tile" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M2 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H2zM22 5h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7z"/></svg></span>
+          <span><strong>型号操作指导</strong><small>核对型号，查看已发布资料</small></span>
+          <svg class="i chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+        <button class="menu-item" @click="openSelfCheck()">
+          <span class="ico-tile" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span>
+          <span><strong>操作自检</strong><small>记录完成情况与遇到的困难</small></span>
+          <svg class="i chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+        <button class="menu-item" @click="openAssistant()">
+          <span class="ico-tile" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span>
+          <span><strong>AI 指导助手</strong><small>了解装置使用问题与资料出处</small></span>
+          <svg class="i chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <p class="app-note">本软件辅助学习与记录，不能替代专业诊疗。</p>
+  </main>
+
+  <nav class="tabbar" aria-label="主要导航">
+    <button :aria-current="'page'" @click="window.scrollTo({top:0,behavior:'smooth'})">
+      <span class="pill"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>今日
+    </button>
+    <button @click="openGuide()">
+      <span class="pill"><svg class="i" viewBox="0 0 24 24"><path d="M2 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H2zM22 5h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7z"/></svg></span>指导
+    </button>
+    <button @click="openHistory()">
+      <span class="pill"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>记录
+    </button>
+  </nav>
+</div>
+
+<dialog x-ref="profile">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2>本人信息</h2>
+      <button class="x" aria-label="关闭本人信息" @click="$refs.profile.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <dl class="facts">
+      <div class="fact"><span>本人标识</span><strong>林女士 · P-024</strong></div>
+      <div class="fact"><span>责任医护</span><strong>陈医护</strong></div>
+      <div class="fact"><span>当前装置</span><strong>信必可都保 · DPI</strong></div>
+      <div class="fact"><span>医护录入计划</span><strong x-text="state==='empty'?'暂无固定计划':'固定计划 · 每日 08:00 / 20:00'"></strong></div>
+    </dl>
+    <p class="hint">档案和计划由医护录入，此处只读查看。</p>
+  </div>
+</dialog>
+
+<dialog x-ref="record" @close="if(!unconfirmed)recordError=''">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div>
+        <h2 x-text="recordKind==='prn'?'按需用药记录':'用药记录'"></h2>
+        <p class="small" x-text="recordKind==='prn'?'按需记录独立保存，不计入固定计划覆盖率。':'关联今日 08:00 固定计划时点，请填写实际发生时间。'"></p>
+      </div>
+      <button class="x" aria-label="关闭用药登记" :disabled="saving" @click="$refs.record.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <form @submit.prevent="submitRecord()">
+      <div class="field">
+        <label for="occurred-time">实际发生时间</label>
+        <input class="input" id="occurred-time" type="datetime-local" required x-model="occurredAt" max="2026-10-14T23:59">
+      </div>
+      <div class="field">
+        <label for="record-note">备注 <span class="hint">（选填）</span></label>
+        <textarea class="input" id="record-note" x-model="note" placeholder="补充与本次记录有关的信息"></textarea>
+      </div>
+      <p class="hint" style="margin-bottom:16px">来源：患者自述，未由设备验证。</p>
+      <div class="alert" x-show="recordError" role="alert">
+        <p x-text="recordError"></p>
+        <div><button type="button" class="btn btn-ghost" x-show="unconfirmed" @click="reconcile()">核对记录</button></div>
+      </div>
+      <button type="submit" class="btn btn-block" :disabled="saving||unconfirmed" x-text="saving?'提交中…':'提交登记'"></button>
+    </form>
+  </div>
+</dialog>
+
+<dialog x-ref="history">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2>用药记录</h2>
+      <button class="x" aria-label="关闭用药记录" @click="$refs.history.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="log">
+      <template x-if="recorded">
+        <div class="log-item">
+          <div><strong>10 月 14 日 · 固定计划</strong><p class="num" x-text="'发生时间：'+regularRecord.time.replace('T',' ')"></p><p class="hint">患者自述，未由设备验证</p></div>
+          <span class="tag ok">已有登记</span>
+        </div>
+      </template>
+      <template x-for="(entry,i) in prnRecords" :key="i">
+        <div class="log-item">
+          <div><strong>按需记录</strong><p class="num" x-text="entry.time.replace('T',' ')"></p><p class="hint">患者自述 · 不计入固定计划覆盖率</p></div>
+          <span class="tag plain">按需</span>
+        </div>
+      </template>
+      <div class="log-item">
+        <div><strong>10 月 13 日 · 固定计划</strong><p class="num">发生时间：20:05</p><p class="hint">患者自述，未由设备验证</p></div>
+        <span class="tag ok">已有登记</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-block" @click="$refs.history.close();openRecord('prn')">登记按需用药</button>
+  </div>
+</dialog>
+
+<dialog x-ref="guide">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div>
+        <h2>型号操作指导</h2>
+        <p class="small">信必可都保 · DPI</p>
+      </div>
+      <button class="x" aria-label="关闭型号指导" @click="$refs.guide.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="empty">
+      <h3>暂无已发布的指导资料</h3>
+      <p>请咨询责任医护，待对应型号资料审核发布后查看。</p>
+    </div>
+  </div>
+</dialog>
+
+<dialog x-ref="selfcheck">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2>操作自检</h2>
+      <button class="x" aria-label="关闭自检" @click="$refs.selfcheck.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <p>当前型号暂无已发布的步骤指导，暂时无法开展对应自检。请咨询责任医护。</p>
+    <h3 style="margin-top:22px">历史自检记录</h3>
+    <p class="hint" style="margin-top:6px">暂无本人历史自检记录。</p>
+  </div>
+</dialog>
+
+<dialog x-ref="assistant">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div>
+        <h2>AI 指导助手</h2>
+        <p class="small">当前型号：信必可都保</p>
+      </div>
+      <button class="x" aria-label="关闭指导助手" @click="$refs.assistant.close()"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <h3>资料不足，请咨询医护</h3>
+    <p style="margin-top:8px;color:var(--ink-2)">当前没有已发布的对应型号资料，无法可靠回答操作问题。</p>
+  </div>
+</dialog>
+
+<div class="notice toast" x-show="toast" x-text="toast" role="status"></div>
+
+<script>
+function patientHome(){return {state:new URLSearchParams(location.search).get('state')||'normal',recorded:false,regularRecord:{time:'',note:''},recordKind:'regular',occurredAt:'2026-10-14T08:05',note:'',saving:false,recordError:'',unconfirmed:false,failNext:new URLSearchParams(location.search).get('submit')||'',prnRecords:[],toast:'',async retry(){this.state='loading';await new Promise(r=>setTimeout(r,350));this.state='normal'},openRecord(kind='regular'){if(this.unconfirmed){this.$refs.record.showModal();return}this.recordKind=kind;this.recordError='';if(kind==='prn')this.occurredAt='2026-10-14T12:00';this.$refs.record.showModal()},openHistory(){this.$refs.history.showModal()},openGuide(){this.$refs.guide.showModal()},openSelfCheck(){this.$refs.selfcheck.showModal()},openAssistant(){this.$refs.assistant.showModal()},async submitRecord(){if(this.saving||this.unconfirmed)return;this.saving=true;this.recordError='';await new Promise(r=>setTimeout(r,400));this.saving=false;if(this.failNext){const kind=this.failNext;this.failNext='';this.unconfirmed=kind==='timeout';this.recordError=this.unconfirmed?'提交结果尚未确认，请先核对记录再决定是否补交。':'登记尚未保存，输入已保留，请重试。';return}if(this.recordKind==='regular'){this.regularRecord={time:this.occurredAt,note:this.note};this.recorded=true}else this.prnRecords.push({time:this.occurredAt,note:this.note});this.$refs.record.close();this.toast='登记已保存，可查看发生时间与来源';setTimeout(()=>this.toast='',2600)},async reconcile(){this.recordError='正在核对关联时点记录…';await new Promise(r=>setTimeout(r,300));this.unconfirmed=false;this.recordError='未找到本次有效登记，可以保留当前输入重新提交。'}}}
+</script>
+</body>
+</html>

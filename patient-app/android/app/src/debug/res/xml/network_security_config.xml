@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 仅 debug 构建使用：允许受控局域网明文 HTTP（PRD §8.3.5） -->
+<network-security-config>
+    <!-- 开发机局域网联调：允许明文 HTTP（仅模拟数据，受控环境） -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

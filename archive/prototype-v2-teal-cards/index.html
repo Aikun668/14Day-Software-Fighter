@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>评审入口 · 方向一 第二版</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="review">
+  <p class="review-kicker">方向一 · 清晰的医疗工作空间 · 第二版视觉</p>
+  <h1>医护工作台与患者今日首页</h1>
+  <p class="review-lead">保留第一版的信息结构与操作流程，重做视觉层级：唯一主动作更突出，待办与依据相邻，患者端把“下一步”和今日时点串成一条线。全部数据为模拟样本，操作只在当前页面内生效。</p>
+
+  <div class="review-grid">
+    <section class="panel review-card">
+      <span class="tag info plain">M01 · 医护 Web</span>
+      <h2>医护工作台</h2>
+      <p>待核查任务、患者摘要（含近 7 天固定时点记录条）、随访表单与近期随访。</p>
+      <a class="btn" href="web.html">打开医护工作台</a>
+      <div class="state-links">
+        <a href="web.html?state=empty">空任务</a>
+        <a href="web.html?state=error">读取失败</a>
+        <a href="web.html?state=loading">加载中</a>
+        <a href="web.html?submit=fail">随访保存失败后重试</a>
+      </div>
+    </section>
+
+    <section class="panel review-card">
+      <span class="tag ok plain">P01 · 患者 Android</span>
+      <h2>患者今日首页</h2>
+      <p>下一步动作居中突出，今日时点以时间线呈现，学习与帮助入口统一为一组菜单。</p>
+      <a class="btn" href="app.html">打开患者今日首页</a>
+      <div class="state-links">
+        <a href="app.html?state=empty">暂无固定计划</a>
+        <a href="app.html?state=error">读取失败</a>
+        <a href="app.html?state=loading">加载中</a>
+        <a href="app.html?submit=fail">登记失败后重试</a>
+        <a href="app.html?submit=timeout">提交未确认后核对</a>
+      </div>
+    </section>
+  </div>
+
+  <p class="review-foot">
+    对比入口：<a href="../prototype/">查看第一版（Codex 版）</a> ·
+    设计依据：<a href="../UI_DESIGN.md">UI_DESIGN.md</a> · <a href="../UX_DESIGN.md">UX_DESIGN.md</a>。
+    手机上直接打开患者页面可看真实宽度；Android 安装、系统返回键与软键盘仍需真机验收。
+  </p>
+</main>
+</body>
+</html>

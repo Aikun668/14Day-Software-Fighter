@@ -1,0 +1,43 @@
+- generic [ref=f1e1138]:
+  - banner [ref=f1e1139]:
+    - strong [ref=f1e1141]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=f1e1142] [cursor=pointer]:
+      - generic [ref=f1e1143]: C
+      - generic [ref=f1e1146]: clinician_b
+  - generic [ref=f1e1147]:
+    - complementary [ref=f1e1148]:
+      - menu [ref=f1e1150]:
+        - menuitem "工作台" [ref=f1e1151] [cursor=pointer]
+        - menuitem "患者管理" [ref=f1e1153] [cursor=pointer]
+        - menuitem "统计与核查" [ref=f1e1155] [cursor=pointer]
+        - menuitem "随访中心" [ref=f1e1157] [cursor=pointer]
+    - main [ref=f1e1159]:
+      - generic [ref=f1e1161]:
+        - heading "工作台" [level=4] [ref=f1e1162]
+        - generic [ref=f1e1163]:
+          - generic [ref=f1e1167]:
+            - generic [ref=f1e1168]: 负责患者
+            - generic [ref=f1e1170]: "4"
+          - generic [ref=f1e1175]:
+            - generic [ref=f1e1176]: 待核查任务
+            - generic [ref=f1e1178]: "1"
+          - generic [ref=f1e1183]:
+            - generic [ref=f1e1184]: 近期随访
+            - generic [ref=f1e1186]: "1"
+        - generic [ref=f1e1190]:
+          - generic [ref=f1e1191]: 待核查任务
+          - list [ref=f1e1198]:
+            - listitem [ref=f1e1199] [cursor=pointer]:
+              - generic [ref=f1e1201]:
+                - heading "郭先生 · P-012" [level=4] [ref=f1e1202]
+                - generic [ref=f1e1203]: 依据：连续多次固定时点未发现登记 · 生成于 2026/10/16 13:14:35
+              - list [ref=f1e1204]:
+                - listitem [ref=f1e1205]:
+                  - generic [ref=f1e1206]: 待核查
+        - generic [ref=f1e1207]:
+          - generic [ref=f1e1208]: 近期随访
+          - list [ref=f1e1215]:
+            - listitem [ref=f1e1216]:
+              - generic [ref=f1e1218]:
+                - heading "胡先生 · 2026/10/14 16:09:54" [level=4] [ref=f1e1219]
+                - generic [ref=f1e1220]: 已电话联系患者，患者表示近期外出忘记登记。

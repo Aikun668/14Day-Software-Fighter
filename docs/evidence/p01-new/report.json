@@ -1,0 +1,30 @@
+[
+  {
+    "file": "page.png",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "emojiIcon",
+        "label": "表情符号当图标",
+        "count": 5,
+        "examples": [
+          "div「📖」",
+          "div「🤖」",
+          "span「🏠」"
+        ]
+      },
+      {
+        "rule": "contrastLow",
+        "label": "文字对比度不达标（正文低于 4.5:1，大字低于 3:1）",
+        "count": 1,
+        "examples": [
+          "span「未到时点」（3.93:1）"
+        ]
+      }
+    ]
+  }
+]

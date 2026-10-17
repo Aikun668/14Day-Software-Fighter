@@ -1,0 +1,51 @@
+- generic [ref=f1e660]:
+  - banner [ref=f1e661]:
+    - strong [ref=f1e663]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=f1e664] [cursor=pointer]:
+      - generic [ref=f1e665]: A
+      - generic [ref=f1e668]: admin
+  - generic [ref=f1e669]:
+    - complementary [ref=f1e670]:
+      - menu [ref=f1e672]:
+        - menuitem "内容与账号管理" [ref=f1e673] [cursor=pointer]
+    - main [ref=f1e675]:
+      - generic [ref=f1e677]:
+        - heading "内容与账号管理" [level=4] [ref=f1e678]
+        - generic [ref=f1e679]:
+          - tablist [ref=f1e680]:
+            - generic [ref=f1e682]:
+              - tab "装置型号（3）" [selected] [ref=f1e684] [cursor=pointer]
+              - tab "指导版本（4）" [ref=f1e686] [cursor=pointer]
+              - tab "账号（19）" [ref=f1e688] [cursor=pointer]
+              - tab "审计日志（30）" [ref=f1e690] [cursor=pointer]
+          - tabpanel "装置型号（3）" [ref=f1e693]:
+            - generic [ref=f1e694]:
+              - button "新建型号" [ref=f1e698] [cursor=pointer]
+              - generic [ref=f1e702]:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - table:
+                          - rowgroup:
+                            - row "类别 品牌 型号 厂商":
+                              - columnheader "类别"
+                              - columnheader "品牌"
+                              - columnheader "型号"
+                              - columnheader "厂商"
+                          - rowgroup:
+                            - row "pMDI 万托林 吸入气雾剂 pMDI 阿斯利康":
+                              - cell "pMDI"
+                              - cell "万托林"
+                              - cell "吸入气雾剂 pMDI"
+                              - cell "阿斯利康"
+                            - row "DPI 信必可 都保 DPI 阿斯利康":
+                              - cell "DPI"
+                              - cell "信必可"
+                              - cell "都保 DPI"
+                              - cell "阿斯利康"
+                            - row "SMI 思力华 能倍乐 Respimat 勃林格殷格翰":
+                              - cell "SMI"
+                              - cell "思力华"
+                              - cell "能倍乐 Respimat"
+                              - cell "勃林格殷格翰"

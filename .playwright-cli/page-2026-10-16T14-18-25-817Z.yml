@@ -1,0 +1,77 @@
+- generic [ref=f1e1138]:
+  - banner [ref=f1e1139]:
+    - strong [ref=f1e1141]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=f1e1142] [cursor=pointer]:
+      - generic [ref=f1e1143]: C
+      - generic [ref=f1e1146]: clinician_b
+  - generic [ref=f1e1147]:
+    - complementary [ref=f1e1148]:
+      - menu [ref=f1e1150]:
+        - menuitem "工作台" [ref=f1e1151] [cursor=pointer]
+        - menuitem "患者管理" [active] [ref=f1e1153] [cursor=pointer]
+        - menuitem "统计与核查" [ref=f1e1155] [cursor=pointer]
+        - menuitem "随访中心" [ref=f1e1157] [cursor=pointer]
+    - main [ref=f1e1159]:
+      - generic [ref=f1e1221]:
+        - heading "患者管理" [level=4] [ref=f1e1222]
+        - generic [ref=f1e1224]:
+          - generic [ref=f1e1225]:
+            - generic [ref=f1e1226]:
+              - searchbox "搜索编号或姓名" [ref=f1e1227]
+              - button [ref=f1e1228] [cursor=pointer]:
+                - img "search" [ref=f1e1230]
+            - button "新建患者" [ref=f1e1233] [cursor=pointer]
+          - generic [ref=f1e1237]:
+            - table [ref=f1e1241]:
+              - rowgroup [ref=f1e1242]:
+                - row [ref=f1e1243]:
+                  - columnheader "患者编号" [ref=f1e1244]
+                  - columnheader "姓名/别名" [ref=f1e1245]
+                  - columnheader "诊断标签" [ref=f1e1246]
+                  - columnheader "账号" [ref=f1e1247]
+                  - columnheader "操作" [ref=f1e1248]
+              - rowgroup [ref=f1e1249]:
+                - row [ref=f1e1250]:
+                  - cell "P-011" [ref=f1e1251]
+                  - cell "何女士" [ref=f1e1252]
+                  - cell "支气管哮喘（DEMO）" [ref=f1e1253]
+                  - cell "未绑定" [ref=f1e1254]
+                  - cell [ref=f1e1255]:
+                    - generic [ref=f1e1256]:
+                      - button "查看详情" [ref=f1e1258] [cursor=pointer]
+                      - button "现场评估" [ref=f1e1261] [cursor=pointer]
+                - row [ref=f1e1263]:
+                  - cell "P-010" [ref=f1e1264]
+                  - cell "胡先生" [ref=f1e1265]
+                  - cell "慢性阻塞性肺疾病（DEMO）" [ref=f1e1266]
+                  - cell "未绑定" [ref=f1e1267]
+                  - cell [ref=f1e1268]:
+                    - generic [ref=f1e1269]:
+                      - button "查看详情" [ref=f1e1271] [cursor=pointer]
+                      - button "现场评估" [ref=f1e1274] [cursor=pointer]
+                - row [ref=f1e1276]:
+                  - cell "P-012" [ref=f1e1277]
+                  - cell "郭先生" [ref=f1e1278]
+                  - cell "慢性阻塞性肺疾病（DEMO）" [ref=f1e1279]
+                  - cell "未绑定" [ref=f1e1280]
+                  - cell [ref=f1e1281]:
+                    - generic [ref=f1e1282]:
+                      - button "查看详情" [ref=f1e1284] [cursor=pointer]
+                      - button "现场评估" [ref=f1e1287] [cursor=pointer]
+                - row [ref=f1e1289]:
+                  - cell "P-013" [ref=f1e1290]
+                  - cell "刘女士" [ref=f1e1291]
+                  - cell "支气管哮喘（DEMO）" [ref=f1e1292]
+                  - cell "未绑定" [ref=f1e1293]
+                  - cell [ref=f1e1294]:
+                    - generic [ref=f1e1295]:
+                      - button "查看详情" [ref=f1e1297] [cursor=pointer]
+                      - button "现场评估" [ref=f1e1300] [cursor=pointer]
+            - list [ref=f1e1302]:
+              - listitem "上一页" [ref=f1e1303]:
+                - button [disabled] [ref=f1e1304]:
+                  - img "left" [ref=f1e1305]
+              - listitem "1" [ref=f1e1308] [cursor=pointer]
+              - listitem "下一页" [ref=f1e1310]:
+                - button [disabled] [ref=f1e1311]:
+                  - img "right" [ref=f1e1312]

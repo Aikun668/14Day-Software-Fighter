@@ -1,0 +1,116 @@
+- generic [ref=f1e660]:
+  - banner [ref=f1e661]:
+    - strong [ref=f1e663]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=f1e664] [cursor=pointer]:
+      - generic [ref=f1e665]: A
+      - generic [ref=f1e668]: admin
+  - generic [ref=f1e669]:
+    - complementary [ref=f1e670]:
+      - menu [ref=f1e672]:
+        - menuitem "内容与账号管理" [ref=f1e673] [cursor=pointer]
+    - main [ref=f1e675]:
+      - generic [ref=f1e677]:
+        - heading "内容与账号管理" [level=4] [ref=f1e678]
+        - generic [ref=f1e679]:
+          - tablist [ref=f1e680]:
+            - generic [ref=f1e682]:
+              - tab "装置型号（3）" [ref=f1e684] [cursor=pointer]
+              - tab "指导版本（4）" [ref=f1e686] [cursor=pointer]
+              - tab "账号（19）" [ref=f1e688] [cursor=pointer]
+              - tab "审计日志（30）" [active] [selected] [ref=f1e690] [cursor=pointer]
+          - tabpanel "审计日志（30）" [ref=f1e993]:
+            - generic [ref=f1e995]:
+              - generic [ref=f1e996]: 记录关键写操作（建档、计划变更、登记撤销、内容发布、随访处理等）；不含密码与令牌。
+              - generic [ref=f1e999]:
+                - table [ref=f1e1003]:
+                  - rowgroup [ref=f1e1006]:
+                    - row [ref=f1e1007]:
+                      - columnheader "时间" [ref=f1e1008]
+                      - columnheader "操作" [ref=f1e1009]
+                      - columnheader "资源" [ref=f1e1010]
+                      - columnheader "详情" [ref=f1e1011]
+                  - rowgroup [ref=f1e1012]:
+                    - row [ref=f1e1013]:
+                      - cell "2026/10/16 13:21:49" [ref=f1e1014]
+                      - cell "撤销登记" [ref=f1e1015]
+                      - cell "medication_event" [ref=f1e1016]
+                      - 'cell "{\"reason\":\"误登记测试\"}" [ref=f1e1017]'
+                    - row [ref=f1e1018]:
+                      - cell "2026/10/15 13:09:54" [ref=f1e1019]
+                      - cell "计划修订" [ref=f1e1020]
+                      - cell "medication_plan" [ref=f1e1021]
+                      - 'cell "{\"old_version\":1}" [ref=f1e1022]'
+                    - row [ref=f1e1023]:
+                      - cell "2026/10/15 03:09:54" [ref=f1e1024]
+                      - cell "随访记录" [ref=f1e1025]
+                      - cell "followup" [ref=f1e1026]
+                      - 'cell "{\"close_task\":false}" [ref=f1e1027]'
+                    - row [ref=f1e1028]:
+                      - cell "2026/10/15 00:09:54" [ref=f1e1029]
+                      - cell "随访记录" [ref=f1e1030]
+                      - cell "followup" [ref=f1e1031]
+                      - 'cell "{\"close_task\":true}" [ref=f1e1032]'
+                    - row [ref=f1e1033]:
+                      - cell "2026/10/14 21:09:54" [ref=f1e1034]
+                      - cell "随访记录" [ref=f1e1035]
+                      - cell "followup" [ref=f1e1036]
+                      - 'cell "{\"close_task\":false}" [ref=f1e1037]'
+                    - row [ref=f1e1038]:
+                      - cell "2026/10/14 20:09:54" [ref=f1e1039]
+                      - cell "随访记录" [ref=f1e1040]
+                      - cell "followup" [ref=f1e1041]
+                      - 'cell "{\"close_task\":false}" [ref=f1e1042]'
+                    - row [ref=f1e1043]:
+                      - cell "2026/10/14 16:09:54" [ref=f1e1044]
+                      - cell "随访记录" [ref=f1e1045]
+                      - cell "followup" [ref=f1e1046]
+                      - 'cell "{\"close_task\":true}" [ref=f1e1047]'
+                    - row [ref=f1e1048]:
+                      - cell "2026/10/14 13:09:54" [ref=f1e1049]
+                      - cell "知识发布" [ref=f1e1050]
+                      - cell "knowledge_document" [ref=f1e1051]
+                      - 'cell "{\"version\":\"1.0\"}" [ref=f1e1052]'
+                    - row [ref=f1e1053]:
+                      - cell "2026/10/14 13:09:54" [ref=f1e1054]
+                      - cell "指导发布" [ref=f1e1055]
+                      - cell "device_guide" [ref=f1e1056]
+                      - 'cell "{\"model\":\"吸入气雾剂 pMDI\",\"version\":\"1.0\"}" [ref=f1e1057]'
+                    - row [ref=f1e1058]:
+                      - cell "2026/10/14 13:09:54" [ref=f1e1059]
+                      - cell "指导发布" [ref=f1e1060]
+                      - cell "device_guide" [ref=f1e1061]
+                      - 'cell "{\"model\":\"都保 DPI\",\"version\":\"1.0\"}" [ref=f1e1062]'
+                    - row [ref=f1e1063]:
+                      - cell "2026/10/14 13:09:54" [ref=f1e1064]
+                      - cell "指导发布" [ref=f1e1065]
+                      - cell "device_guide" [ref=f1e1066]
+                      - 'cell "{\"model\":\"能倍乐 Respimat\",\"version\":\"1.0\"}" [ref=f1e1067]'
+                    - row [ref=f1e1068]:
+                      - cell "2026/10/14 13:09:54" [ref=f1e1069]
+                      - cell "生成核查任务" [ref=f1e1070]
+                      - cell "task" [ref=f1e1071]
+                      - 'cell "{\"task_type\":\"MISSED_MEDICATION\"}" [ref=f1e1072]'
+                    - row [ref=f1e1073]:
+                      - cell "2026/10/14 13:09:54" [ref=f1e1074]
+                      - cell "知识发布" [ref=f1e1075]
+                      - cell "knowledge_document" [ref=f1e1076]
+                      - 'cell "{\"version\":\"1.0\"}" [ref=f1e1077]'
+                    - row [ref=f1e1078]:
+                      - cell "2026/10/14 13:09:54" [ref=f1e1079]
+                      - cell "知识发布" [ref=f1e1080]
+                      - cell "knowledge_document" [ref=f1e1081]
+                      - 'cell "{\"version\":\"1.0\"}" [ref=f1e1082]'
+                    - row [ref=f1e1083]:
+                      - cell "2026/10/14 12:09:54" [ref=f1e1084]
+                      - cell "生成核查任务" [ref=f1e1085]
+                      - cell "task" [ref=f1e1086]
+                      - 'cell "{\"task_type\":\"MISSED_MEDICATION\"}" [ref=f1e1087]'
+                - list [ref=f1e1088]:
+                  - listitem "上一页" [ref=f1e1089]:
+                    - button [disabled] [ref=f1e1090]:
+                      - img "left" [ref=f1e1091]
+                  - listitem "1" [ref=f1e1094] [cursor=pointer]
+                  - listitem "2" [ref=f1e1096] [cursor=pointer]
+                  - listitem "下一页" [ref=f1e1098] [cursor=pointer]:
+                    - button [ref=f1e1099]:
+                      - img "right" [ref=f1e1100]

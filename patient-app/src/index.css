@@ -1,0 +1,53 @@
+/* J007 视觉变量：与 UI_DESIGN §2 对齐（唯一来源 prototype/styles.css 的 :root） */
+:root {
+  --bg: #F8F9FC;
+  --surface: #FFFFFF;
+  --line: #E6E9F1;
+  --line-soft: #F0F2F7;
+  --ink: #0F0D27;
+  --ink-2: #3D3D56;
+  --muted: #6B6E7F;
+  --brand: #573BF4;
+  --brand-hover: #4A2FE0;
+  --brand-ink: #4D3BA7;
+  --brand-soft: #EFECFE;
+  --brand-tint: #F8F5FF;
+  --missed: #24243E;
+  --missed-soft: #EEEFF5;
+  --missed-line: #C9CBD9;
+  --progress: #14938E;
+  --progress-ink: #0F6E6A;
+  --progress-soft: #E8F6F4;
+
+  /* 安全区：刘海/状态栏/底部手势条 */
+  --safe-top: var(--safe-top-fallback, env(safe-area-inset-top, 24px));
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* 顶栏高度（避开状态栏后内容区起点） */
+  --appbar-h: 56px;
+  --tabbar-h: 64px;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 让 env(safe-area-inset-*) 生效 */
+  viewport-fit: cover;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+/* 全局可点击区域：≥ 44px 高，符合移动端触控 */
+button {
+  font-family: inherit;
+}

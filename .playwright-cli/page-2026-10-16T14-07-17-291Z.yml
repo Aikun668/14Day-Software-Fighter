@@ -1,0 +1,43 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e34]:
+    - banner [ref=f1e35]:
+      - strong [ref=f1e37]: 吸入治疗指导与依从性辅助管理软件
+      - generic [ref=f1e38] [cursor=pointer]:
+        - generic [ref=f1e39]: C
+        - generic [ref=f1e42]: clinician_a
+    - generic [ref=f1e43]:
+      - complementary [ref=f1e44]:
+        - menu [ref=f1e46]:
+          - menuitem "工作台" [ref=f1e47] [cursor=pointer]
+          - menuitem "患者管理" [ref=f1e49] [cursor=pointer]
+          - menuitem "统计与核查" [ref=f1e51] [cursor=pointer]
+          - menuitem "随访中心" [ref=f1e53] [cursor=pointer]
+      - main [ref=f1e55]:
+        - generic [ref=f1e311]:
+          - heading "统计与核查" [level=4] [ref=f1e312]
+          - generic [ref=f1e315]:
+            - generic [ref=f1e317]:
+              - generic [ref=f1e318]:
+                - generic: 选择患者
+                - combobox [expanded] [active] [ref=f1e319]:
+                  - listbox:
+                    - option "郑先生 (P-008)": f86225b7-63da-43e3-a0b2-0eb4b5219072
+                    - option "李先生 (P-004)": 320f18e0-a613-4e80-ae2c-98daf9ee37f7
+              - img "search" [ref=f1e336]
+            - textbox "开始日期" [ref=f1e327]: 2026-10-08
+            - textbox "结束日期" [ref=f1e331]: 2026-10-15
+            - button "查询" [disabled] [ref=f1e333]
+            - button "重置为近 7 日" [ref=f1e335] [cursor=pointer]
+  - generic [ref=f1e341]:
+    - generic [ref=f1e344]:
+      - generic "郑先生 (P-008)" [ref=f1e345] [cursor=pointer]
+      - generic "李先生 (P-004)" [ref=f1e347] [cursor=pointer]
+      - generic "王女士 (P-003)" [ref=f1e349] [cursor=pointer]
+      - generic "周先生 (P-006)" [ref=f1e351] [cursor=pointer]
+      - generic "陈先生 (P-002)" [ref=f1e353] [cursor=pointer]
+      - generic "吴女士 (P-007)" [ref=f1e355] [cursor=pointer]
+      - generic "孙女士 (P-009)" [ref=f1e357] [cursor=pointer]
+      - generic "林女士 (P-001)" [ref=f1e359] [cursor=pointer]
+      - generic "赵女士 (P-005)" [ref=f1e361] [cursor=pointer]
+      - generic "测试患者100 (P-100)" [ref=f1e363] [cursor=pointer]
+    - generic [ref=f1e365] [cursor=pointer]

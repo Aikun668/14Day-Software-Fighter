@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>今日 · 吸入治疗指导与依从性辅助管理软件 V1.0</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles.css">
+<style>
+[x-cloak]{display:none!important}
+.app{--edge:16px;--pad:16px;--gap:24px;--gap-in:12px;max-width:480px;min-height:100dvh;margin:0 auto;padding-bottom:88px;background:var(--bg);font-size:16px;position:relative}
+.app .small{font-size:14px}
+.app .btn{min-height:48px;height:auto;padding:12px 18px;font-size:16px}
+.app .btn-lg{min-height:52px}
+.app .btn-sm{min-height:40px;height:auto;font-size:14px}
+.app .tag{height:26px;font-size:13px}
+.app .input{height:48px;font-size:16px}
+.app textarea.input{height:auto;min-height:96px}
+.i{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.topbar{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;min-height:56px;padding:0 var(--edge);background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar h1{font-size:17px;font-weight:600;text-align:center}
+.topbar .back{display:grid;place-items:center;width:44px;height:44px;margin-left:-12px;border:0;background:none;color:var(--ink);border-radius:var(--r-sm)}
+.topbar .back:hover{background:var(--bg)}
+.topbar .back .i{width:22px;height:22px}
+
+.page{padding:var(--edge) var(--edge) 0}
+.page-view{padding-bottom:24px}
+.identity{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:var(--pad);margin-bottom:var(--pad);border-bottom:1px solid var(--line)}
+.identity strong{display:block;font-size:17px;line-height:1.4}
+.identity .small{display:block;margin-top:2px}
+.text-link{min-height:44px;padding:0 4px;border:0;background:none;color:var(--brand-ink);font-size:15px;font-weight:600;white-space:nowrap}
+.page-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:var(--pad)}
+.page-title h2{font-size:24px}
+
+.block{margin-top:var(--gap)}
+.block:first-child{margin-top:0}
+.block-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:var(--gap-in)}
+.block-head h2{font-size:17px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.note-block{display:grid;gap:8px;padding:var(--pad)}
+.foot-note{margin-top:var(--gap);font-size:13px;color:var(--muted)}
+
+.hero{padding:var(--pad)}
+.hero-main{display:grid;grid-template-columns:minmax(0,1fr) 88px;gap:var(--pad);align-items:center}
+.eyebrow{font-size:13px;font-weight:600;color:var(--brand-ink)}
+.hero h2{margin-top:4px;font-size:20px;line-height:1.35}
+.hero .ring{width:88px;height:88px}
+.hero .ring-text strong{font-size:19px}
+.hero .ring-text span{font-size:11px;margin-top:0}
+.hero .btn{width:100%;margin-top:var(--pad)}
+
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.item{display:grid;grid-template-columns:56px minmax(0,1fr) 20px;gap:12px;align-items:center;width:100%;min-height:68px;padding:12px var(--pad);border:0;background:var(--surface);color:var(--ink);text-align:left}
+.item+.item{border-top:1px solid var(--line-soft)}
+button.item:hover{background:#FAFAFD}
+.item .i{color:var(--muted)}
+.item-time{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.item-title{display:block;font-size:16px;font-weight:600}
+.item-body .tag{margin-top:6px}
+
+.shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.shortcut{display:grid;justify-items:center;align-content:center;gap:8px;min-height:96px;padding:var(--pad) 4px;border:0;background:none;color:var(--ink);font-size:14px;font-weight:600}
+.shortcut+.shortcut{border-left:1px solid var(--line-soft)}
+.shortcut:hover{background:#FAFAFD}
+.tile{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--brand-soft);color:var(--brand-ink)}
+
+.menu-item{display:grid;grid-template-columns:40px minmax(0,1fr) 20px;gap:12px;align-items:center;width:100%;min-height:72px;padding:12px var(--pad);border:0;background:var(--surface);color:var(--ink);text-align:left}
+.menu-item+.menu-item{border-top:1px solid var(--line-soft)}
+.menu-item:hover{background:#FAFAFD}
+.menu-item strong{display:block;font-size:16px;font-weight:600}
+.menu-item small{display:block;margin-top:2px;font-size:14px;color:var(--muted)}
+.menu-item .i{color:var(--muted)}
+
+.log{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px var(--pad)}
+.log+.log{border-top:1px solid var(--line-soft)}
+.log strong{display:block;font-size:15px}
+.log .small{display:block;margin-top:2px}
+
+.form{padding:var(--pad)}
+.form .field{margin-bottom:var(--pad)}
+.form .btn{width:100%;margin-top:var(--gap-in)}
+.fact-list{margin:0;padding:0 var(--pad);border-top:0}
+.fact-list .fact:last-child{border-bottom:0}
+
+.tabbar{position:fixed;left:50%;bottom:0;z-index:5;transform:translateX(-50%);display:grid;grid-template-columns:repeat(3,1fr);width:100%;max-width:480px;padding:6px 12px max(10px,env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line)}
+.tabbar button{display:grid;justify-items:center;gap:2px;min-height:56px;border:0;border-radius:var(--r-sm);background:none;color:var(--muted);font-size:13px;font-weight:600}
+.tabbar .pill{display:grid;place-items:center;width:52px;height:28px;border-radius:999px}
+.tabbar button[aria-current="page"]{color:var(--brand-ink)}
+.tabbar button[aria-current="page"] .pill{background:var(--brand-soft)}
+.toast{left:var(--edge);right:var(--edge);bottom:100px;max-width:none}
+</style>
+<script defer src="vendor/alpine.min.js"></script>
+</head>
+<body x-data="patientHome()" x-cloak>
+<div class="app">
+
+  <template x-if="tab==='today' && screen==='home'">
+    <div>
+      <main class="page">
+        <header class="identity">
+          <div>
+            <strong>林女士 · P-024</strong>
+            <span class="small">当前装置：信必可都保</span>
+          </div>
+          <button class="text-link" @click="go('profile')">本人信息 ›</button>
+        </header>
+
+        <div class="page-title">
+          <h2>今日</h2>
+          <span class="small num">10 月 14 日 · 周三</span>
+        </div>
+
+        <div class="alert" x-show="state==='error'" role="alert">
+          <strong>今日信息暂时无法读取</strong>
+          <span>请检查网络后重新读取。</span>
+          <div><button class="btn btn-secondary btn-sm" @click="retry()">重新读取</button></div>
+        </div>
+        <div class="loading" x-show="state==='loading'" role="status" style="display:grid;gap:12px">
+          <span class="small">正在读取今日信息…</span>
+          <div class="skeleton" style="height:150px;border-radius:14px"></div>
+          <div class="skeleton" style="height:90px;border-radius:14px"></div>
+        </div>
+
+        <div x-show="state==='normal'">
+          <section class="block">
+            <div class="panel hero">
+              <div class="hero-main">
+                <div>
+                  <p class="eyebrow" x-text="recorded?'下一次 · 20:00 时点':'下一步'"></p>
+                  <h2 x-text="recorded?'今日暂无待办':'登记 08:00 用药'"></h2>
+                </div>
+                <div class="ring" aria-label="今日已登记 0 / 2 个固定时点">
+                  <svg viewBox="0 0 96 96"><circle class="ring-track" cx="48" cy="48" r="40"/><circle class="ring-fill" cx="48" cy="48" r="40" stroke-dasharray="251.3" :stroke-dashoffset="251.3*(1-done/2)"/></svg>
+                  <div class="ring-text"><strong class="num" x-text="done+' / 2'"></strong><span>已登记</span></div>
+                </div>
+              </div>
+              <button class="btn btn-lg" x-show="!recorded" @click="openRecord()">登记实际情况</button>
+            </div>
+          </section>
+
+          <section class="block">
+            <div class="block-head"><h2>今日固定时点</h2></div>
+            <div class="list">
+              <button class="item" @click="openSlot()">
+                <span class="item-time num">08:00</span>
+                <div class="item-body">
+                  <span class="item-title">医护录入计划</span>
+                  <span class="tag" :class="recorded?'tag-logged':'tag-missed'" x-text="recorded?'已登记':'未发现登记'"></span>
+                </div>
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+              </button>
+              <div class="item">
+                <span class="item-time num">20:00</span>
+                <div class="item-body">
+                  <span class="item-title">医护录入计划</span>
+                  <span class="tag tag-plain">未到时点</span>
+                </div>
+                <span aria-hidden="true"></span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div x-show="state==='empty'">
+          <section class="block">
+            <div class="panel note-block">
+              <h2>暂无固定计划</h2>
+              <p class="small">当前没有医护录入的有效固定计划；按需用药可单独记录。</p>
+              <button class="btn btn-secondary btn-block" style="margin-top:8px" @click="openRecord('prn')">登记按需用药</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="block">
+          <div class="block-head"><h2>学习与帮助</h2></div>
+          <div class="shortcuts">
+            <button class="shortcut" @click="go('guide')">
+              <span class="tile"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H2zM22 5h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7z"/></svg></span>
+              型号指导
+            </button>
+            <button class="shortcut" @click="go('selfcheck')">
+              <span class="tile"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span>
+              操作自检
+            </button>
+            <button class="shortcut" @click="go('assistant')">
+              <span class="tile"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span>
+              AI 助手
+            </button>
+          </div>
+        </section>
+
+        <p class="foot-note">本软件辅助学习与记录，不能替代专业诊疗。</p>
+      </main>
+    </div>
+  </template>
+
+  <template x-if="tab==='guide' && screen==='home'">
+    <div>
+      <main class="page">
+        <div class="page-title"><h2>指导</h2></div>
+        <section class="block">
+          <div class="panel note-block">
+            <p class="small">当前型号</p>
+            <h2>信必可都保 · DPI</h2>
+          </div>
+        </section>
+        <section class="block">
+          <div class="panel">
+            <button class="menu-item" @click="go('guide')">
+              <span class="tile"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H2zM22 5h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7z"/></svg></span>
+              <span><strong>型号操作指导</strong><small>核对型号，查看已发布资料</small></span>
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+            <button class="menu-item" @click="go('selfcheck')">
+              <span class="tile"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span>
+              <span><strong>操作自检</strong><small>记录完成情况与遇到的困难</small></span>
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+            <button class="menu-item" @click="go('assistant')">
+              <span class="tile"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span>
+              <span><strong>AI 指导助手</strong><small>了解装置使用问题与资料出处</small></span>
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </template>
+
+  <template x-if="tab==='history' && screen==='home'">
+    <div>
+      <main class="page">
+        <div class="page-title"><h2>记录</h2></div>
+        <section class="block">
+          <div class="block-head"><h2>用药记录</h2><span class="small">患者自述</span></div>
+          <div class="list">
+            <template x-if="recorded">
+              <div class="log">
+                <span class="num small">10/14</span>
+                <div><strong>固定计划 · 08:00</strong><span class="small num" x-text="'发生时间 '+regularRecord.time.replace('T',' ')"></span></div>
+                <span class="tag tag-logged">已登记</span>
+              </div>
+            </template>
+            <template x-for="(entry,i) in prnRecords" :key="i">
+              <div class="log">
+                <span class="num small">按需</span>
+                <div><strong>按需记录</strong><span class="small num" x-text="entry.time.replace('T',' ')"></span></div>
+                <span class="tag tag-plain">按需</span>
+              </div>
+            </template>
+            <div class="log">
+              <span class="num small">10/13</span>
+              <div><strong>固定计划 · 20:00</strong><span class="small num">发生时间 20:05</span></div>
+              <span class="tag tag-logged">已登记</span>
+            </div>
+          </div>
+          <p class="foot-note">患者自述，未由设备验证。按需记录不计入固定计划覆盖率。</p>
+        </section>
+        <section class="block">
+          <button class="btn btn-secondary btn-block" @click="openRecord('prn')">登记按需用药</button>
+        </section>
+      </main>
+    </div>
+  </template>
+
+  <template x-if="screen!=='home'">
+    <div>
+      <header class="topbar">
+        <button class="back" aria-label="返回" @click="back()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <h1 x-text="subTitle()"></h1>
+        <span aria-hidden="true"></span>
+      </header>
+
+      <main class="page page-view">
+
+        <template x-if="screen==='record'">
+          <section class="block">
+            <p class="small" style="margin-bottom:12px" x-text="recordKind==='prn'?'按需记录独立保存，不计入固定计划覆盖率。':'关联今日 08:00 固定计划时点，请填写实际发生时间。'"></p>
+            <form class="panel form" @submit.prevent="submitRecord()">
+              <div class="field">
+                <label for="occurred-time">实际发生时间</label>
+                <input class="input" id="occurred-time" type="datetime-local" required x-model="occurredAt" max="2026-10-14T23:59">
+              </div>
+              <div class="field">
+                <label for="record-note">备注 <span class="small">（选填）</span></label>
+                <textarea class="input" id="record-note" x-model="note" placeholder="补充与本次记录有关的信息"></textarea>
+              </div>
+              <p class="small">来源：患者自述，未由设备验证。</p>
+              <div class="alert" x-show="recordError" role="alert" style="margin-top:var(--pad)">
+                <span x-text="recordError"></span>
+                <div><button type="button" class="btn btn-secondary btn-sm" x-show="unconfirmed" @click="reconcile()">核对记录</button></div>
+              </div>
+              <button type="submit" class="btn btn-lg" :disabled="saving||unconfirmed" x-text="saving?'提交中…':'提交登记'"></button>
+            </form>
+          </section>
+        </template>
+
+        <template x-if="screen==='profile'">
+          <section class="block">
+            <div class="panel">
+              <dl class="facts fact-list">
+                <div class="fact"><span>本人标识</span><strong>林女士 · P-024</strong></div>
+                <div class="fact"><span>责任医护</span><strong>陈医护</strong></div>
+                <div class="fact"><span>当前装置</span><strong>信必可都保 · DPI</strong></div>
+                <div class="fact"><span>医护录入计划</span><strong x-text="state==='empty'?'暂无固定计划':'固定计划 · 每日 08:00 / 20:00'"></strong></div>
+              </dl>
+            </div>
+            <p class="foot-note">档案和计划由医护录入，此处只读查看。</p>
+          </section>
+        </template>
+
+        <template x-if="screen==='guide'">
+          <section class="block">
+            <div class="panel note-block">
+              <h2>暂无已发布的指导资料</h2>
+              <p class="small">请咨询责任医护，待对应型号资料审核发布后查看。</p>
+            </div>
+          </section>
+        </template>
+
+        <template x-if="screen==='selfcheck'">
+          <div>
+            <section class="block">
+              <div class="panel note-block">
+                <h2>暂时无法开展自检</h2>
+                <p class="small">当前型号暂无已发布的步骤指导。请咨询责任医护。</p>
+              </div>
+            </section>
+            <section class="block">
+              <div class="block-head"><h2>历史自检记录</h2></div>
+              <div class="panel note-block"><p class="small">暂无本人历史自检记录。</p></div>
+            </section>
+          </div>
+        </template>
+
+        <template x-if="screen==='assistant'">
+          <section class="block">
+            <div class="panel note-block">
+              <h2>资料不足，请咨询医护</h2>
+              <p class="small">当前没有已发布的对应型号资料，无法可靠回答操作问题。</p>
+            </div>
+          </section>
+        </template>
+
+      </main>
+    </div>
+  </template>
+
+  <nav class="tabbar" aria-label="主要导航" x-show="screen==='home'">
+    <button :aria-current="tab==='today'?'page':null" @click="tab='today'">
+      <span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>今日
+    </button>
+    <button :aria-current="tab==='guide'?'page':null" @click="tab='guide'">
+      <span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H2zM22 5h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7z"/></svg></span>指导
+    </button>
+    <button :aria-current="tab==='history'?'page':null" @click="tab='history'">
+      <span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>记录
+    </button>
+  </nav>
+
+  <div class="toast" x-show="toast" x-text="toast" role="status"></div>
+</div>
+
+<script>
+function patientHome(){return {
+  tab:'today',
+  screen:'home',
+  history:[],
+  state:new URLSearchParams(location.search).get('state')||'normal',
+  recorded:false,
+  regularRecord:{time:'',note:''},
+  recordKind:'regular',
+  occurredAt:'2026-10-14T08:05',
+  note:'',
+  saving:false,
+  recordError:'',
+  unconfirmed:false,
+  failNext:new URLSearchParams(location.search).get('submit')||'',
+  prnRecords:[],
+  toast:'',
+  get done(){return this.recorded?1:0},
+  subTitle(){return {record:this.recordKind==='prn'?'登记按需用药':'用药登记',profile:'本人信息',guide:'型号操作指导',selfcheck:'操作自检',assistant:'AI 指导助手'}[this.screen]||''},
+  go(s){this.history.push(this.screen);this.screen=s;window.scrollTo(0,0)},
+  back(){this.screen=this.history.pop()||'home';if(this.screen==='home'){this.recordError=''}window.scrollTo(0,0)},
+  openSlot(){if(this.recorded){this.tab='history';return}this.openRecord()},
+  openRecord(kind='regular'){if(this.unconfirmed){this.go('record');return}this.recordKind=kind;this.recordError='';if(kind==='prn')this.occurredAt='2026-10-14T12:00';this.go('record')},
+  async retry(){this.state='loading';await new Promise(r=>setTimeout(r,350));this.state='normal'},
+  async submitRecord(){if(this.saving||this.unconfirmed)return;this.saving=true;this.recordError='';await new Promise(r=>setTimeout(r,400));this.saving=false;if(this.failNext){const kind=this.failNext;this.failNext='';this.unconfirmed=kind==='timeout';this.recordError=this.unconfirmed?'提交结果尚未确认，请先核对记录再决定是否补交。':'登记尚未保存，输入已保留，请重试。';return}if(this.recordKind==='regular'){this.regularRecord={time:this.occurredAt,note:this.note};this.recorded=true}else this.prnRecords.push({time:this.occurredAt,note:this.note});this.history=[];this.screen='home';this.tab=this.recordKind==='regular'?'today':'history';this.toast='登记已保存，可查看发生时间与来源';setTimeout(()=>this.toast='',2600)},
+  async reconcile(){this.recordError='正在核对关联时点记录…';await new Promise(r=>setTimeout(r,300));this.unconfirmed=false;this.recordError='未找到本次有效登记，可以保留当前输入重新提交。'}
+}}
+</script>
+</body>
+</html>

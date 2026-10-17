@@ -1,0 +1,76 @@
+- generic [ref=e37]:
+  - banner [ref=e38]:
+    - strong [ref=e40]: 吸入治疗指导与依从性辅助管理软件
+    - generic [ref=e41] [cursor=pointer]:
+      - generic [ref=e42]: C
+      - generic [ref=e45]: clinician_a
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - menu [ref=e49]:
+        - menuitem "工作台" [ref=e50] [cursor=pointer]
+        - menuitem "患者管理" [ref=e52] [cursor=pointer]
+        - menuitem "统计与核查" [ref=e54] [cursor=pointer]
+        - menuitem "随访中心" [ref=e56] [cursor=pointer]
+    - main [ref=e58]:
+      - generic [ref=e60]:
+        - heading "工作台" [level=4] [ref=e61]
+        - generic [ref=e62]:
+          - generic [ref=e66]:
+            - generic [ref=e67]: 负责患者
+            - generic [ref=e69]: "17"
+          - generic [ref=e74]:
+            - generic [ref=e75]: 待核查任务
+            - generic [ref=e77]: "4"
+          - generic [ref=e82]:
+            - generic [ref=e83]: 近期随访
+            - generic [ref=e85]: "4"
+        - generic [ref=e89]:
+          - generic [ref=e90]: 待核查任务
+          - list [ref=e97]:
+            - listitem [ref=e98] [cursor=pointer]:
+              - generic [ref=e100]:
+                - heading "林女士 · P-001" [level=4] [ref=e101]
+                - generic [ref=e102]: 依据：连续多次固定时点未发现登记 · 生成于 2026/10/16 13:24:35
+              - list [ref=e103]:
+                - listitem [ref=e104]:
+                  - generic [ref=e105]: 待核查
+            - listitem [ref=e106] [cursor=pointer]:
+              - generic [ref=e108]:
+                - heading "周先生 · P-006" [level=4] [ref=e109]
+                - generic [ref=e110]: 依据：连续多次固定时点未发现登记 · 生成于 2026/10/16 13:14:35
+              - list [ref=e111]:
+                - listitem [ref=e112]:
+                  - generic [ref=e113]: 待核查
+            - listitem [ref=e114] [cursor=pointer]:
+              - generic [ref=e116]:
+                - heading "陈先生 · P-002" [level=4] [ref=e117]
+                - generic [ref=e118]: 依据：连续多次固定时点未发现登记 · 生成于 2026/10/16 13:14:35
+              - list [ref=e119]:
+                - listitem [ref=e120]:
+                  - generic [ref=e121]: 待核查
+            - listitem [ref=e122] [cursor=pointer]:
+              - generic [ref=e124]:
+                - heading "赵女士 · P-005" [level=4] [ref=e125]
+                - generic [ref=e126]: 依据：连续多次固定时点未发现登记 · 生成于 2026/10/16 13:14:35
+              - list [ref=e127]:
+                - listitem [ref=e128]:
+                  - generic [ref=e129]: 待核查
+        - generic [ref=e130]:
+          - generic [ref=e131]: 近期随访
+          - list [ref=e138]:
+            - listitem [ref=e139]:
+              - generic [ref=e141]:
+                - heading "赵女士 · 2026/10/15 03:09:54" [level=4] [ref=e142]
+                - generic [ref=e143]: 复训后操作明显改善。
+            - listitem [ref=e144]:
+              - generic [ref=e146]:
+                - heading "王女士 · 2026/10/15 00:09:54" [level=4] [ref=e147]
+                - generic [ref=e148]: 随访时发现患者未正确屏气。
+            - listitem [ref=e149]:
+              - generic [ref=e151]:
+                - heading "林女士 · 2026/10/14 21:09:54" [level=4] [ref=e152]
+                - generic [ref=e153]: 患者反馈吸入器使用顺畅，无不适。
+            - listitem [ref=e154]:
+              - generic [ref=e156]:
+                - heading "陈先生 · 2026/10/14 20:09:54" [level=4] [ref=e157]
+                - generic [ref=e158]: 患者主诉晨起气促，已建议门诊复诊。
