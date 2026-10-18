@@ -6,6 +6,7 @@ __pycache__/
 venv/
 .pytest_cache/
 .mypy_cache/
+.coverage
 
 # 环境与密钥（严禁提交）
 .env
