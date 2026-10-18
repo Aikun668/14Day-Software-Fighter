@@ -67,6 +67,8 @@ export default function PatientDetailPage() {
   const [trainings, setTrainings] = useState<Training[]>([])
   const [followups, setFollowups] = useState<Followup[]>([])
   const [modelNames, setModelNames] = useState<Record<string, string>>({})
+  // 各列表的服务端总数（页面上只取前 50 条，计数要显示真实总数）
+  const [totals, setTotals] = useState({ events: 0, trainings: 0, followups: 0, plans: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -78,9 +80,9 @@ export default function PatientDetailPage() {
           apiFetch<PatientDetail>(`/api/patients/${id}`),
           apiFetch<{ items: Device[] }>(`/api/patients/${id}/devices`).catch(() => ({ items: [] })),
           apiFetch<{ items: Plan[] }>(`/api/patients/${id}/medication-plans?include_history=true&page_size=100`).catch(() => ({ items: [] })),
-          apiFetch<{ items: Event[] }>(`/api/patients/${id}/medication-events?page_size=50`).catch(() => ({ items: [] })),
-          apiFetch<{ items: Training[] }>(`/api/patients/${id}/training-sessions?page_size=50`).catch(() => ({ items: [] })),
-          apiFetch<{ items: Followup[] }>(`/api/patients/${id}/followups?page_size=50`).catch(() => ({ items: [] })),
+          apiFetch<{ items: Event[]; total: number }>(`/api/patients/${id}/medication-events?page_size=50`).catch(() => ({ items: [], total: 0 })),
+          apiFetch<{ items: Training[]; total: number }>(`/api/patients/${id}/training-sessions?page_size=50`).catch(() => ({ items: [], total: 0 })),
+          apiFetch<{ items: Followup[]; total: number }>(`/api/patients/${id}/followups?page_size=50`).catch(() => ({ items: [], total: 0 })),
           apiFetch<{ items: { id: string; model_name: string }[] }>('/api/device-models?page_size=100').catch(() => ({ items: [] })),
         ])
         setPatient(p)
@@ -89,6 +91,8 @@ export default function PatientDetailPage() {
         setEvents(ev.items)
         setTrainings(tr.items)
         setFollowups(fu.items)
+        // 服务端总数（列表只取了前 50 条，标签计数不能直接用数组长度）
+        setTotals({ events: ev.total, trainings: tr.total, followups: fu.total, plans: pl.items.length })
         setModelNames(Object.fromEntries(models.items.map((m) => [m.id, m.model_name])))
       } catch (e) {
         message.error((e as Error).message)
@@ -179,12 +183,18 @@ export default function PatientDetailPage() {
       apiFetch<PatientDetail>(`/api/patients/${id}`),
       apiFetch<{ items: Device[] }>(`/api/patients/${id}/devices`).catch(() => ({ items: [] })),
       apiFetch<{ items: Plan[] }>(`/api/patients/${id}/medication-plans?include_history=true&page_size=100`).catch(() => ({ items: [] })),
-      apiFetch<{ items: Event[] }>(`/api/patients/${id}/medication-events?page_size=50`).catch(() => ({ items: [] })),
-      apiFetch<{ items: Training[] }>(`/api/patients/${id}/training-sessions?page_size=50`).catch(() => ({ items: [] })),
-      apiFetch<{ items: Followup[] }>(`/api/patients/${id}/followups?page_size=50`).catch(() => ({ items: [] })),
+      apiFetch<{ items: Event[]; total: number }>(`/api/patients/${id}/medication-events?page_size=50`).catch(() => ({ items: [], total: 0 })),
+      apiFetch<{ items: Training[]; total: number }>(`/api/patients/${id}/training-sessions?page_size=50`).catch(() => ({ items: [], total: 0 })),
+      apiFetch<{ items: Followup[]; total: number }>(`/api/patients/${id}/followups?page_size=50`).catch(() => ({ items: [], total: 0 })),
     ])
     setPatient(p2); setDevices(d2.items); setPlans(pl2.items)
     setEvents(ev2.items); setTrainings(tr2.items); setFollowups(fu2.items)
+    setTotals({
+      events: ev2.total ?? ev2.items.length,
+      trainings: tr2.total ?? tr2.items.length,
+      followups: fu2.total ?? fu2.items.length,
+      plans: pl2.items.length,
+    })
   }
 
   const openEdit = () => {
@@ -290,6 +300,10 @@ export default function PatientDetailPage() {
   }
 
   const blank = (text: string) => <p className="card-empty" style={{ padding: 0 }}>{text}</p>
+  // 列表只取前 50 条：标签显示服务端总数，超出时在列表上方给出说明，避免误以为「就这么多」
+  const LIST_LIMIT = 50
+  const truncated = (kind: 'events' | 'trainings' | 'followups') => totals[kind] > LIST_LIMIT
+  const truncatedHint = `仅显示最近 ${LIST_LIMIT} 条（更早的记录仍保留在库中，标签数字为总条数）。`
   // 空状态给下一步：说明数据从哪来（UI/UX 规范：空状态不应是死胡同）
   const blankHint = (text: string, action?: React.ReactNode) => (
     <div className="card-empty" style={{ padding: 0 }}>
@@ -345,9 +359,12 @@ export default function PatientDetailPage() {
           items={[
             {
               key: 'timeline',
-              label: `动态（${timeline.length}）`,
+              label: `动态（${totals.events + totals.trainings + totals.followups + totals.plans}）`,
               children: timeline.length === 0 ? blank('暂无动态') : (
                 <div className="timeline">
+                  {(truncated('events') || truncated('trainings') || truncated('followups'))
+                    ? <p className="muted" style={{ margin: '0 0 8px' }}>{truncatedHint}</p>
+                    : null}
                   {timelineGroups.map((g) => (
                     <div key={g.day} className="tl-group">
                       <div className="tl-day">{g.day}</div>
@@ -432,9 +449,10 @@ export default function PatientDetailPage() {
             },
             {
               key: 'event',
-              label: `用药登记（${events.length}）`,
+              label: `用药登记（${totals.events}）`,
               children: events.length === 0 ? blank('暂无用药登记记录') : (
                 <ul className="record-list">
+                  {truncated('events') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
                   {events.map((e) => (
                     <li key={e.id} className="record-row">
                       <span className="strong tabular">{dt(e.occurred_at)}</span>
@@ -452,9 +470,10 @@ export default function PatientDetailPage() {
             },
             {
               key: 'training',
-              label: `训练记录（${trainings.length}）`,
+              label: `训练记录（${totals.trainings}）`,
               children: trainings.length === 0 ? blankHint('暂无训练记录。患者完成操作自检或医护提交现场评估后，会显示在这里。') : (
                 <ul className="record-list">
+                  {truncated('trainings') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
                   {trainings.map((t) => (
                     <li key={t.id} className="record-row">
                       <span className="strong tabular">{dt(t.submit_at)}</span>
@@ -471,11 +490,12 @@ export default function PatientDetailPage() {
             },
             {
               key: 'followup',
-              label: `随访（${followups.length}）`,
+              label: `随访（${totals.followups}）`,
               children: followups.length === 0 ? blankHint('暂无随访记录。', (
                 <Button size="small" onClick={() => navigate('/followups')}>去记录随访</Button>
               )) : (
                 <ul className="record-list">
+                  {truncated('followups') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
                   {followups.map((f) => (
                     <li key={f.id}>
                       <div className="record-row">

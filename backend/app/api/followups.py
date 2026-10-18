@@ -88,6 +88,33 @@ def create_followup(
         raise
 
 
+@router.get("/followups", response_model=Page[FollowupOut])
+def list_my_followups(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    user: User = Depends(require_clinician),
+    db: Session = Depends(get_db),
+):
+    """当前医护负责患者的随访（工作台「近期随访」），按时间倒序。
+
+    一次查询替代「先拉患者列表、再逐个患者请求随访」的 N+1 请求。
+    仅 CLINICIAN：管理员按 PRD 不继承患者临床数据访问权（返回空列表会被误读为「没有随访」）。
+    """
+    if user.role != "CLINICIAN":
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "仅医护可访问", "details": None})
+    q = (
+        db.query(Followup)
+        .join(Patient, Followup.patient_id == Patient.id)
+        .filter(Patient.assigned_clinician_id == user.id)
+    )
+    total = q.count()
+    items = q.order_by(Followup.followed_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return Page[FollowupOut](
+        items=[FollowupOut.model_validate(f) for f in items],
+        total=total, page=page, page_size=page_size,
+    )
+
+
 @router.get("/patients/{patient_id}/followups", response_model=Page[FollowupOut])
 def list_followups(
     patient_id: uuid.UUID,

@@ -110,10 +110,11 @@
 
 | 方法与路径 | 权限 | 请求参数 / JSON | 成功响应与关键校验 |
 |---|---|---|---|
-| `GET /api/patients` | Clinician | `page,page_size,search?` | `200 → Page<PatientBrief>`；只返回责任医护的患者 |
+| `GET /api/patients` | Clinician | `page,page_size,search?,diagnosis_label?,account_status?` | `200 → Page<PatientBrief>`；只返回责任医护的患者。`account_status` 取 `bound/unbound`；筛选在服务端生效（不是只筛当前页） |
+| `GET /api/patients/filter-options` | Clinician | 无 | `200 → {diagnosis_labels:[string]}`；责任患者诊断标签去重（全量），供表头筛选选项 |
 | `POST /api/patients` | Clinician | `{patient_code,display_name,diagnosis_label?,note?}` | `201 → PatientBrief`；责任医护取当前用户，患者编号全局唯一 |
 | `GET /api/patients/{id}` | 所属医护 | 无 | `200 → PatientDetail`（PatientBrief 加 `note?` 与当前装置摘要）；越权 404 或 403 |
-| `PATCH /api/patients/{id}` | 所属医护 | `{display_name?,diagnosis_label?,note?}` | `200 → PatientBrief`；不可绕过管理员私改责任医护 |
+| `PATCH /api/patients/{id}` | 所属医护 | `{display_name?,diagnosis_label?,note?}` | `200 → PatientDetail`（含 `note`）；不可绕过管理员私改责任医护 |
 | `GET /api/me/patient` | Patient | 无 | `200 → PatientBrief + current_devices[]`；只读本人；医护录入的用药计划另取 `/api/me/medication-plans` |
 | `GET /api/patients/{id}/devices` | 所属医护 | 无 | `200 → {items:[{id,device_model_id,effective_from,effective_to?}],total,...}` |
 | `POST /api/patients/{id}/devices` | 所属医护 | `{device_model_id,effective_from}` | `201 → {id,patient_id,device_model_id,effective_from,effective_to:null}`；同一装置绑定关系的生效期按服务端规则关闭旧记录，历史训练不改写 |
@@ -204,10 +205,13 @@ Content-Type: application/json
 |---|---|---|---|
 | `GET /api/me/reminders` | Patient | `date?` | `200 → {items:PatientReminder[]}`；合并计划派生提醒和持久复训/随访提醒，不泄露内部 task |
 | `GET /api/me/stats` | Patient | `from,to` | `200 → StatsResponse`；仅本人 |
-| `GET /api/patients/{id}/stats` | 所属医护 | `from,to` | `200 → StatsResponse`；含缺失 slot 和来源分布 |
+| `GET /api/patients/{id}/stats` | 所属医护 | `from,to` | `200 → StatsResponse`；含缺失 slot 和来源分布。`to` 必须晚于 `from`，否则 422 |
+| `GET /api/patients/{id}/stats/trend` | 所属医护 | `from,to` | `200 → {points:[{day,N,M,coverage_rate}]}`；一次查询返回逐日趋势（比逐日调 N 次 stats 少 N 倍请求）。`N=0` 的日子 `coverage_rate=null`；区间上限 92 天，超限 422 |
+| `GET /api/stats/overview` | Clinician | `from,to` | `200 → {patient_count,planned_count,total_N,total_M,coverage_rate,rows:[{patient_id,patient_code,display_name,N,M,coverage_rate,missing_count}]}`；聚合本人负责患者，`rows` 按缺失数降序、无计划（N=0）垫底。**仅 CLINICIAN**；ADMIN 返回 403（管理员不继承临床数据访问权），Patient 403 |
 | `GET /api/tasks` | Clinician | `status?,patient_id?,page,page_size` | `200 → Page<Task>`；仅已物化任务，无 GET 写入副作用 |
 | `PATCH /api/tasks/{id}` | 所属医护 | `{status:"IN_PROGRESS"}` | `200 → Task`；关闭任务优先经随访流程，已 CLOSED 不能重开 |
 | `POST /api/followups` | 所属医护 | `{patient_id,task_id?,followed_at,feedback?,action_taken?,next_plan?,close_task?,create_retraining_reminder?}` | `201 → {followup:Followup,task?:Task,reminder?:PatientReminder}`；保存、关闭任务、创建提醒和审计同事务 |
+| `GET /api/followups` | Clinician | `page,page_size` | `200 → Page<Followup>`；本人负责患者的随访，按时间倒序（工作台「近期随访」，替代逐患者请求） |
 | `GET /api/patients/{id}/followups` | 所属医护 | `from?,to?,page,page_size` | `200 → Page<Followup>`；供 M04 报告与 M05 历史 |
 
 统计响应示例（7 天每天 2 次、已关联 10 个时点，假设均已到期）：
@@ -242,7 +246,7 @@ Content-Type: application/json
 
 | 方法与路径 | 权限 | 请求参数 / JSON | 成功响应与关键校验 |
 |---|---|---|---|
-| `POST /api/ai/ask` | Patient/Clinician | `{device_model_id,question}` | `200 → AIResponse`；只基于当前型号与已发布版本知识；Patient 型号需为本人当前绑定之一 |
+| `POST /api/ai/ask` | Patient/Clinician | `{device_model_id,question}` | `200 → AIResponse`；只基于当前型号与已发布版本知识；Patient 型号需为本人当前绑定之一。同一标题存在多个已发布文档时，检索只用**最新发布**的那份，旧版片段不参与回答 |
 | `GET /api/admin/knowledge-documents` | Admin/授权医护 | `device_model_id?,review_status?,page,page_size` | `200 → Page<KnowledgeDocument>` |
 | `POST /api/admin/knowledge-documents` | Admin/授权医护 | `{device_model_id,guide_id?,title,version,source_url?,text}` | `201 → KnowledgeDocument`（DRAFT）；文本按段落切成 knowledge_chunks |
 | `GET /api/admin/knowledge-documents/{id}` | Admin/授权医护 | 无 | `200 → KnowledgeDocument + source_text/chunks`，后台草稿可见 |

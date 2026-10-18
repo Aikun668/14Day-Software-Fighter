@@ -45,3 +45,20 @@ class OverviewResponse(BaseModel):
     coverage_rate: float | None # 聚合覆盖率 = total_M / total_N
     rows: list[PatientCoverageRow]  # 按缺失数降序（紧急在前）
     disclaimer: str = "基于登记记录的覆盖率，不等于实际服药依从性"
+
+
+class TrendPoint(BaseModel):
+    """逐日趋势的一个点；N=0 表示当天没有到期时点（rate 必须为 null，不是 0%）。"""
+    day: str
+    N: int
+    M: int
+    coverage_rate: float | None
+
+
+class TrendResponse(BaseModel):
+    """逐日覆盖率趋势（一次查询覆盖整个区间）。"""
+    from_: str
+    to: str
+    timezone: str
+    points: list[TrendPoint]
+    disclaimer: str = "基于登记记录的覆盖率，不等于实际服药依从性"

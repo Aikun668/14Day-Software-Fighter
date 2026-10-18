@@ -38,15 +38,27 @@ def list_patients(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     search: str | None = None,
+    diagnosis_label: list[str] | None = Query(None),
+    account_status: str | None = Query(None, pattern=r"^(bound|unbound)$"),
     user: User = Depends(require_clinician),
     db: Session = Depends(get_db),
 ):
+    """患者列表：搜索与表头筛选都在服务端完成（此前筛选只作用于当前页）。
+
+    诊断标签支持多选：重复传 `diagnosis_label=a&diagnosis_label=b`，按「任一」匹配。
+    """
     q = db.query(Patient).filter(Patient.assigned_clinician_id == user.id)
     if search:
         like = f"%{search}%"
         q = q.filter(
             (Patient.patient_code.ilike(like)) | (Patient.display_name.ilike(like))
         )
+    if diagnosis_label:
+        q = q.filter(Patient.diagnosis_label.in_(diagnosis_label))
+    if account_status == "bound":
+        q = q.filter(Patient.account_user_id.is_not(None))
+    elif account_status == "unbound":
+        q = q.filter(Patient.account_user_id.is_(None))
     total = q.count()
     items = q.order_by(Patient.created_at).offset((page - 1) * page_size).limit(page_size).all()
     return Page[PatientBrief](
@@ -55,6 +67,22 @@ def list_patients(
         page=page,
         page_size=page_size,
     )
+
+
+@router.get("/patients/filter-options")
+def patient_filter_options(
+    user: User = Depends(require_clinician),
+    db: Session = Depends(get_db),
+):
+    """患者列表的筛选项：诊断标签去重（全量，不是当前页）。"""
+    rows = (
+        db.query(Patient.diagnosis_label)
+        .filter(Patient.assigned_clinician_id == user.id, Patient.diagnosis_label.is_not(None))
+        .distinct()
+        .order_by(Patient.diagnosis_label)
+        .all()
+    )
+    return {"diagnosis_labels": [r[0] for r in rows if r[0]]}
 
 
 @router.post("/patients", response_model=PatientBrief, status_code=status.HTTP_201_CREATED)

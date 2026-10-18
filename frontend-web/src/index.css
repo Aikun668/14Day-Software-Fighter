@@ -112,6 +112,38 @@ body,
   color: var(--brand-ink);
 }
 
+/* 状态胶囊（草稿/已审核/已发布）：深色文字保证 ≥4.5:1 对比度 */
+.status-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  background: #eef0f5;
+  color: #4a4d5c;
+}
+
+.status-pill.is-draft {
+  background: #eef0f5;
+  color: #4a4d5c;
+}
+
+.status-pill.is-reviewed {
+  background: #e6ecfb;
+  color: #24418f;
+}
+
+.status-pill.is-published {
+  background: #e2f2ee;
+  color: #0d6058;
+}
+
+.status-pill.is-disabled {
+  background: #f7e6e6;
+  color: #8e2020;
+}
+
 /* 表单两列并排（开始/结束日期） */
 .form-row {
   display: grid;
@@ -183,6 +215,17 @@ body,
   border: 1px solid var(--line);
   border-radius: 10px;
   margin-bottom: 24px;
+}
+
+/* 工作台：覆盖率环更宽，其余三格等分（4 格必须是 4 列，否则第 4 格会掉行） */
+.overview-4 {
+  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+  .overview-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .overview-cell {

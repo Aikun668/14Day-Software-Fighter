@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Form, Input, message, Modal, Select, Space, Table, Tag } from 'antd'
 import { apiFetch } from '../../api/client'
@@ -28,6 +28,10 @@ export default function PatientListPage() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  // 表头筛选：诊断标签 / 账号绑定状态（均在服务端过滤，不是只筛当前页）
+  const [diagnosisFilter, setDiagnosisFilter] = useState<string[]>([])
+  const [accountFilter, setAccountFilter] = useState<string[]>([])
+  const [diagnosisOptions, setDiagnosisOptions] = useState<{ text: string; value: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [form] = Form.useForm()
@@ -38,11 +42,20 @@ export default function PatientListPage() {
   const [evalModels, setEvalModels] = useState<DeviceModel[]>([])
   const [evalGuides, setEvalGuides] = useState<Guide[]>([])
 
-  const fetchList = async (p = page, s = search) => {
+  const fetchList = async (
+    p = page,
+    s = search,
+    diag = diagnosisFilter,
+    acct = accountFilter,
+  ) => {
     setLoading(true)
     try {
       const q = new URLSearchParams({ page: String(p), page_size: '20' })
       if (s) q.set('search', s)
+      // 筛选全部在服务端：多选诊断标签重复传参，按「任一」匹配
+      diag.forEach((label) => q.append('diagnosis_label', label))
+      if (acct.length === 1) q.set('account_status', acct[0])
+      // 两个都选 = 不筛选（省略参数，避免空值触发 422）
       const resp = await apiFetch<PageResp>(`/api/patients?${q}`)
       setData(resp.items)
       setTotal(resp.total)
@@ -53,7 +66,14 @@ export default function PatientListPage() {
     }
   }
 
-  useEffect(() => { fetchList(page, search) }, [page])
+  useEffect(() => { fetchList(page, search) }, [page])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 筛选项：全量诊断标签（服务端去重，不受当前页影响）
+  useEffect(() => {
+    apiFetch<{ diagnosis_labels: string[] }>('/api/patients/filter-options')
+      .then((r) => setDiagnosisOptions(r.diagnosis_labels.map((v) => ({ text: v, value: v }))))
+      .catch(() => setDiagnosisOptions([]))
+  }, [])
 
   const onCreate = async (values: { patient_code: string; display_name: string; diagnosis_label?: string; note?: string }) => {
     setSubmitting(true)
@@ -110,20 +130,17 @@ export default function PatientListPage() {
     } catch (e) { message.error((e as Error).message) }
   }
 
-  // 诊断标签筛选项（去重）
-  const diagnosisFilters = useMemo(() => {
-    const set = new Set<string>()
-    data.forEach((p) => { if (p.diagnosis_label) set.add(p.diagnosis_label) })
-    return [...set].map((v) => ({ text: v, value: v }))
-  }, [data])
-
+  // 表头筛选走服务端：列上的 filters 只负责展示选项与受控状态，onFilter=false
+  // 交给 antd 不要本地过滤（否则与分页数据打架，看起来像「筛完只剩几条」）
   const columns = [
     { title: '患者编号', dataIndex: 'patient_code', width: 120, render: (v: string) => <span className="tabular">{v}</span> },
     { title: '姓名/别名', dataIndex: 'display_name', render: (v: string) => <span className="strong">{v}</span> },
     {
       title: '诊断标签', dataIndex: 'diagnosis_label',
-      filters: diagnosisFilters,
-      onFilter: (value: unknown, r: Patient) => r.diagnosis_label === value,
+      filters: diagnosisOptions,
+      filterMultiple: true,
+      filteredValue: diagnosisFilter.length > 0 ? diagnosisFilter : null,
+      onFilter: () => true,
       render: (v: string | null) => v || '—',
     },
     {
@@ -132,7 +149,8 @@ export default function PatientListPage() {
         { text: '已绑定', value: 'bound' },
         { text: '未绑定', value: 'unbound' },
       ],
-      onFilter: (value: unknown, r: Patient) => (value === 'bound' ? !!r.account_user_id : !r.account_user_id),
+      filteredValue: accountFilter.length > 0 ? accountFilter : null,
+      onFilter: () => true,
       render: (v: string | null) => v ? <Tag className="tag-brand">已绑定</Tag> : <Tag>未绑定</Tag>,
     },
     { title: '操作', key: 'action', width: 180, render: (_: unknown, r: Patient) => (
@@ -163,6 +181,15 @@ export default function PatientListPage() {
           columns={columns}
           dataSource={data}
           loading={loading}
+          onChange={(_pagination, filters) => {
+            // 表头筛选变化 → 回第一页并请求服务端（不是只筛当前页）
+            const diag = (filters.diagnosis_label as string[] | null) ?? []
+            const acct = (filters.account_user_id as string[] | null) ?? []
+            setDiagnosisFilter(diag)
+            setAccountFilter(acct)
+            setPage(1)
+            fetchList(1, search, diag, acct)
+          }}
           pagination={{
             current: page,
             total,

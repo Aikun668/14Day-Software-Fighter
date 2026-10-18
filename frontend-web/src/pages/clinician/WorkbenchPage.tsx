@@ -29,7 +29,7 @@ function OverviewRing({ rate, M, N }: { rate: number | null; M: number; N: numbe
   const c = 2 * Math.PI * r
   const ratio = rate === null ? 0 : Math.min(rate, 100) / 100
   return (
-    <div className="wb-ring" style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }} aria-hidden>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#EFECFE" strokeWidth={stroke} />
         <circle
@@ -73,33 +73,29 @@ export default function WorkbenchPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        // 统计窗口：过去 7 个完整日（与演示数据 v1 区间一致）
+        // 统计窗口：过去 7 个完整日，按浏览器本地日期（不能用 toISOString：
+        // 东八区 00:00–08:00 会落到前一天，与统计页的区间错位）
+        const fmt = (d: Date) => {
+          const y = d.getFullYear()
+          const m = String(d.getMonth() + 1).padStart(2, '0')
+          const day = String(d.getDate()).padStart(2, '0')
+          return `${y}-${m}-${day}`
+        }
         const end = new Date()
-        const start = new Date(end.getTime() - 7 * 86400000)
-        const fmt = (d: Date) => d.toISOString().slice(0, 10)
+        const start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 7)
         const win = `from=${fmt(start)}&to=${fmt(end)}`
 
-        const [t, p, ov] = await Promise.all([
+        const [t, p, ov, fu] = await Promise.all([
           apiFetch<{ items: Task[] }>('/api/tasks?status=OPEN&page_size=50'),
           apiFetch<{ items: Patient[] }>('/api/patients?page_size=100'),
           apiFetch<Overview>(`/api/stats/overview?${win}`).catch(() => null),
+          // 一次拿负责患者的随访（此前是每个患者各发一次请求）
+          apiFetch<{ items: Followup[] }>('/api/followups?page_size=5').catch(() => ({ items: [] as Followup[] })),
         ])
         setTasks(t.items)
         setPatients(p.items)
         setOverview(ov)
-
-        // 聚合所有负责患者的随访，按时间倒序取最近 5 条
-        const all = await Promise.all(
-          p.items.map((pt) =>
-            apiFetch<{ items: Followup[] }>(`/api/patients/${pt.id}/followups?page_size=20`)
-              .then((r) => r.items)
-              .catch(() => [] as Followup[]),
-          ),
-        )
-        const merged = all.flat().sort(
-          (a, b) => new Date(b.followed_at).getTime() - new Date(a.followed_at).getTime(),
-        )
-        setRecentFollowups(merged.slice(0, 5))
+        setRecentFollowups(fu.items.slice(0, 5))
       } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
     }
     load()
@@ -113,25 +109,25 @@ export default function WorkbenchPage() {
     <div>
       <PageHeader title="工作台" meta={today} />
 
-      {/* 概览：聚合覆盖率环 + 三格数字 */}
-      <section className="overview" aria-label="工作台概览">
-        {overview && overview.total_N > 0 && (
-          <div className="overview-cell" style={{ paddingRight: 20 }}>
-            <span className="overview-label">近 7 日登记覆盖率</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <OverviewRing rate={overview.coverage_rate} M={overview.total_M} N={overview.total_N} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span style={{ fontSize: 13, color: '#6B6E7F' }}>
-                  负责患者 <b style={{ color: '#24243E' }}>{overview.patient_count}</b> 人
-                </span>
-                <span style={{ fontSize: 13, color: '#6B6E7F' }}>
-                  有计划 <b style={{ color: '#24243E' }}>{overview.planned_count}</b> 人
-                </span>
-                <span style={{ fontSize: 12, color: '#6B6E7F' }}>基于登记记录</span>
-              </div>
+      {/* 概览：覆盖率环 + 三格数字（4 格固定布局，无数据也占位，避免列数跳变） */}
+      <section className="overview overview-4" aria-label="工作台概览">
+        <div className="overview-cell">
+          <span className="overview-label">近 7 日登记覆盖率</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <OverviewRing rate={overview?.coverage_rate ?? null} M={overview?.total_M ?? 0} N={overview?.total_N ?? 0} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 13, color: '#6B6E7F' }}>
+                负责患者 <b style={{ color: '#24243E' }}>{count(overview?.patient_count ?? patients.length)}</b> 人
+              </span>
+              <span style={{ fontSize: 13, color: '#6B6E7F' }}>
+                有计划 <b style={{ color: '#24243E' }}>{count(overview?.planned_count ?? 0)}</b> 人
+              </span>
+              <span style={{ fontSize: 12, color: '#6B6E7F' }}>
+                {overview && overview.total_N === 0 ? '该区间无固定时点' : '基于登记记录'}
+              </span>
             </div>
           </div>
-        )}
+        </div>
         <div className="overview-cell">
           <span className="overview-label">负责患者</span>
           <span className="overview-value">{count(overview?.patient_count ?? patients.length)}</span>

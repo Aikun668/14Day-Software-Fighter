@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tabs, Tag, Typography } from 'antd'
+import { Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tabs, Typography } from 'antd'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 
@@ -171,11 +171,13 @@ export default function AdminPage() {
     } catch (e) { message.error((e as Error).message) }
   }
 
+  // 状态标签用自定义类而非预设色：预设「已发布」绿字对比度只有 3.37:1，
+  // 达不到正文 4.5:1 的无障碍要求（截图工具已报过 contrastLow）。
   const statusTag = (s: string) => {
-    if (s === 'DRAFT') return <Tag>草稿</Tag>
-    if (s === 'REVIEWED') return <Tag color="blue">已审核</Tag>
-    if (s === 'PUBLISHED') return <Tag color="green">已发布</Tag>
-    return <Tag>{s}</Tag>
+    if (s === 'DRAFT') return <span className="status-pill is-draft">草稿</span>
+    if (s === 'REVIEWED') return <span className="status-pill is-reviewed">已审核</span>
+    if (s === 'PUBLISHED') return <span className="status-pill is-published">已发布</span>
+    return <span className="status-pill">{s}</span>
   }
 
   const roleLabel = (r: string) => ({ ADMIN: '管理员', CLINICIAN: '医护', PATIENT: '患者' }[r] || r)
@@ -268,7 +270,9 @@ export default function AdminPage() {
                       { title: '角色', dataIndex: 'role', render: (v: string) => roleLabel(v) },
                       {
                         title: '状态', dataIndex: 'status',
-                        render: (v: string) => v === 'ACTIVE' ? <Tag color="green">启用</Tag> : <Tag color="red">停用</Tag>,
+                        render: (v: string) => v === 'ACTIVE'
+                          ? <span className="status-pill is-published">启用</span>
+                          : <span className="status-pill is-disabled">停用</span>,
                       },
                       { title: '需改密', dataIndex: 'must_change_password', render: (v: boolean) => v ? '是' : '否' },
                       {

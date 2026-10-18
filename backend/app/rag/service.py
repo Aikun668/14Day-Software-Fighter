@@ -49,15 +49,45 @@ def _tokenize(text: str) -> set[str]:
     return tokens
 
 
-def retrieve_published_chunks(db: Session, device_model_id, question: str, top_k: int = TOP_K):
-    """只在该型号已发布文档的片段中检索（型号 + 发布状态双重过滤）。"""
-    rows = (
-        db.query(KnowledgeChunk, KnowledgeDocument)
-        .join(KnowledgeDocument, KnowledgeChunk.document_id == KnowledgeDocument.id)
+def _latest_published_docs(db: Session, device_model_id) -> list[KnowledgeDocument]:
+    """该型号下每个标题只取最新一次发布版本。
+
+    知识文档的「发布」是追加式的（已发布不可原地修改，新版本另建文档），
+    所以同一 title 可能同时存在多个 PUBLISHED 版本；检索必须只用最新版，
+    否则旧版步骤会和新版一起被引用，患者会同时看到两套操作要求。
+    """
+    docs = (
+        db.query(KnowledgeDocument)
         .filter(
             KnowledgeDocument.device_model_id == device_model_id,
             KnowledgeDocument.review_status == "PUBLISHED",
         )
+        .all()
+    )
+    latest: dict[str, KnowledgeDocument] = {}
+    for doc in docs:
+        key = doc.title.strip()
+        cur = latest.get(key)
+        if cur is None:
+            latest[key] = doc
+            continue
+        # 以发布时间为准；缺失时退回创建时间，再退回 id 保证确定性
+        doc_key = (doc.published_at or doc.created_at, str(doc.id))
+        cur_key = (cur.published_at or cur.created_at, str(cur.id))
+        if doc_key > cur_key:
+            latest[key] = doc
+    return list(latest.values())
+
+
+def retrieve_published_chunks(db: Session, device_model_id, question: str, top_k: int = TOP_K):
+    """只在该型号「最新已发布」文档的片段中检索（型号 + 发布状态 + 版本三重过滤）。"""
+    docs = _latest_published_docs(db, device_model_id)
+    if not docs:
+        return []
+    doc_by_id = {d.id: d for d in docs}
+    rows = (
+        db.query(KnowledgeChunk)
+        .filter(KnowledgeChunk.document_id.in_(list(doc_by_id)))
         .all()
     )
     if not rows:
@@ -65,7 +95,8 @@ def retrieve_published_chunks(db: Session, device_model_id, question: str, top_k
 
     q_tokens = _tokenize(question)
     scored = []
-    for chunk, doc in rows:
+    for chunk in rows:
+        doc = doc_by_id[chunk.document_id]
         c_tokens = _tokenize(chunk.text)
         if not c_tokens:
             continue

@@ -15,6 +15,16 @@ interface Stats {
   disclaimer: string;
 }
 
+interface TrendPoint {
+  day: string
+  N: number
+  M: number
+  coverage_rate: number | null
+}
+interface TrendResp {
+  points: TrendPoint[]
+}
+
 /** 覆盖率进度环（纯 SVG，跟随主题色） */
 function CoverageRing({ rate, M, N }: { rate: number | null; M: number; N: number }) {
   const size = 132
@@ -42,8 +52,8 @@ function CoverageRing({ rate, M, N }: { rate: number | null; M: number; N: numbe
   )
 }
 
-/** 逐日覆盖率趋势：折线 + 每日刻度格（有数据的日期着色，深浅按覆盖率） */
-function TrendChart({ trend }: { trend: { day: string; rate: number | null; N: number; M: number }[] }) {
+/** 逐日覆盖率趋势：折线 + 每日数值标注 + 50/100% 参考线 */
+function TrendChart({ trend }: { trend: TrendPoint[] }) {
   if (trend.length === 0) {
     return <p className="muted" style={{ margin: 0 }}>暂无趋势数据</p>
   }
@@ -54,10 +64,22 @@ function TrendChart({ trend }: { trend: { day: string; rate: number | null; N: n
   const n = trend.length
   const x = (i: number) => padL + (n === 1 ? (W - padL) / 2 : (i * (W - padL)) / (n - 1))
   const y = (v: number) => 12 + (1 - v / 100) * (H - padB - 12)
-  const pts = trend.map((t, i) => (t.rate === null ? null : `${x(i)},${y(t.rate)}`)).filter(Boolean) as string[]
-  const valid = trend.filter((t) => t.rate !== null)
-  const first = valid[0]?.rate ?? null
-  const last = valid[valid.length - 1]?.rate ?? null
+  // 无数据的日期（N=0）不能连线：按连续有数据的片段切成多条折线，
+  // 否则会把空档「跳过去」连成一条，视觉上像是连续平稳。
+  const segments: string[][] = []
+  let current: string[] = []
+  trend.forEach((t, i) => {
+    if (t.coverage_rate === null) {
+      if (current.length > 0) segments.push(current)
+      current = []
+    } else {
+      current.push(`${x(i)},${y(t.coverage_rate)}`)
+    }
+  })
+  if (current.length > 0) segments.push(current)
+  const valid = trend.filter((t) => t.coverage_rate !== null)
+  const first = valid[0]?.coverage_rate ?? null
+  const last = valid[valid.length - 1]?.coverage_rate ?? null
   const delta = first !== null && last !== null ? Math.round((last - first) * 10) / 10 : null
 
   return (
@@ -77,12 +99,18 @@ function TrendChart({ trend }: { trend: { day: string; rate: number | null; N: n
             <text x={4} y={y(g) + 4} fontSize={11} fill="#6B6E7F">{g}%</text>
           </g>
         ))}
-        {pts.length > 1 && <polyline points={pts.join(' ')} fill="none" stroke="#573BF4" strokeWidth={2.5} strokeLinejoin="round" />}
+        {segments.map((seg, i) => (
+          seg.length > 1
+            ? <polyline key={i} points={seg.join(' ')} fill="none" stroke="#573BF4" strokeWidth={2.5} strokeLinejoin="round" />
+            : <circle key={i} cx={Number(seg[0].split(',')[0])} cy={Number(seg[0].split(',')[1])} r={2.5} fill="#573BF4" />
+        ))}
         {trend.map((t, i) => (
           <g key={t.day}>
-            {t.rate !== null && <circle cx={x(i)} cy={y(t.rate)} r={4} fill="#573BF4" />}
-            {t.rate !== null && (
-              <text x={x(i)} y={y(t.rate) - 9} fontSize={11} fill="#24243E" textAnchor="middle">{t.rate}%</text>
+            {t.coverage_rate !== null
+              ? <circle cx={x(i)} cy={y(t.coverage_rate)} r={4} fill="#573BF4" />
+              : <circle cx={x(i)} cy={y(0)} r={3} fill="#fff" stroke="#C9CDD8" strokeWidth={1.5} />}
+            {t.coverage_rate !== null && (
+              <text x={x(i)} y={y(t.coverage_rate) - 9} fontSize={11} fill="#24243E" textAnchor="middle">{t.coverage_rate}%</text>
             )}
             <text x={x(i)} y={H - 8} fontSize={11} fill="#6B6E7F" textAnchor="middle">
               {t.day.slice(5)}
@@ -90,6 +118,9 @@ function TrendChart({ trend }: { trend: { day: string; rate: number | null; N: n
           </g>
         ))}
       </svg>
+      {trend.some((t) => t.N === 0) && trend.some((t) => t.N > 0) && (
+        <p className="muted" style={{ margin: '8px 0 0' }}>空心点表示当天没有到期的固定时点（不参与连线）。</p>
+      )}
       {trend.every((t) => t.N === 0) && (
         <p className="muted" style={{ margin: '8px 0 0' }}>该区间内无固定计划时点（按需用药不计入覆盖率）。</p>
       )}
@@ -142,7 +173,7 @@ export default function StatsPage() {
   const [from, setFrom] = useState('2026-10-08')
   const [to, setTo] = useState('2026-10-15')
   const [stats, setStats] = useState<Stats | null>(null)
-  const [trend, setTrend] = useState<{ day: string; rate: number | null; N: number; M: number }[]>([])
+  const [trend, setTrend] = useState<TrendPoint[]>([])
   const [loading, setLoading] = useState(false)
 
   const fetchPatients = async () => {
@@ -158,24 +189,15 @@ export default function StatsPage() {
     if (!selected) return
     setLoading(true)
     try {
-      const r = await apiFetch<Stats>(`/api/patients/${selected}/stats?from=${from}&to=${to}`)
+      const [r, t] = await Promise.all([
+        apiFetch<Stats>(`/api/patients/${selected}/stats?from=${from}&to=${to}`),
+        // 逐日趋势由服务端一次查询返回（此前是前端按天并发发 N 个请求）
+        apiFetch<TrendResp>(`/api/patients/${selected}/stats/trend?from=${from}&to=${to}`)
+          .then((x) => x.points)
+          .catch(() => [] as TrendPoint[]),
+      ])
       setStats(r)
-      // 逐日趋势：把 [from, to) 按天切片并行查询（每天一个左闭右开窗口）
-      const days: string[] = []
-      let cur = dayjs(from)
-      const end = dayjs(to)
-      while (cur.isBefore(end) && days.length < 31) {
-        days.push(cur.format('YYYY-MM-DD'))
-        cur = cur.add(1, 'day')
-      }
-      const daily = await Promise.all(
-        days.map((d) =>
-          apiFetch<Stats>(`/api/patients/${selected}/stats?from=${d}&to=${dayjs(d).add(1, 'day').format('YYYY-MM-DD')}`)
-            .then((s) => ({ day: d, rate: s.coverage_rate, N: s.N, M: s.M }))
-            .catch(() => ({ day: d, rate: null, N: 0, M: 0 })),
-        ),
-      )
-      setTrend(daily)
+      setTrend(t)
     } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
   }
 

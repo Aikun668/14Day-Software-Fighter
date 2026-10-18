@@ -67,12 +67,15 @@ print(f"{'#':>3}  {'期望':<14}{'实际':<14}结论  问题")
 print("-" * 78)
 
 passed = 0
+failed = 0
 for i, (q, expect) in enumerate(SAMPLES, start=1):
     code, res = req("POST", "/api/ai/ask", {"device_model_id": my_model, "question": q}, token=pat)
     actual = res.get("status", f"HTTP{code}")
     ok = actual == expect
     passed += ok
-    print(f"{i:>3}  {expect:<14}{actual:<14}{'PASS' if ok else 'FAIL'}  {q[:30]}")
+    failed += (not ok)
+    # PASS/FAIL 必须出现在行首：一键验收脚本按 ^PASS/^FAIL 统计断言数
+    print(f"{'PASS' if ok else 'FAIL'} {i:>3}  期望 {expect:<14}实际 {actual:<14}{q[:30]}")
 
 print("-" * 78)
 print(f"样本通过：{passed}/{len(SAMPLES)}")
@@ -80,7 +83,9 @@ print(f"样本通过：{passed}/{len(SAMPLES)}")
 # 跨型号隔离：问未绑定型号应 403
 if other_model:
     code, res = req("POST", "/api/ai/ask", {"device_model_id": other_model, "question": "使用前要做什么"}, token=pat)
-    print(f"\n跨型号隔离（问未绑定型号）：HTTP {code} {'PASS' if code == 403 else 'FAIL'}")
+    ok = code == 403
+    failed += (not ok)
+    print(f"\n{'PASS' if ok else 'FAIL'} 跨型号隔离（问未绑定型号）：HTTP {code}")
 
 # AI 故障不影响核心业务
 print("\nAI 场景下核心接口可用性：")
@@ -88,4 +93,9 @@ for path, name in [("/api/health", "探活"), ("/api/me/patient", "本人档案"
                    ("/api/me/medication-plans", "用药计划"),
                    ("/api/me/stats?from=2026-10-08&to=2026-10-15", "统计")]:
     code, _ = req("GET", path, token=pat)
-    print(f"  {name}: HTTP {code} {'PASS' if code == 200 else 'FAIL'}")
+    ok = code == 200
+    failed += (not ok)
+    print(f"{'PASS' if ok else 'FAIL'} {name}: HTTP {code}")
+
+print(f"\n=== 结果：{passed} PASS, {failed} FAIL ===")
+raise SystemExit(0 if failed == 0 else 1)
