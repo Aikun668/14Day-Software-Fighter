@@ -388,6 +388,33 @@ backend\.venv\Scripts\python.exe backend\tests\run_acceptance.py
 
 > P04 撤销遵循 MED-03：撤销需确认并给出结果；原记录保留留痕（REVOKED 不硬删）；重复撤销由服务端 409 拦截。
 
+## 基线（P0-3，2026-10-18）
+
+UI 优化开始前的验收基线，后续对比以此为准。`run_acceptance` 原始输出：`docs/evidence/ui-upgrade-2026-10-P0-3/run_acceptance-baseline.txt`。
+
+| 阶段 | PASS | FAIL |
+|---|---|---|
+| AI 边界样本 | 27 | 0 |
+| S6 全量回归 | 16 | 0 |
+| S2 认证与基础 | 14 | 0 |
+| S3 指导与训练 | 16 | 0 |
+| S4 计划与登记 | 18 | 0 |
+| S4 版本/PRN/撤销 | 11 | 0 |
+| S5 任务随访 AI | 14 | 0 |
+| S6 越权隔离 | 16 | 0 |
+| S6 AI 故障回退 | 14 | 0 |
+| 医护闭环（增补） | 22 | 0 |
+| 知识闭环（增补） | 24 | 0 |
+| **合计** | **192** | **0** |
+
+- 退出码 0。合计与 TASKS 记录的 192 一致。
+- 「AI 边界样本」计数口径为断言行数（27），与 2026-10-16 表中「22/22 样本」口径不同，不直接比较。
+- 2026-10-16 表中的「合计 119」与其上方各行之和不一致，本基线不沿用该数字。
+- 本次运行重置了演示库（`inhaler_demo`）。`docs/evidence/` 中依赖旧演示数据的截图视为作废，需在 E 阶段重拍。
+- 运行方式：先启动后端（`backend\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8010`，在 `backend` 目录），再在项目根执行 `backend\.venv\Scripts\python.exe backend\tests\run_acceptance.py`。
+
+pytest（测试库 `inhaler_test`，与演示库隔离）：2 passed。覆盖率（`task_service` 23%、`rag/service.py` 18%、`api/stats.py` 22%）低于 80% 目标，待 D-2 迁移后再测。
+
 ## 待真机复核（C02/C03/C04 完整执行）
 
 
