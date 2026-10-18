@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { apiFetch } from '../../api/client'
 import AppLayout from '../../components/AppLayout'
+import GuideStepImage from '../../components/GuideStepImage'
 
-interface GuideStep { id: string; step_no: number; text: string; error_notes: string | null }
+interface GuideStep { id: string; step_no: number; text: string; error_notes: string | null; image_path: string | null }
 interface Guide { id: string; title: string; steps: GuideStep[] }
 interface Device { id: string; device_model_id: string }
 interface PatientInfo { id: string; current_devices: Device[] }
@@ -92,6 +93,7 @@ export default function TrainingPage() {
             <div key={s.id} style={{ marginTop: 12, background: '#fff', border: '1px solid #E6E9F1', borderRadius: 14, padding: 16 }}>
               <div style={{ fontSize: 14, color: '#4D3BA7', fontWeight: 600 }}>步骤 {s.step_no}</div>
               <div style={{ fontSize: 16, color: '#0F0D27', marginTop: 8 }}>{s.text}</div>
+              <GuideStepImage src={s.image_path} stepNo={s.step_no} />
               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                 {['DONE', 'DIFFICULT', 'NOT_DONE'].map((st) => (
                   <button key={st} onClick={() => setChoice(s.id, st)}
