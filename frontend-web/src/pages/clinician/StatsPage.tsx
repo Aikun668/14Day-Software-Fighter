@@ -3,6 +3,8 @@ import { Button, Card, DatePicker, message, Select, Space, Statistic, Table, Typ
 import dayjs from 'dayjs'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
+import CoverageHeatmap, { type MatrixResponse } from '../../components/CoverageHeatmap'
+import CoverageTrendChart from '../../components/CoverageTrendChart'
 
 const { Text } = Typography
 
@@ -52,82 +54,6 @@ function CoverageRing({ rate, M, N }: { rate: number | null; M: number; N: numbe
   )
 }
 
-/** 逐日覆盖率趋势：折线 + 每日数值标注 + 50/100% 参考线 */
-function TrendChart({ trend }: { trend: TrendPoint[] }) {
-  if (trend.length === 0) {
-    return <p className="muted" style={{ margin: 0 }}>暂无趋势数据</p>
-  }
-  const W = 720
-  const H = 180
-  const padL = 34
-  const padB = 26
-  const n = trend.length
-  const x = (i: number) => padL + (n === 1 ? (W - padL) / 2 : (i * (W - padL)) / (n - 1))
-  const y = (v: number) => 12 + (1 - v / 100) * (H - padB - 12)
-  // 无数据的日期（N=0）不能连线：按连续有数据的片段切成多条折线，
-  // 否则会把空档「跳过去」连成一条，视觉上像是连续平稳。
-  const segments: string[][] = []
-  let current: string[] = []
-  trend.forEach((t, i) => {
-    if (t.coverage_rate === null) {
-      if (current.length > 0) segments.push(current)
-      current = []
-    } else {
-      current.push(`${x(i)},${y(t.coverage_rate)}`)
-    }
-  })
-  if (current.length > 0) segments.push(current)
-  const valid = trend.filter((t) => t.coverage_rate !== null)
-  const first = valid[0]?.coverage_rate ?? null
-  const last = valid[valid.length - 1]?.coverage_rate ?? null
-  const delta = first !== null && last !== null ? Math.round((last - first) * 10) / 10 : null
-
-  return (
-    <div>
-      {delta !== null && n > 1 && (
-        <p className="muted" style={{ margin: '0 0 8px' }}>
-          区间变化：<b style={{ color: delta > 0 ? '#14938E' : delta < 0 ? '#B02A2A' : undefined }}>
-            {delta > 0 ? `+${delta}` : delta}
-          </b>{' '}
-          个百分点（{valid[0]?.day} → {valid[valid.length - 1]?.day}）｜ 仅统计已到期时点
-        </p>
-      )}
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 180 }} role="img" aria-label="逐日覆盖率趋势">
-        {[0, 50, 100].map((g) => (
-          <g key={g}>
-            <line x1={padL} y1={y(g)} x2={W} y2={y(g)} stroke="#F0F2F7" strokeWidth={1} />
-            <text x={4} y={y(g) + 4} fontSize={11} fill="#6B6E7F">{g}%</text>
-          </g>
-        ))}
-        {segments.map((seg, i) => (
-          seg.length > 1
-            ? <polyline key={i} points={seg.join(' ')} fill="none" stroke="#573BF4" strokeWidth={2.5} strokeLinejoin="round" />
-            : <circle key={i} cx={Number(seg[0].split(',')[0])} cy={Number(seg[0].split(',')[1])} r={2.5} fill="#573BF4" />
-        ))}
-        {trend.map((t, i) => (
-          <g key={t.day}>
-            {t.coverage_rate !== null
-              ? <circle cx={x(i)} cy={y(t.coverage_rate)} r={4} fill="#573BF4" />
-              : <circle cx={x(i)} cy={y(0)} r={3} fill="#fff" stroke="#C9CDD8" strokeWidth={1.5} />}
-            {t.coverage_rate !== null && (
-              <text x={x(i)} y={y(t.coverage_rate) - 9} fontSize={11} fill="#24243E" textAnchor="middle">{t.coverage_rate}%</text>
-            )}
-            <text x={x(i)} y={H - 8} fontSize={11} fill="#6B6E7F" textAnchor="middle">
-              {t.day.slice(5)}
-            </text>
-          </g>
-        ))}
-      </svg>
-      {trend.some((t) => t.N === 0) && trend.some((t) => t.N > 0) && (
-        <p className="muted" style={{ margin: '8px 0 0' }}>空心点表示当天没有到期的固定时点（不参与连线）。</p>
-      )}
-      {trend.every((t) => t.N === 0) && (
-        <p className="muted" style={{ margin: '8px 0 0' }}>该区间内无固定计划时点（按需用药不计入覆盖率）。</p>
-      )}
-    </div>
-  )
-}
-
 /** 缺失时点按日分布柱状图（纯 SVG） */
 function MissingBars({ missing }: { missing: { scheduled_at: string }[] }) {
   if (missing.length === 0) {
@@ -169,12 +95,13 @@ function MissingBars({ missing }: { missing: { scheduled_at: string }[] }) {
 export default function StatsPage() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [selected, setSelected] = useState<string | null>(null)
-  // 默认查询区间与演示数据计划周期一致（可复现 PRD T06 的 N=14/M=10/71.4%）
-  const [from, setFrom] = useState('2026-10-08')
-  const [to, setTo] = useState('2026-10-15')
+  // 默认区间：相对今日的近 7 天（左闭右开，与「重置为近 7 日」一致）
+  const [from, setFrom] = useState(() => dayjs().subtract(7, 'day').format('YYYY-MM-DD'))
+  const [to, setTo] = useState(() => dayjs().format('YYYY-MM-DD'))
   const [stats, setStats] = useState<Stats | null>(null)
   const [trend, setTrend] = useState<TrendPoint[]>([])
   const [loading, setLoading] = useState(false)
+  const [matrix, setMatrix] = useState<MatrixResponse | null>(null)
 
   const fetchPatients = async () => {
     try {
@@ -184,6 +111,15 @@ export default function StatsPage() {
   }
 
   useEffect(() => { fetchPatients() }, [])
+
+  // 覆盖矩阵与患者无关，随日期区间变化刷新
+  useEffect(() => {
+    let cancelled = false
+    apiFetch<MatrixResponse>(`/api/stats/matrix?from=${from}&to=${to}`)
+      .then((r) => { if (!cancelled) setMatrix(r) })
+      .catch((e) => { if (!cancelled) message.error((e as Error).message) })
+    return () => { cancelled = true }
+  }, [from, to])
 
   const fetchStats = async () => {
     if (!selected) return
@@ -245,6 +181,14 @@ export default function StatsPage() {
         </div>
       </Card>
 
+      <Card title="覆盖矩阵（负责患者 × 日期）" style={{ marginBottom: 24 }}>
+        {matrix ? (
+          <CoverageHeatmap days={matrix.days} rows={matrix.rows} />
+        ) : (
+          <p className="muted" style={{ margin: 0 }}>加载中…</p>
+        )}
+      </Card>
+
       {!stats && (
         <Card>
           <p className="muted" style={{ margin: 0 }}>选择患者与统计区间后，点击「查询」查看覆盖率与缺失时点。</p>
@@ -273,7 +217,7 @@ export default function StatsPage() {
           </Card>
 
           <Card title="逐日覆盖率趋势">
-            <TrendChart trend={trend} />
+            <CoverageTrendChart trend={trend} />
           </Card>
 
           <div className="stats-grid">
