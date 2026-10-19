@@ -6,7 +6,9 @@
 - 引用由服务端基于真实命中片段组装，拒绝模型虚构；
 - 未配置 LLM 时使用「抽取式回答」（基于已审片段，可追溯），不编造步骤。
 """
+import json
 import re
+import urllib.request
 
 from sqlalchemy.orm import Session
 
@@ -15,6 +17,15 @@ from app.models import KnowledgeChunk, KnowledgeDocument
 
 TOP_K = 3
 
+_NO_LLM_LABEL = "未启用大模型，基于已审核片段的抽取式回答"
+_OUT_OF_SCOPE_ANSWER = "这属于诊疗决策，超出本助手范围。请及时联系您的医护人员；如出现急性症状，请立即就医。"
+_SYSTEM_PROMPT = (
+    "你是医疗装置操作说明的问答助手。"
+    "你只能依据用户消息中给出的资料片段回答，片段之外的内容不得补充，不得编造步骤。"
+    "如果片段不足以回答，请说明资料不足，并建议联系医护人员。"
+    "涉及剂量调整、诊断或急症时，必须拒绝回答，并引导用户联系医护人员；如出现急性症状，请立即就医。"
+)
+
 # 越界关键词（剂量调整 / 诊断 / 急症）
 _OUT_OF_SCOPE_PATTERNS = [
     r"加倍|加大|增加|减少|调整?剂[量量]|剂[量量]够不够|多吃|少吃|停药",
@@ -22,8 +33,10 @@ _OUT_OF_SCOPE_PATTERNS = [
     r"呼吸困难加重|喘不上气|急救|急诊|晕倒|昏厥|大出血|窒息",
 ]
 _SENSITIVE_PATTERNS = [
-    r"\d{11}",  # 手机号
+    r"(?:\D*\d){11}",  # 手机号（允许中间夹杂空格、连字符等分隔符，宁可误拦）
     r"\d{15,18}[0-9Xx]",  # 身份证
+    r"我姓[一-龥]",  # 姓氏自述
+    r"名字是[一-龥]{2,4}",  # 姓名自述
     r"我叫[\u4e00-\u9fa5]{2,4}",  # 姓名自述
 ]
 
@@ -115,20 +128,71 @@ def _extractive_answer(question: str, hits) -> str:
     return "\n".join(lines)
 
 
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """禁止跟随重定向：否则 Authorization 头会被转发到重定向目标。"""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(newurl, code, f"redirect refused: {msg}", headers, fp)
+
+
+_LLM_OPENER = urllib.request.build_opener(_NoRedirectHandler)
+
+
+def _post_chat(payload: dict, settings) -> dict:
+    """向 OpenAI 兼容的 chat/completions 端点发送一次请求（标准库，不新增依赖）。"""
+    req = urllib.request.Request(
+        settings.llm_base_url.rstrip("/") + "/chat/completions",
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {settings.llm_api_key}",
+        },
+        method="POST",
+    )
+    with _LLM_OPENER.open(req, timeout=settings.llm_timeout_seconds) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def _llm_answer(question: str, hits) -> tuple[str, bool]:
+    """调用外部大模型生成回答，返回 (回答文本, 是否被替换为拒答)。请求体只含问题文本与命中片段正文。
+
+    超时或返回异常直接抛出，由 API 层转 503，不静默回落到抽取式回答。
+    """
+    settings = get_settings()
+    if not settings.llm_base_url or not settings.llm_model:
+        raise RuntimeError("LLM 配置不完整：需要 llm_base_url 与 llm_model")
+    snippets = "\n".join(f"{i}. {chunk.text}" for i, (chunk, _doc) in enumerate(hits, start=1))
+    payload = {
+        "model": settings.llm_model,
+        "messages": [
+            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "user", "content": f"资料片段：\n{snippets}\n\n问题：{question}"},
+        ],
+    }
+    body = _post_chat(payload, settings)
+    text = str(body["choices"][0]["message"]["content"] or "").strip()
+    if not text:
+        raise RuntimeError("LLM 返回空内容")
+    # 输出后检：模型若越界或带出敏感信息，整段替换为拒答
+    if _is_out_of_scope(text) or _contains_sensitive(text):
+        return _OUT_OF_SCOPE_ANSWER, True
+    return text, False
+
+
 def ask(db: Session, device_model_id, question: str) -> dict:
     """返回 {status, answer, citations}。"""
-    # 1) 敏感信息拦截
+    # 1) 敏感信息拦截（先于任何 LLM 调用）
     if _contains_sensitive(question):
         return {
             "status": "OUT_OF_SCOPE",
             "answer": "请勿输入个人身份或病历信息。如需帮助，请联系医护人员。",
             "citations": [],
         }
-    # 2) 越界（剂量/诊断/急症）
+    # 2) 越界（剂量/诊断/急症，先于任何 LLM 调用）
     if _is_out_of_scope(question):
         return {
             "status": "OUT_OF_SCOPE",
-            "answer": "这属于诊疗决策，超出本助手范围。请及时联系您的医护人员；如出现急性症状，请立即就医。",
+            "answer": _OUT_OF_SCOPE_ANSWER,
             "citations": [],
         }
     # 3) 受限检索
@@ -140,12 +204,14 @@ def ask(db: Session, device_model_id, question: str) -> dict:
             "citations": [],
         }
 
-    settings = get_settings()
-    # 4) 有 LLM 则调用（此处保留适配位；失败由 API 层转 503）
-    if settings.llm_api_key:
-        answer = _extractive_answer(question, hits)  # 适配器占位：真实实现替换为 LLM 调用
+    # 4) 显式分支：配置了 key 走外部模型（失败抛异常 → API 层 503）；否则抽取式并标注
+    if get_settings().llm_api_key:
+        answer, refused = _llm_answer(question, hits)
+        if refused:
+            # 模型输出越界被替换为拒答：不附引用，避免把拒答呈现为有资料依据的回答
+            return {"status": "OUT_OF_SCOPE", "answer": answer, "citations": []}
     else:
-        answer = _extractive_answer(question, hits)
+        answer = f"{_NO_LLM_LABEL}\n{_extractive_answer(question, hits)}"
 
     # 5) 引用由服务端基于真实命中片段组装（不接受模型虚构）
     citations = []

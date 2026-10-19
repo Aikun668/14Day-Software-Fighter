@@ -7,6 +7,9 @@ interface PatientInfo { id: string; current_devices: Device[] }
 interface Citation { document_title: string; version: string; step_ref: string }
 interface AskResult { status: string; answer: string; citations: Citation[] }
 
+// 与后端 rag/service.py 的 _NO_LLM_LABEL 保持一致：以此区分抽取式回答与外部模型回答
+const NO_LLM_LABEL = '未启用大模型，基于已审核片段的抽取式回答'
+
 // P05 AI 指导助手（J042，二级页）
 export default function AssistantPage() {
   const [deviceModelId, setDeviceModelId] = useState('')
@@ -83,6 +86,11 @@ export default function AssistantPage() {
           <div style={{ fontSize: 16, color: '#0F0D27', marginTop: 10, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
             {result.answer}
           </div>
+          {result.status === 'ANSWERED' && !result.answer.startsWith(NO_LLM_LABEL) && (
+            <p style={{ fontSize: 13, color: '#6B6E7F', marginTop: 12 }}>
+              回答由外部模型生成，内容仅供参考，以医护说明为准。
+            </p>
+          )}
           {result.citations.length > 0 && (
             <div style={{ marginTop: 14, borderTop: '1px solid #F0F2F7', paddingTop: 12 }}>
               <div style={{ fontSize: 13, color: '#6B6E7F', marginBottom: 6 }}>资料出处：</div>
