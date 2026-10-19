@@ -19,6 +19,7 @@ from app.auth.dependencies import get_current_user
 from app.core.database import get_db
 from app.models import MedicationEvent, Patient, PlannedSlot, User
 from app.schemas.stats import (
+    MatrixResponse,
     MissingSlot,
     OverviewResponse,
     PatientCoverageRow,
@@ -26,11 +27,12 @@ from app.schemas.stats import (
     TrendPoint,
     TrendResponse,
 )
+from app.services.stats_matrix import build_coverage_matrix
 
 router = APIRouter(prefix="/api", tags=["stats"])
 
 TZ_NAME = "Asia/Shanghai"
-MAX_TREND_DAYS = 92
+MAX_RANGE_DAYS = 92  # 趋势与覆盖矩阵共用的区间上限
 
 
 def _parse_window(from_date: str, to_date: str) -> tuple[datetime, datetime]:
@@ -50,6 +52,31 @@ def _parse_window(from_date: str, to_date: str) -> tuple[datetime, datetime]:
             detail={"code": "INVALID_RANGE", "message": "结束日期必须晚于开始日期", "details": None},
         )
     return date_from.astimezone(ZoneInfo("UTC")), date_to.astimezone(ZoneInfo("UTC"))
+
+
+def _window_days(from_date: str, to_date: str, max_days: int = MAX_RANGE_DAYS) -> list[date]:
+    """区间内的业务日列表（左闭右开）；超过上限返回 422 RANGE_TOO_LARGE（先判跨度，再建列表）。"""
+    from_utc, to_utc = _parse_window(from_date, to_date)
+    tz = ZoneInfo(TZ_NAME)
+    start_day = from_utc.astimezone(tz).date()
+    end_day = to_utc.astimezone(tz).date()
+    span = (end_day - start_day).days
+    if span > max_days:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "RANGE_TOO_LARGE", "message": f"区间最多 {max_days} 天", "details": None},
+        )
+    return [start_day + timedelta(days=i) for i in range(span)]
+
+
+def _assigned_patients(db: Session, user: User) -> list[Patient]:
+    """医护负责的患者，按编号排序。"""
+    return (
+        db.query(Patient)
+        .filter(Patient.assigned_clinician_id == user.id)
+        .order_by(Patient.patient_code)
+        .all()
+    )
 
 
 def _load_slots(db: Session, patient_ids: list[uuid.UUID], from_utc: datetime, to_utc: datetime) -> list[PlannedSlot]:
@@ -160,18 +187,7 @@ def get_patient_trend(
     N=0 的日子返回 rate=null（无计划时点，不是 0%）。
     """
     from_utc, to_utc = _parse_window(from_, to)
-
-    days: list[date] = []
-    cur = from_utc.astimezone(ZoneInfo(TZ_NAME)).date()
-    end_day = to_utc.astimezone(ZoneInfo(TZ_NAME)).date()
-    while cur < end_day:
-        days.append(cur)
-        cur += timedelta(days=1)
-    if len(days) > MAX_TREND_DAYS:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "RANGE_TOO_LARGE", "message": f"趋势区间最多 {MAX_TREND_DAYS} 天", "details": None},
-        )
+    days = _window_days(from_, to)
 
     slots = _load_slots(db, [patient_id], from_utc, to_utc)
     active_events = _load_events(db, {s.id for s in slots})
@@ -221,12 +237,7 @@ def get_overview(
 
     from_utc, to_utc = _parse_window(from_, to)
 
-    patients = (
-        db.query(Patient)
-        .filter(Patient.assigned_clinician_id == user.id)
-        .order_by(Patient.patient_code)
-        .all()
-    )
+    patients = _assigned_patients(db, user)
 
     # 两次查询覆盖全部负责患者，避免「每个患者各查 2 次」的 N+1
     patient_ids = [p.id for p in patients]
@@ -274,4 +285,38 @@ def get_overview(
         patient_count=len(patients), planned_count=planned_count,
         total_N=total_N, total_M=total_M, coverage_rate=coverage,
         rows=rows,
+    )
+
+
+@router.get("/stats/matrix", response_model=MatrixResponse)
+def get_coverage_matrix(
+    from_: str = Query(..., alias="from", pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    to: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """负责患者 × 日期的覆盖矩阵（03 A-1）。
+
+    权限：仅 CLINICIAN（与 overview 一致）。口径与 overview 相同：只统计已到期时点，
+    未到期日期的格子 N=0、coverage_rate=null（显示为空白，不是 0%）。
+    """
+    if user.role != "CLINICIAN":
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "仅医护可访问", "details": None})
+
+    from_utc, to_utc = _parse_window(from_, to)
+    days = _window_days(from_, to)
+
+    patients = _assigned_patients(db, user)
+    slots = _load_slots(db, [p.id for p in patients], from_utc, to_utc)
+    active_events = _load_events(db, {s.id for s in slots})
+    covered = {e.slot_id for e in active_events if e.slot_id is not None}
+
+    return build_coverage_matrix(
+        from_str=from_,
+        to_str=to,
+        patients=patients,
+        slots=slots,
+        covered_slot_ids=covered,
+        days=days,
+        tz_name=TZ_NAME,
     )

@@ -62,3 +62,36 @@ class TrendResponse(BaseModel):
     timezone: str
     points: list[TrendPoint]
     disclaimer: str = "基于登记记录的覆盖率，不等于实际服药依从性"
+
+
+class MatrixCell(BaseModel):
+    """覆盖矩阵的一格：某患者某天。N=0 时 coverage_rate 为 null（无计划，不是 0%）。"""
+    day: str
+    N: int
+    M: int
+    missing: int  # = N - M
+    coverage_rate: float | None
+
+
+class MatrixRow(BaseModel):
+    """覆盖矩阵的一行：一个负责患者，cells 与顶层 days 按位置一一对应。"""
+    patient_id: str
+    patient_code: str
+    display_name: str
+    N: int
+    M: int
+    coverage_rate: float | None
+    cells: list[MatrixCell]
+
+
+class MatrixResponse(BaseModel):
+    """负责患者 × 日期的覆盖矩阵（03 A-1）。口径与 overview / trend 一致。"""
+    from_: str
+    to: str
+    timezone: str
+    days: list[str]
+    total_N: int
+    total_M: int
+    coverage_rate: float | None
+    rows: list[MatrixRow]  # 缺失多的在前；无计划的患者垫底
+    disclaimer: str = "基于登记记录的覆盖率，不等于实际服药依从性"
