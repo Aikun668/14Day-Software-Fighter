@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
 import AppLayout from '../../components/AppLayout'
+import GuideStepImage from '../../components/GuideStepImage'
 import { IconAlert } from '../../components/icons'
 
 interface Device { id: string; device_model_id: string }
 interface PatientInfo { id: string; current_devices: Device[] }
-interface GuideStep { id: string; step_no: number; text: string; error_notes: string | null }
+interface GuideStep { id: string; step_no: number; text: string; error_notes: string | null; image_path: string | null }
 interface Guide { id: string; version: string; title: string; steps: GuideStep[]; source_title: string | null }
 
 // P02 型号指导（J021，底部导航根页面之一）
@@ -59,6 +60,7 @@ export default function GuidePage() {
             <div key={s.id} style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, padding: 16 }}>
               <div style={{ fontSize: 14, color: 'var(--brand-ink)', fontWeight: 600 }}>步骤 {s.step_no}</div>
               <div style={{ fontSize: 16, color: 'var(--ink)', marginTop: 8 }}>{s.text}</div>
+              <GuideStepImage src={s.image_path} stepNo={s.step_no} />
               {s.error_notes && (
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                   <span style={{ display: 'inline-flex', flexShrink: 0, marginTop: 1 }}>

@@ -1,0 +1,312 @@
+{
+  "models": {
+    "pMDI": {
+      "guide": [
+        {
+          "step": 1,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 2,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 3,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 4,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 5,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 6,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        }
+      ],
+      "training": [
+        {
+          "step": 1,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 2,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 3,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 4,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 5,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 6,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        }
+      ],
+      "guideOverflow": {
+        "scrollW": 380,
+        "clientW": 380
+      },
+      "trainingOverflow": {
+        "scrollW": 380,
+        "clientW": 380
+      },
+      "submitStepCount": 6,
+      "submitAllDone": true
+    },
+    "DPI": {
+      "guide": [
+        {
+          "step": 1,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 2,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 3,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 4,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 5,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 6,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        }
+      ],
+      "training": [
+        {
+          "step": 1,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 2,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 3,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 4,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 5,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 6,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        }
+      ],
+      "guideOverflow": {
+        "scrollW": 380,
+        "clientW": 380
+      },
+      "trainingOverflow": {
+        "scrollW": 380,
+        "clientW": 380
+      },
+      "submitStepCount": 6,
+      "submitAllDone": true
+    },
+    "SMI": {
+      "guide": [
+        {
+          "step": 1,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 2,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 3,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 4,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 5,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 6,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        }
+      ],
+      "training": [
+        {
+          "step": 1,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 2,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 3,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 4,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 5,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        },
+        {
+          "step": 6,
+          "imgFound": true,
+          "srcOk": true,
+          "loaded": true,
+          "textOk": true
+        }
+      ],
+      "guideOverflow": {
+        "scrollW": 380,
+        "clientW": 380
+      },
+      "trainingOverflow": {
+        "scrollW": 380,
+        "clientW": 380
+      },
+      "submitStepCount": 6,
+      "submitAllDone": true
+    }
+  },
+  "fallback404": {
+    "fallbackTextCount": 1,
+    "imagesRendered": 5,
+    "submitted": 1,
+    "submitSteps": 6
+  },
+  "submitAll": null,
+  "errors": []
+}
