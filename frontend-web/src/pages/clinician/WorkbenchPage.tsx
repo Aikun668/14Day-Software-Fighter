@@ -3,6 +3,8 @@ import { Button, Card, message, Table, Tag } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
+import TodayProgressCard from '../../components/TodayProgressCard'
+import { summarizeDay, type DaySummary, type MatrixResponse } from '../../components/todayCoverage'
 
 interface Task {
   id: string; patient_id: string; task_type: string; status: string;
@@ -59,7 +61,15 @@ function MiniBar({ rate }: { rate: number | null }) {
   )
 }
 
-// M01 工作台（J036）：聚合概览 + 紧急任务 + 患者覆盖率排行 + 近期随访
+// 按浏览器本地日期（不能用 toISOString：东八区 00:00–08:00 会落到前一天，与统计页的区间错位）
+const formatLocalDay = (d: Date) => {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+// M01 工作台（J036）：今日处理 + 聚合概览 + 紧急任务 + 患者覆盖率排行 + 近期随访
 export default function WorkbenchPage() {
   const navigate = useNavigate()
   const [tasks, setTasks] = useState<Task[]>([])
@@ -68,34 +78,36 @@ export default function WorkbenchPage() {
   const [overview, setOverview] = useState<Overview | null>(null)
   const [selected, setSelected] = useState<Task | null>(null)
   const [loading, setLoading] = useState(true)
+  const [todaySummary, setTodaySummary] = useState<DaySummary | null>(null)
+  const [todayAsOf, setTodayAsOf] = useState('')
   const [today] = useState(() => new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
 
   useEffect(() => {
     const load = async () => {
       try {
-        // 统计窗口：过去 7 个完整日，按浏览器本地日期（不能用 toISOString：
-        // 东八区 00:00–08:00 会落到前一天，与统计页的区间错位）
-        const fmt = (d: Date) => {
-          const y = d.getFullYear()
-          const m = String(d.getMonth() + 1).padStart(2, '0')
-          const day = String(d.getDate()).padStart(2, '0')
-          return `${y}-${m}-${day}`
-        }
+        // 统计窗口：过去 7 个完整日
         const end = new Date()
         const start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 7)
-        const win = `from=${fmt(start)}&to=${fmt(end)}`
+        const win = `from=${formatLocalDay(start)}&to=${formatLocalDay(end)}`
+        // 今日：[今天 00:00, 明天 00:00)，后端矩阵的 N 只含已到期时点
+        const todayKey = formatLocalDay(end)
+        const tomorrow = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
+        const todayWin = `from=${todayKey}&to=${formatLocalDay(tomorrow)}`
 
-        const [t, p, ov, fu] = await Promise.all([
+        const [t, p, ov, fu, mx] = await Promise.all([
           apiFetch<{ items: Task[] }>('/api/tasks?status=OPEN&page_size=50'),
           apiFetch<{ items: Patient[] }>('/api/patients?page_size=100'),
           apiFetch<Overview>(`/api/stats/overview?${win}`).catch(() => null),
           // 一次拿负责患者的随访（此前是每个患者各发一次请求）
           apiFetch<{ items: Followup[] }>('/api/followups?page_size=5').catch(() => ({ items: [] as Followup[] })),
+          apiFetch<MatrixResponse>(`/api/stats/matrix?${todayWin}`).catch(() => null),
         ])
         setTasks(t.items)
         setPatients(p.items)
         setOverview(ov)
         setRecentFollowups(fu.items.slice(0, 5))
+        setTodaySummary(mx ? summarizeDay(mx, todayKey) : null)
+        setTodayAsOf(end.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }))
       } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
     }
     load()
@@ -108,6 +120,8 @@ export default function WorkbenchPage() {
   return (
     <div>
       <PageHeader title="工作台" meta={today} />
+
+      <TodayProgressCard loading={loading} summary={todaySummary} asOf={todayAsOf} />
 
       {/* 概览：覆盖率环 + 三格数字（4 格固定布局，无数据也占位，避免列数跳变） */}
       <section className="overview overview-4" aria-label="工作台概览">
