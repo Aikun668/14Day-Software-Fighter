@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, Checkbox, DatePicker, Form, Input, message, Select, Space, Tag, Typography } from 'antd'
+import { Button, Checkbox, DatePicker, Form, Input, message, Select, Space, Tag, Typography } from 'antd'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 
@@ -75,11 +75,15 @@ export default function FollowupPage() {
 
   return (
     <div>
-      <PageHeader title="随访中心" />
+      <PageHeader title="随访中心" subtitle="记录随访结果，跟踪患者反馈与后续计划" />
 
       <div className="followup-layout">
-        <div className="stack">
-          <Card title="待处理任务">
+        <div>
+          <section className="page-section">
+            <div className="section-head">
+              <h2 className="section-title">待处理任务（{tasks.length}）</h2>
+              <span className="section-extra">连续多次未登记生成</span>
+            </div>
             {tasks.length === 0 ? <Text type="secondary">暂无待处理任务</Text> : (
               <ul className="record-list">
                 {tasks.map((t) => {
@@ -101,9 +105,12 @@ export default function FollowupPage() {
                 })}
               </ul>
             )}
-          </Card>
+          </section>
 
-          <Card title="随访历史">
+          <section className="page-section" style={{ borderBottom: 'none' }}>
+            <div className="section-head">
+              <h2 className="section-title">随访历史</h2>
+            </div>
             {followups.length === 0 ? <Text type="secondary">暂无随访记录</Text> : (
               <ul className="record-list">
                 {followups.map((f) => (
@@ -120,10 +127,13 @@ export default function FollowupPage() {
                 ))}
               </ul>
             )}
-          </Card>
+          </section>
         </div>
 
-        <Card title="记录随访" className="followup-form-card">
+        <div className="followup-form-card">
+          <div className="section-head">
+            <h2 className="section-title">记录随访</h2>
+          </div>
           <Form form={form} layout="vertical" onFinish={onSubmit}>
             {/* 患者不进表单字段（由页面状态控制），这里用原生 label 关联，保证读屏可读出名称 */}
             <div className="form-field">
@@ -157,7 +167,7 @@ export default function FollowupPage() {
             </Space>
             <Button type="primary" htmlType="submit" block loading={submitting}>保存随访</Button>
           </Form>
-        </Card>
+        </div>
       </div>
     </div>
   )

@@ -107,7 +107,12 @@ def create_revision(
     old = db.query(MedicationPlan).filter(MedicationPlan.id == plan_id).first()
     if old is None:
         raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "计划不存在", "details": None})
-    # 归属校验
+    # 归属校验（SEC-1 / SEC-1b）：与 get_patient_for_clinician 一致。
+    # PATIENT 一律 403；ADMIN 一律 404（管理员不默认访问患者临床档案，老板裁定）。
+    if user.role == "PATIENT":
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "无权访问该资源", "details": None})
+    if user.role == "ADMIN":
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "管理员不默认访问患者临床档案", "details": None})
     if user.role == "CLINICIAN":
         patient = db.query(Patient).filter(Patient.id == old.patient_id).first()
         if patient is None or patient.assigned_clinician_id != user.id:
@@ -173,6 +178,71 @@ def get_my_plans(
         q = q.filter((MedicationPlan.ends_at.is_(None)) | (MedicationPlan.ends_at > now))
     items = q.order_by(MedicationPlan.created_at.desc()).all()
     return Page[PlanOut](items=[_build_plan_out(p, db) for p in items], total=len(items), page=1, page_size=20)
+
+
+@router.get("/patients/{patient_id}/daily-slots")
+def get_patient_daily_slots(
+    patient_id: uuid.UUID,
+    date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    from_: str | None = Query(None, alias="from", pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    to: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    patient: Patient = Depends(get_patient_for_clinician),
+    db: Session = Depends(get_db),
+):
+    """医护查看某患者区间内的固定时点（补登用药时选时点用）。"""
+    tz = ZoneInfo("Asia/Shanghai")
+    if date:
+        day = datetime.strptime(date, "%Y-%m-%d").date()
+        date_from = datetime.combine(day, time(0, 0), tzinfo=tz)
+        date_to = date_from + timedelta(days=1)
+    elif from_ and to:
+        date_from = datetime.strptime(from_, "%Y-%m-%d").replace(tzinfo=tz)
+        date_to = datetime.strptime(to, "%Y-%m-%d").replace(tzinfo=tz)
+    else:
+        today = datetime.now(tz).date()
+        date_from = datetime.combine(today, time(0, 0), tzinfo=tz)
+        date_to = date_from + timedelta(days=1)
+
+    if (date_to - date_from).days > 31:
+        raise HTTPException(status_code=422, detail={"code": "RANGE_TOO_LARGE", "message": "日期跨度最多 31 天", "details": None})
+
+    plans = db.query(MedicationPlan).filter(
+        MedicationPlan.patient_id == patient_id,
+        MedicationPlan.plan_type == "REGULAR",
+        (MedicationPlan.ends_at.is_(None)) | (MedicationPlan.ends_at > date_from),
+    ).all()
+    for p in plans:
+        ensure_slots(db, p, date_from, date_to)
+    db.commit()
+
+    from_utc = date_from.astimezone(ZoneInfo("UTC"))
+    to_utc = date_to.astimezone(ZoneInfo("UTC"))
+    slots = (
+        db.query(PlannedSlot)
+        .filter(
+            PlannedSlot.patient_id == patient_id,
+            PlannedSlot.state == "ACTIVE",
+            PlannedSlot.scheduled_at >= from_utc,
+            PlannedSlot.scheduled_at < to_utc,
+        )
+        .order_by(PlannedSlot.scheduled_at)
+        .all()
+    )
+    result = []
+    for s in slots:
+        has = (
+            db.query(MedicationEvent)
+            .filter(
+                MedicationEvent.slot_id == s.id,
+                MedicationEvent.status == "ACTIVE",
+            )
+            .first()
+            is not None
+        )
+        out = PlannedSlotOut.model_validate(s)
+        out.has_active_record = has
+        result.append(out)
+    return {"items": result, "timezone": "Asia/Shanghai"}
 
 
 @router.get("/me/daily-slots")

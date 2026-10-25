@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
 import { apiFetch } from '../api/client'
 import BrandMark from './BrandMark'
+import { IconFollowups, IconPatients, IconStats, IconWorkbench } from './navIcons'
 
 const { Header, Sider, Content } = Layout
 
@@ -69,11 +70,12 @@ export default function WebLayout({ children }: { children: ReactNode }) {
 
   // 按角色区分菜单（PRD：管理员不继承患者临床数据访问权）
   const isAdmin = user?.role === 'ADMIN'
-  const items: { key: string; label: ReactNode }[] = isAdmin
+  const items: { key: string; label: ReactNode; icon?: ReactNode }[] = isAdmin
     ? [{ key: '/admin', label: '内容与账号管理' }]
     : [
         {
           key: '/workbench',
+          icon: <IconWorkbench />,
           label: (
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               工作台
@@ -81,9 +83,9 @@ export default function WebLayout({ children }: { children: ReactNode }) {
             </span>
           ),
         },
-        { key: '/patients', label: '患者管理' },
-        { key: '/stats', label: '统计与核查' },
-        { key: '/followups', label: '随访中心' },
+        { key: '/patients', label: '患者管理', icon: <IconPatients /> },
+        { key: '/stats', label: '统计与核查', icon: <IconStats /> },
+        { key: '/followups', label: '随访中心', icon: <IconFollowups /> },
       ]
 
   // 子页面（如 /patients/:id）高亮所属菜单项

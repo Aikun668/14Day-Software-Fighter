@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, Form, Input, message, Modal, Select, Space, Table, Tag } from 'antd'
+import { Button, Form, Input, message, Modal, Select, Space, Table, Tag } from 'antd'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 
@@ -163,9 +163,9 @@ export default function PatientListPage() {
 
   return (
     <div>
-      <PageHeader title="患者管理" />
-      <Card>
-        <div className="toolbar">
+      <PageHeader title="患者管理" subtitle="负责患者的档案、账号与装置绑定情况" />
+      <div className="page-toolbar">
+        <div className="page-toolbar-left">
           <Input.Search
             placeholder="搜索编号或姓名"
             aria-label="搜索编号或姓名"
@@ -174,30 +174,32 @@ export default function PatientListPage() {
             onSearch={(v) => { setPage(1); fetchList(1, v) }}
             style={{ width: 280 }}
           />
+        </div>
+        <div className="page-toolbar-right">
           <Button type="primary" onClick={() => setModalOpen(true)}>新建患者</Button>
         </div>
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={data}
-          loading={loading}
-          onChange={(_pagination, filters) => {
-            // 表头筛选变化 → 回第一页并请求服务端（不是只筛当前页）
-            const diag = (filters.diagnosis_label as string[] | null) ?? []
-            const acct = (filters.account_user_id as string[] | null) ?? []
-            setDiagnosisFilter(diag)
-            setAccountFilter(acct)
-            setPage(1)
-            fetchList(1, search, diag, acct)
-          }}
-          pagination={{
-            current: page,
-            total,
-            pageSize: 20,
-            onChange: (p) => setPage(p),
-          }}
-        />
-      </Card>
+      </div>
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        onChange={(_pagination, filters) => {
+          // 表头筛选变化 → 回第一页并请求服务端（不是只筛当前页）
+          const diag = (filters.diagnosis_label as string[] | null) ?? []
+          const acct = (filters.account_user_id as string[] | null) ?? []
+          setDiagnosisFilter(diag)
+          setAccountFilter(acct)
+          setPage(1)
+          fetchList(1, search, diag, acct)
+        }}
+        pagination={{
+          current: page,
+          total,
+          pageSize: 20,
+          onChange: (p) => setPage(p),
+        }}
+      />
 
       <Modal title="新建患者" open={modalOpen} onCancel={() => setModalOpen(false)} onOk={() => form.submit()} confirmLoading={submitting} destroyOnHidden>
         <Form form={form} layout="vertical" onFinish={onCreate}>

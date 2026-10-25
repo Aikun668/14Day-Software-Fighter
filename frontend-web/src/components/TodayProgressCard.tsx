@@ -27,7 +27,7 @@ export default function TodayProgressCard({ loading, summary, asOf }: Props) {
           size={96}
           percent={rate ?? 0}
           strokeColor="#573BF4"
-          format={() => (rate === null ? '—' : `${rate}%`)}
+          format={() => <span className="num">{rate === null ? '—' : `${rate}%`}</span>}
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={{ fontSize: 14, color: '#24243E', fontWeight: 500 }}>{statusText(summary)}</span>

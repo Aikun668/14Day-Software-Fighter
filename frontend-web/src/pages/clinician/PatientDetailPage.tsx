@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, Card, DatePicker, Empty, Form, Input, Modal, Select, Space, Spin, Tabs, Tag, message } from 'antd'
+import { Button, DatePicker, Empty, Form, Input, Modal, Select, Space, Spin, Tabs, Tag, message } from 'antd'
 import dayjs from 'dayjs'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
+import MedicationBackfillModal from '../../components/MedicationBackfillModal'
 
 interface PatientDetail {
   id: string
@@ -70,6 +71,7 @@ export default function PatientDetailPage() {
   // 各列表的服务端总数（页面上只取前 50 条，计数要显示真实总数）
   const [totals, setTotals] = useState({ events: 0, trainings: 0, followups: 0, plans: 0 })
   const [loading, setLoading] = useState(true)
+  const [backfillOpen, setBackfillOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -315,21 +317,20 @@ export default function PatientDetailPage() {
   return (
     <div>
       <Button type="link" style={{ paddingLeft: 0, marginBottom: 8 }} onClick={() => navigate('/patients')}>← 返回患者列表</Button>
-      <PageHeader title={`${patient.display_name} · ${patient.patient_code}`} />
+      <PageHeader title={`${patient.display_name} · ${patient.patient_code}`} subtitle="患者档案、动态时间线与用药计划" />
 
-      <Card
-        title="基本信息"
-        style={{ marginBottom: 24 }}
-        extra={
+      <section className="page-section">
+        <div className="section-head">
+          <h2 className="section-title">基本信息</h2>
           <Space size={8}>
+            <Button size="small" onClick={() => setBackfillOpen(true)}>补登用药</Button>
             <Button size="small" onClick={openEdit}>编辑信息</Button>
             {patient.account_user_id
               ? null
               : <Button size="small" type="primary" onClick={openBindAcct}>绑定登录账号</Button>}
             <Button size="small" onClick={openBindDev}>绑定装置</Button>
           </Space>
-        }
-      >
+        </div>
         <dl className="info-grid">
           <div>
             <dt>患者编号</dt>
@@ -352,9 +353,9 @@ export default function PatientDetailPage() {
             <dd>{patient.note || '—'}</dd>
           </div>
         </dl>
-      </Card>
+      </section>
 
-      <Card>
+      <section className="page-section" style={{ borderBottom: 'none' }}>
         <Tabs
           items={[
             {
@@ -513,7 +514,15 @@ export default function PatientDetailPage() {
             },
           ]}
         />
-      </Card>
+      </section>
+
+      <MedicationBackfillModal
+        open={backfillOpen}
+        patientId={patient.id}
+        patientName={patient.display_name}
+        onClose={() => setBackfillOpen(false)}
+        onSuccess={() => { void reload() }}
+      />
 
       {/* 编辑患者信息 */}
       <Modal title="编辑患者信息" open={editOpen} onCancel={() => setEditOpen(false)} onOk={() => editForm.submit()} confirmLoading={busy} destroyOnHidden>

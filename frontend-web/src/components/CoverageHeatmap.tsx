@@ -38,32 +38,62 @@ const STATE_TEXT: Record<CellState, string> = {
   hollow: '未发现登记',
 }
 
-const STATE_GLYPH: Record<CellState, string> = {
-  blank: '',
-  solid: '●',
-  partial: '◐',
-  hollow: '○',
+/** 品牌紫单色系（--brand #573BF4）：状态靠图形区分（实心/比例/空心），不靠色相 */
+const STATE_COLOR: Record<CellState, string> = {
+  blank: '#C7CBD6',
+  solid: '#573BF4',
+  partial: '#573BF4',
+  hollow: '#573BF4',
 }
 
-const PURPLE = '#573BF4'
-
-function cellStyle(state: CellState): CSSProperties {
-  const base: CSSProperties = {
+/** 26px 单元格容器：Tooltip / 焦点 / 悬停的挂载点 */
+function cellBox(): CSSProperties {
+  return {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     width: 26,
     height: 26,
     borderRadius: 6,
-    fontSize: 14,
-    lineHeight: 1,
-    color: PURPLE,
     boxSizing: 'border-box',
+    cursor: 'default',
   }
-  if (state === 'solid') return { ...base, background: PURPLE, color: '#fff' }
-  if (state === 'partial') return { ...base, background: '#E6E0FE', border: `2px solid ${PURPLE}` }
-  if (state === 'hollow') return { ...base, background: '#fff', border: `2px solid ${PURPLE}` }
-  return base
+}
+
+/**
+ * CSS 绘制的状态图形（不依赖系统字体的 Unicode 字符，跨平台渲染一致）：
+ * 实心圆 = 已登记；按 M/N 填充的比例圆 = 部分登记；空心圆 = 未发现登记；小灰点 = 无计划时点。
+ */
+function CellMark({ state, ratio }: { state: CellState; ratio?: number }) {
+  const c = STATE_COLOR[state]
+  if (state === 'blank') {
+    return <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: c }} />
+  }
+  if (state === 'solid') {
+    return <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: '50%', background: c }} />
+  }
+  if (state === 'hollow') {
+    return (
+      <span
+        aria-hidden="true"
+        style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${c}`, boxSizing: 'border-box' }}
+      />
+    )
+  }
+  const pct = Math.round(Math.min(Math.max(ratio ?? 0, 0), 1) * 100)
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: 16,
+        height: 16,
+        borderRadius: '50%',
+        border: `2px solid ${c}`,
+        boxSizing: 'border-box',
+        background: `conic-gradient(${c} 0 ${pct}%, transparent ${pct}% 0)`,
+      }}
+    />
+  )
 }
 
 function cellLabel(row: MatrixRow, cell: MatrixCell): string {
@@ -73,13 +103,21 @@ function cellLabel(row: MatrixRow, cell: MatrixCell): string {
 }
 
 function Legend() {
-  const items: CellState[] = ['solid', 'partial', 'hollow', 'blank']
+  const items: { state: CellState; note?: string }[] = [
+    { state: 'solid' },
+    { state: 'partial', note: '按已登记比例填充' },
+    { state: 'hollow' },
+    { state: 'blank' },
+  ]
   return (
     <ul className="heatmap-legend" style={{ display: 'flex', gap: 16, listStyle: 'none', padding: 0, margin: '12px 0 0', flexWrap: 'wrap', fontSize: 13, color: '#6B6E7F' }}>
-      {items.map((s) => (
-        <li key={s} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span aria-hidden="true" style={cellStyle(s)}>{STATE_GLYPH[s]}</span>
-          {STATE_TEXT[s]}
+      {items.map(({ state, note }) => (
+        <li key={state} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span aria-hidden="true" style={cellBox()}>
+            <CellMark state={state} ratio={0.5} />
+          </span>
+          {STATE_TEXT[state]}
+          {note && <span style={{ fontSize: 12 }}>({note})</span>}
         </li>
       ))}
     </ul>
@@ -135,9 +173,9 @@ export default function CoverageHeatmap({ days, rows }: Props) {
                           role="img"
                           aria-label={label}
                           tabIndex={0}
-                          style={cellStyle(state)}
+                          style={cellBox()}
                         >
-                          {STATE_GLYPH[state]}
+                          <CellMark state={state} ratio={cell.N > 0 ? cell.M / cell.N : undefined} />
                         </span>
                       </Tooltip>
                     </td>

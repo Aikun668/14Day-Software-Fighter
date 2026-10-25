@@ -1,12 +1,36 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, DatePicker, message, Select, Space, Statistic, Table, Typography } from 'antd'
+import { Button, DatePicker, message, Select, Statistic, Table, Typography } from 'antd'
 import dayjs from 'dayjs'
+import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
+import EmptyState from '../../components/EmptyState'
 import CoverageHeatmap, { type MatrixResponse } from '../../components/CoverageHeatmap'
 import CoverageTrendChart from '../../components/CoverageTrendChart'
 
 const { Text } = Typography
+
+interface CoverageRow {
+  patient_id: string; patient_code: string; display_name: string
+  N: number; M: number; coverage_rate: number | null; missing_count: number
+}
+interface Overview {
+  from_: string; to: string; timezone: string
+  patient_count: number; planned_count: number
+  total_N: number; total_M: number; coverage_rate: number | null
+  rows: CoverageRow[]
+}
+
+/** 小型进度条（患者覆盖率行内，仅统计页排行表使用） */
+function MiniBar({ rate }: { rate: number | null }) {
+  const v = rate === null ? 0 : Math.min(rate, 100)
+  const color = rate === null ? '#C9CDD8' : v >= 80 ? '#14938E' : v >= 60 ? '#573BF4' : '#C7681F'
+  return (
+    <div style={{ width: 96, height: 6, background: '#F0F2F7', borderRadius: 3, overflow: 'hidden' }} aria-hidden>
+      <div style={{ width: `${v}%`, height: '100%', background: color, borderRadius: 3 }} />
+    </div>
+  )
+}
 
 interface Patient { id: string; patient_code: string; display_name: string }
 interface Stats {
@@ -45,10 +69,10 @@ function CoverageRing({ rate, M, N }: { rate: number | null; M: number; N: numbe
         />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: 24, fontWeight: 600, color: '#573BF4' }}>
+        <span className="num" style={{ fontSize: 24, fontWeight: 600, color: '#573BF4' }}>
           {rate === null ? '—' : `${rate}%`}
         </span>
-        <span style={{ fontSize: 13, color: '#6B6E7F' }}>{M} / {N}</span>
+        <span className="num" style={{ fontSize: 13, color: '#6B6E7F' }}>{M} / {N}</span>
       </div>
     </div>
   )
@@ -93,6 +117,7 @@ function MissingBars({ missing }: { missing: { scheduled_at: string }[] }) {
 
 // M04 统计与核查（J032）
 export default function StatsPage() {
+  const navigate = useNavigate()
   const [patients, setPatients] = useState<Patient[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   // 默认区间：相对今日的近 7 天（左闭右开，与「重置为近 7 日」一致）
@@ -102,6 +127,7 @@ export default function StatsPage() {
   const [trend, setTrend] = useState<TrendPoint[]>([])
   const [loading, setLoading] = useState(false)
   const [matrix, setMatrix] = useState<MatrixResponse | null>(null)
+  const [overviewRows, setOverviewRows] = useState<CoverageRow[]>([])
 
   const fetchPatients = async () => {
     try {
@@ -112,12 +138,15 @@ export default function StatsPage() {
 
   useEffect(() => { fetchPatients() }, [])
 
-  // 覆盖矩阵与患者无关，随日期区间变化刷新
+  // 覆盖矩阵与患者登记情况均与所选患者无关，随日期区间变化刷新
   useEffect(() => {
     let cancelled = false
     apiFetch<MatrixResponse>(`/api/stats/matrix?from=${from}&to=${to}`)
       .then((r) => { if (!cancelled) setMatrix(r) })
       .catch((e) => { if (!cancelled) message.error((e as Error).message) })
+    apiFetch<Overview>(`/api/stats/overview?from=${from}&to=${to}`)
+      .then((r) => { if (!cancelled) setOverviewRows(r.rows) })
+      .catch(() => { if (!cancelled) setOverviewRows([]) })
     return () => { cancelled = true }
   }, [from, to])
 
@@ -139,68 +168,119 @@ export default function StatsPage() {
 
   return (
     <div>
-      <PageHeader title="统计与核查" />
-      <Card style={{ marginBottom: 24 }}>
-        <div className="toolbar" style={{ marginBottom: 0 }}>
-          <Space size={12} wrap>
-            <label htmlFor="stats-patient" className="field-label">患者</label>
-            <Select
-              id="stats-patient"
-              style={{ width: 240 }}
-              placeholder="选择患者"
-              options={patients.map(p => ({ value: p.id, label: `${p.display_name} (${p.patient_code})` }))}
-              onChange={setSelected}
-              showSearch optionFilterProp="label"
-            />
-            <span className="field-label">开始</span>
-            <DatePicker
-              value={dayjs(from)}
-              onChange={(d) => d && setFrom(d.format('YYYY-MM-DD'))}
-              placeholder="开始日期"
-              allowClear={false}
-            />
-            <span className="field-label">结束</span>
-            <DatePicker
-              value={dayjs(to)}
-              onChange={(d) => d && setTo(d.format('YYYY-MM-DD'))}
-              placeholder="结束日期"
-              allowClear={false}
-            />
-            <Button type="primary" onClick={fetchStats} disabled={!selected} loading={loading}>查询</Button>
-            <Button
-              onClick={() => {
-                // 演示区间与种子脚本的 v1 计划区间一致（过去 7 个完整日）
-                const start = dayjs().subtract(7, 'day').format('YYYY-MM-DD')
-                const end = dayjs().format('YYYY-MM-DD')
-                setFrom(start); setTo(end)
-              }}
-            >
-              重置为近 7 日
-            </Button>
-          </Space>
-        </div>
-      </Card>
+      <PageHeader title="统计与核查" subtitle="负责患者登记覆盖率、缺失时点与逐日趋势" />
 
-      <Card title="覆盖矩阵（负责患者 × 日期）" style={{ marginBottom: 24 }}>
+      {/* 工具行：左筛选，右操作 */}
+      <div className="page-toolbar">
+        <div className="page-toolbar-left">
+          <label htmlFor="stats-patient" className="field-label">患者</label>
+          <Select
+            id="stats-patient"
+            style={{ width: 240 }}
+            placeholder="选择患者"
+            options={patients.map(p => ({ value: p.id, label: `${p.display_name} (${p.patient_code})` }))}
+            onChange={setSelected}
+            showSearch optionFilterProp="label"
+          />
+          <span className="field-label">开始</span>
+          <DatePicker
+            value={dayjs(from)}
+            onChange={(d) => d && setFrom(d.format('YYYY-MM-DD'))}
+            placeholder="开始日期"
+            allowClear={false}
+          />
+          <span className="field-label">结束</span>
+          <DatePicker
+            value={dayjs(to)}
+            onChange={(d) => d && setTo(d.format('YYYY-MM-DD'))}
+            placeholder="结束日期"
+            allowClear={false}
+          />
+        </div>
+        <div className="page-toolbar-right">
+          <Button
+            onClick={() => {
+              // 演示区间与种子脚本的 v1 计划区间一致（过去 7 个完整日）
+              const start = dayjs().subtract(7, 'day').format('YYYY-MM-DD')
+              const end = dayjs().format('YYYY-MM-DD')
+              setFrom(start); setTo(end)
+            }}
+          >
+            重置为近 7 日
+          </Button>
+          <Button type="primary" onClick={fetchStats} disabled={!selected} loading={loading}>查询</Button>
+        </div>
+      </div>
+
+      <section className="page-section">
+        <div className="section-head">
+          <h2 className="section-title">覆盖矩阵（负责患者 × 日期）</h2>
+          <span className="section-extra">仅统计已到期时点</span>
+        </div>
         {matrix ? (
           <CoverageHeatmap days={matrix.days} rows={matrix.rows} />
         ) : (
           <p className="muted" style={{ margin: 0 }}>加载中…</p>
         )}
-      </Card>
+      </section>
+
+      {/* 患者登记情况排行（随所选区间） */}
+      {overviewRows.length > 0 && (
+        <section className="page-section">
+          <div className="section-head">
+            <h2 className="section-title">患者登记情况（缺失多在前）</h2>
+            <span className="section-extra">随所选区间 · 点击行查看详情</span>
+          </div>
+          <Table
+            rowKey="patient_id"
+            pagination={false}
+            dataSource={[...overviewRows].sort((a, b) => b.missing_count - a.missing_count)}
+            locale={{ emptyText: '暂无数据' }}
+            onRow={(r) => ({ onClick: () => navigate(`/patients/${r.patient_id}`), style: { cursor: 'pointer' } })}
+            columns={[
+              {
+                title: '患者', dataIndex: 'display_name', width: 200,
+                render: (_: string, r: CoverageRow) => (
+                  <span className="task-name">{r.display_name}<span className="task-code">{r.patient_code}</span></span>
+                ),
+              },
+              { title: '应记录 N', dataIndex: 'N', width: 100, align: 'right' as const },
+              { title: '已登记 M', dataIndex: 'M', width: 100, align: 'right' as const },
+              {
+                title: '缺失', dataIndex: 'missing_count', width: 90, align: 'right' as const,
+                render: (v: number) => v > 0 ? <span style={{ color: 'var(--bad)', fontWeight: 500 }}>{v}</span> : <span style={{ color: 'var(--ok)' }}>0</span>,
+              },
+              {
+                title: '覆盖率', dataIndex: 'coverage_rate', width: 220,
+                render: (v: number | null) => (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                    <MiniBar rate={v} />
+                    <span style={{ fontSize: 13, color: '#24243E', fontWeight: 500 }}>{v === null ? '暂无计划' : `${v}%`}</span>
+                  </span>
+                ),
+                align: 'right' as const,
+              },
+            ]}
+          />
+        </section>
+      )}
 
       {!stats && (
-        <Card>
-          <p className="muted" style={{ margin: 0 }}>选择患者与统计区间后，点击「查询」查看覆盖率与缺失时点。</p>
-        </Card>
+        <section className="page-section" style={{ borderBottom: 'none' }}>
+          <EmptyState
+            title="先选择一位患者"
+            hint="上方选择患者与统计区间后点击「查询」，查看该患者的覆盖率与缺失时点；覆盖矩阵与排行不依赖患者选择，已随区间展示。"
+          />
+        </section>
       )}
 
       {stats && (
-        <div className="stack">
-          <Card>
-            <p className="muted" style={{ margin: '0 0 16px' }}>
-              统计区间：{stats.from_} 至 {stats.to}（左闭右开）｜ 时区：{stats.timezone}
-            </p>
+        <>
+          <section className="page-section">
+            <div className="section-head">
+              <h2 className="section-title">覆盖率汇总</h2>
+              <span className="section-extra">区间：{stats.from_} 至 {stats.to}（左闭右开）｜ 时区：{stats.timezone}</span>
+            </div>
             <div className="stats-summary">
               <CoverageRing rate={stats.coverage_rate} M={stats.M} N={stats.N} />
               <div className="stats-numbers">
@@ -214,19 +294,28 @@ export default function StatsPage() {
               </div>
             </div>
             <p className="muted" style={{ margin: '16px 0 0' }}>{stats.disclaimer}</p>
-          </Card>
+          </section>
 
-          <Card title="逐日覆盖率趋势">
+          <section className="page-section">
+            <div className="section-head">
+              <h2 className="section-title">逐日覆盖率趋势</h2>
+            </div>
             <CoverageTrendChart trend={trend} />
-          </Card>
+          </section>
 
-          <div className="stats-grid">
-            <Card title="缺失时点按日分布">
+          <div className="stats-grid page-section">
+            <div>
+              <div className="section-head">
+                <h2 className="section-title">缺失时点按日分布</h2>
+              </div>
               <MissingBars missing={stats.missing_slots} />
-            </Card>
+            </div>
 
-            <Card title="来源分布">
-              <p className="muted" style={{ margin: '0 0 12px' }}>按有效登记事件数统计（非去重时点数）</p>
+            <div>
+              <div className="section-head">
+                <h2 className="section-title">来源分布</h2>
+                <span className="section-extra">按有效登记事件数统计（非去重时点数）</span>
+              </div>
               <Table
                 rowKey="source"
                 dataSource={Object.entries(stats.source_breakdown).map(([k, v]) => ({ source: k, count: v }))}
@@ -236,10 +325,13 @@ export default function StatsPage() {
                   { title: '事件数', dataIndex: 'count' },
                 ]}
               />
-            </Card>
+            </div>
           </div>
 
-          <Card title={`缺失时点（${stats.missing_slots.length} 个）`} styles={{ body: { padding: 0 } }}>
+          <section className="page-section" style={{ borderBottom: 'none' }}>
+            <div className="section-head">
+              <h2 className="section-title">缺失时点（{stats.missing_slots.length} 个）</h2>
+            </div>
             <Table
               rowKey="slot_id"
               dataSource={stats.missing_slots}
@@ -249,8 +341,8 @@ export default function StatsPage() {
                 { title: '状态', render: () => '无有效登记' },
               ]}
             />
-          </Card>
-        </div>
+          </section>
+        </>
       )}
     </div>
   )

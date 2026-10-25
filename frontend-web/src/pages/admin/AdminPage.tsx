@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tabs, Typography } from 'antd'
+import { Button, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tabs, Typography } from 'antd'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 
@@ -220,9 +220,9 @@ export default function AdminPage() {
 
   return (
     <div>
-      <PageHeader title="内容与账号管理" />
+      <PageHeader title="内容与账号管理" subtitle="维护指导内容、装置型号与用户账号" />
 
-      <Card>
+      <section className="page-section" style={{ borderBottom: 'none' }}>
         <Tabs
           items={[
             {
@@ -349,7 +349,7 @@ export default function AdminPage() {
             },
           ]}
         />
-      </Card>
+      </section>
 
       <Modal title="新建型号" open={modelModal} onCancel={() => setModelModal(false)} onOk={() => modelForm.submit()} destroyOnHidden>
         <Form form={modelForm} layout="vertical" onFinish={createModel}>

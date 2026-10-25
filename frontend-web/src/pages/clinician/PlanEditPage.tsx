@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, DatePicker, Form, Input, message, Radio, Select, Space, Table } from 'antd'
+import { Button, DatePicker, Form, Input, message, Radio, Select, Table } from 'antd'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 
@@ -76,67 +76,71 @@ export default function PlanEditPage() {
 
   return (
     <div>
-      <PageHeader title="用药计划编辑" />
-      <div className="stack">
-        <Card>
-          <Space size={12} wrap>
-            <label htmlFor="plan-patient" className="field-label">选择患者</label>
-            <Select
-              id="plan-patient"
-              style={{ width: 240 }}
-              placeholder="选择患者"
-              options={patients.map(p => ({ value: p.id, label: `${p.display_name} (${p.patient_code})` }))}
-              onChange={onSelectPatient}
-              showSearch
-              optionFilterProp="label"
-            />
-          </Space>
-        </Card>
-
-        {selectedPatient && (
-          <>
-            <Card title={`新建计划 - ${selectedPatient.display_name}`}>
-              <Form form={form} layout="vertical" onFinish={onCreate}>
-                <Form.Item name="device_model_id" label="型号" rules={[{ required: true }]}>
-                  <Select options={models.map(m => ({ value: m.id, label: m.model_name }))} />
-                </Form.Item>
-                <Form.Item name="drug_label" label="药物名称" rules={[{ required: true }]}>
-                  <Input placeholder="如 布地奈德福莫特罗粉吸入剂" />
-                </Form.Item>
-                <Form.Item name="plan_type" label="计划类型" rules={[{ required: true }]}>
-                  <Radio.Group>
-                    <Radio value="REGULAR">固定计划（每日固定时点）</Radio>
-                    <Radio value="PRN">按需计划（不固定时点）</Radio>
-                  </Radio.Group>
-                </Form.Item>
-          <div className="form-row">
-                  <Form.Item name="starts_at" label="生效开始日期" rules={[{ required: true }]}>
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                  <Form.Item name="ends_at" label="生效结束日期（可空）">
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                </div>
-                <Form.Item name="daily_times_text" label="每日时点（每行一个，HH:MM，仅固定计划）">
-                  <Input.TextArea rows={3} placeholder={'08:00\n20:00'} />
-                </Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading}>创建计划</Button>
-              </Form>
-            </Card>
-
-            <Card title="历史版本" styles={{ body: { padding: 0 } }}>
-              <Table rowKey="id" dataSource={plans} pagination={false}
-                columns={[
-                  { title: '版本', dataIndex: 'version' },
-                  { title: '药物', dataIndex: 'drug_label' },
-                  { title: '类型', dataIndex: 'plan_type', render: (v: string) => v === 'REGULAR' ? '固定' : '按需' },
-                  { title: '开始', dataIndex: 'starts_at', render: (v: string) => new Date(v).toLocaleDateString('zh-CN') },
-                  { title: '结束', dataIndex: 'ends_at', render: (v: string | null) => v ? new Date(v).toLocaleDateString('zh-CN') : '—' },
-                ]} />
-            </Card>
-          </>
-        )}
+      <PageHeader title="用药计划编辑" subtitle="调整固定时点与计划周期" />
+      <div className="page-toolbar">
+        <div className="page-toolbar-left">
+          <label htmlFor="plan-patient" className="field-label">选择患者</label>
+          <Select
+            id="plan-patient"
+            style={{ width: 240 }}
+            placeholder="选择患者"
+            options={patients.map(p => ({ value: p.id, label: `${p.display_name} (${p.patient_code})` }))}
+            onChange={onSelectPatient}
+            showSearch
+            optionFilterProp="label"
+          />
+        </div>
       </div>
+
+      {selectedPatient && (
+        <>
+          <section className="page-section">
+            <div className="section-head">
+              <h2 className="section-title">新建计划 · {selectedPatient.display_name}</h2>
+            </div>
+            <Form form={form} layout="vertical" onFinish={onCreate}>
+              <Form.Item name="device_model_id" label="型号" rules={[{ required: true }]}>
+                <Select options={models.map(m => ({ value: m.id, label: m.model_name }))} />
+              </Form.Item>
+              <Form.Item name="drug_label" label="药物名称" rules={[{ required: true }]}>
+                <Input placeholder="如 布地奈德福莫特罗粉吸入剂" />
+              </Form.Item>
+              <Form.Item name="plan_type" label="计划类型" rules={[{ required: true }]}>
+                <Radio.Group>
+                  <Radio value="REGULAR">固定计划（每日固定时点）</Radio>
+                  <Radio value="PRN">按需计划（不固定时点）</Radio>
+                </Radio.Group>
+              </Form.Item>
+              <div className="form-row">
+                <Form.Item name="starts_at" label="生效开始日期" rules={[{ required: true }]}>
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="ends_at" label="生效结束日期（可空）">
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+              </div>
+              <Form.Item name="daily_times_text" label="每日时点（每行一个，HH:MM，仅固定计划）">
+                <Input.TextArea rows={3} placeholder={'08:00\n20:00'} />
+              </Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading}>创建计划</Button>
+            </Form>
+          </section>
+
+          <section className="page-section" style={{ borderBottom: 'none' }}>
+            <div className="section-head">
+              <h2 className="section-title">历史版本</h2>
+            </div>
+            <Table rowKey="id" dataSource={plans} pagination={false}
+              columns={[
+                { title: '版本', dataIndex: 'version' },
+                { title: '药物', dataIndex: 'drug_label' },
+                { title: '类型', dataIndex: 'plan_type', render: (v: string) => v === 'REGULAR' ? '固定' : '按需' },
+                { title: '开始', dataIndex: 'starts_at', render: (v: string) => new Date(v).toLocaleDateString('zh-CN') },
+                { title: '结束', dataIndex: 'ends_at', render: (v: string | null) => v ? new Date(v).toLocaleDateString('zh-CN') : '—' },
+              ]} />
+          </section>
+        </>
+      )}
     </div>
   )
 }

@@ -1,10 +1,10 @@
-/* 医护 Web 全局样式：与 UI_DESIGN §2 视觉变量对齐 */
+/* 医护 Web 全局样式：与 UI_DESIGN §2 视觉变量对齐（P0 视觉升级：冷白底 / 数字字体 / 状态色语义化） */
 :root {
-  --bg: #F8F9FC;
+  --bg: #F5F7FB;
   --surface: #FFFFFF;
-  --line: #E6E9F1;
+  --line: #E5E9F2;
   --line-soft: #F0F2F7;
-  --ink: #0F0D27;
+  --ink: #101828;
   --ink-2: #3D3D56;
   --muted: #6B6E7F;
   --brand: #573BF4;
@@ -15,6 +15,12 @@
   --progress: #14938E;
   --missed: #24243E;
   --missed-soft: #EEEFF5;
+  /* 状态语义色：达标/已登记、注意/部分、需干预/缺失（与患者时间线同源） */
+  --ok: #14938E;
+  --warn: #C7681F;
+  --bad: #B02A2A;
+  /* 数字字体：仪表感等宽数字，Windows 走 Bahnschrift、macOS 走 DIN Alternate */
+  --font-numeric: 'Bahnschrift', 'DIN Alternate', 'Segoe UI', system-ui, sans-serif;
 }
 
 html,
@@ -38,10 +44,10 @@ body,
   box-sizing: border-box;
 }
 
-/* 页标题：24px 墨色，右侧放日期或页面级操作（UI_DESIGN §5） */
+/* 页标题：24px 墨色 + 灰色副标题，右侧元素与标题块垂直居中对齐 */
 .page-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
@@ -53,6 +59,88 @@ body,
   font-weight: 600;
   line-height: 1.3;
   color: var(--ink);
+}
+
+.page-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── 去卡片化布局体系：内容直接放底色上，靠留白与组标题分区（参考摆放范式） ── */
+
+/* 工具行：左筛选/搜索，右操作，两端对齐（页头下第一条） */
+.page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 4px;
+}
+
+.page-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.page-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+/* 内容区块：无框无阴影，组标题 + 内容，区块间靠 margin 分隔 */
+.page-section {
+  margin: 0;
+  padding: 16px 0 24px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.page-section:last-child {
+  border-bottom: none;
+}
+
+/* 组标题行：标题左、辅助操作右 */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.section-extra {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* 区块内列表：无边框容器，行与行细线分隔 */
+.section-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section-list > li + li {
+  border-top: 1px solid var(--line-soft);
 }
 
 .page-header-side {
@@ -69,6 +157,13 @@ body,
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* 数字 / 仪表读数：等宽数字字体（覆盖率、计数等关键数字） */
+.num {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 
 .strong {
@@ -207,123 +302,169 @@ body,
   color: var(--muted);
 }
 
-/* 工作台概览：一条白底横条，三格之间用竖线分开，不做三张卡 */
-.overview {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  margin-bottom: 24px;
+/* 今日状态行：通栏无框，靠下边线与后续区块分隔 */
+.status-strip {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  padding: 4px 0 20px;
+  margin-bottom: 0;
 }
 
-/* 工作台：覆盖率环更宽，其余三格等分（4 格必须是 4 列，否则第 4 格会掉行） */
-.overview-4 {
-  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+.status-sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--line-soft);
+  flex-shrink: 0;
 }
 
-@media (max-width: 1100px) {
-  .overview-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.status-today {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.overview-cell {
+.status-today-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-line1 {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-line2 {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.status-kpi {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 20px 24px;
 }
 
-.overview-cell + .overview-cell {
-  border-left: 1px solid var(--line-soft);
-}
-
-.overview-label {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.overview-value {
-  color: var(--ink);
-  font-size: 28px;
+.status-kpi-num {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
   font-weight: 600;
   line-height: 1.2;
-  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 
-.overview-value.is-brand {
-  color: var(--brand);
+.status-kpi-label {
+  color: var(--muted);
+  font-size: 12px;
 }
 
-/* 主区：选中患者后右侧出现 340px 详情，否则列表占满整行 */
-.workbench-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
-  margin-bottom: 24px;
-}
-
-.workbench-main.has-detail {
-  grid-template-columns: minmax(0, 1fr) 340px;
-}
-
-/* 待核查列表：整行可点；选中行浅紫底加左侧 3px 线（UI_DESIGN §5） */
-.task-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.task-list > li + li {
-  border-top: 1px solid var(--line-soft);
-}
-
-.task-row {
-  width: 100%;
+/* 交班单行列表：任务 / 关注患者 / 随访记录（无框通栏，行高适中） */
+.queue-row,
+.watch-row,
+.fu-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 20px;
-  border: none;
-  background: transparent;
-  box-shadow: inset 3px 0 0 transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 0 -12px;
+  border-radius: 8px;
+  min-height: 44px;
+}
+
+.queue-row,
+.watch-row,
+.fu-row {
   cursor: pointer;
 }
 
-.task-row:hover {
+.queue-row:hover,
+.watch-row:hover,
+.fu-row:hover {
   background: #FAFBFD;
 }
 
-.task-row:focus-visible {
+.queue-row:focus-visible,
+.watch-row:focus-visible,
+.fu-row:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: -2px;
 }
 
-.task-row.is-selected {
-  background: var(--brand-tint);
-  box-shadow: inset 3px 0 0 var(--brand);
+.row-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  flex-shrink: 0;
 }
 
-.task-main {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.row-dot.tone-warn {
+  background: var(--warn);
+}
+
+.row-dot.tone-ok {
+  background: var(--ok);
+}
+
+.row-name {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.row-time {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.queue-row .row-time {
+  margin-left: auto;
+}
+
+.row-rate {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.watch-row .row-rate {
+  margin-left: auto;
+  min-width: 56px;
+  text-align: right;
+}
+
+.row-miss {
+  color: var(--bad);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.fu-text {
+  color: var(--ink-2);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   min-width: 0;
+  flex: 1;
 }
 
-.task-head {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
+/* 患者行内名称与编号（排行表、交班行等处复用） */
 .task-name {
   color: var(--ink);
   font-size: 15px;
@@ -335,17 +476,6 @@ body,
   color: var(--muted);
   font-size: 13px;
   font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-
-.task-basis {
-  color: var(--ink-2);
-  font-size: 13px;
-}
-
-.task-time {
-  color: var(--muted);
-  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -492,7 +622,6 @@ body,
 }
 
 @media (max-width: 1200px) {
-  .workbench-main.has-detail,
   .stats-grid,
   .followup-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -555,15 +684,15 @@ body,
 }
 
 .tl-dot.tone-ok {
-  background: #14938e;
+  background: var(--ok);
 }
 
 .tl-dot.tone-warn {
-  background: #c7681f;
+  background: var(--warn);
 }
 
 .tl-dot.tone-bad {
-  background: #b02a2a;
+  background: var(--bad);
 }
 
 .tl-body {
@@ -621,4 +750,119 @@ body,
   font-size: 13px;
   color: var(--ink-2);
   overflow-wrap: anywhere;
+}
+
+/* 补登用药：时点平铺点选（漏登记的时点一眼可见） */
+.slot-pick-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 264px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.slot-pick-list > li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.slot-pick {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.slot-pick:hover:not(:disabled) {
+  background: #FAFBFD;
+}
+
+.slot-pick:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
+.slot-pick.is-selected {
+  background: var(--brand-tint);
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+
+.slot-pick:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.slot-date {
+  color: var(--ink);
+  font-size: 13px;
+  min-width: 96px;
+}
+
+.slot-time {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.slot-chip {
+  margin-left: auto;
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+.slot-chip.is-done {
+  background: #EFF1F5;
+  color: var(--muted);
+}
+
+/* 空状态：呼吸波纹母题（全站唯一的品牌记忆点），静止克制、可降级 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 36px 16px;
+  text-align: center;
+}
+
+.empty-state-title {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.empty-state-hint {
+  margin: 0;
+  max-width: 440px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 呼吸波纹：4s 一次极缓的明暗起伏，仅对未开启"减少动态"的用户生效 */
+.breath-wave {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .breath-wave {
+    animation: breath 4s ease-in-out infinite;
+  }
+
+  @keyframes breath {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
 }
