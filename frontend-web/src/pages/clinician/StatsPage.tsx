@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, DatePicker, message, Select, Statistic, Table, Tag, Typography } from 'antd'
+import { Button, DatePicker, message, Select, Statistic, Table, Tabs, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
-import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 import EmptyState from '../../components/EmptyState'
@@ -124,7 +123,7 @@ function MissingBars({ missing }: { missing: { scheduled_at: string }[] }) {
 
 // M04 统计与核查（J032）
 export default function StatsPage() {
-  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<'overview' | 'report'>('overview')
   const [patients, setPatients] = useState<Patient[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   // 默认区间：相对今日的近 7 天（左闭右开，与「重置为近 7 日」一致）
@@ -158,18 +157,20 @@ export default function StatsPage() {
     return () => { cancelled = true }
   }, [from, to])
 
-  const fetchStats = async () => {
-    if (!selected) return
+  // patientId 由「团队概览」点行时直接传入，避免 setSelected 异步导致查到旧患者
+  const fetchStats = async (patientId?: string) => {
+    const target = patientId ?? selected
+    if (!target) return
     setLoading(true)
     try {
       const [r, t, f] = await Promise.all([
-        apiFetch<Stats>(`/api/patients/${selected}/stats?from=${from}&to=${to}`),
+        apiFetch<Stats>(`/api/patients/${target}/stats?from=${from}&to=${to}`),
         // 逐日趋势由服务端一次查询返回（此前是前端按天并发发 N 个请求）
-        apiFetch<TrendResp>(`/api/patients/${selected}/stats/trend?from=${from}&to=${to}`)
+        apiFetch<TrendResp>(`/api/patients/${target}/stats/trend?from=${from}&to=${to}`)
           .then((x) => x.points)
           .catch(() => [] as TrendPoint[]),
         // REP-01：随访摘要复用既有接口，前端按统计周期（Asia/Shanghai，左闭右开）过滤
-        apiFetch<{ items: Followup[] }>(`/api/patients/${selected}/followups?page_size=100`)
+        apiFetch<{ items: Followup[] }>(`/api/patients/${target}/followups?page_size=100`)
           .then((x) => x.items)
           .catch(() => [] as Followup[]),
       ])
@@ -190,7 +191,7 @@ export default function StatsPage() {
 
   return (
     <div>
-      <PageHeader title="统计与核查" subtitle="负责患者登记覆盖率、缺失时点与逐日趋势" />
+      <PageHeader title="统计与核查" subtitle="团队覆盖概览与单患者基础管理报告" />
 
       {/* 工具行：左筛选，右操作 */}
       <div className="page-toolbar">
@@ -199,7 +200,9 @@ export default function StatsPage() {
           <Select
             id="stats-patient"
             style={{ width: 240 }}
-            placeholder="选择患者"
+            disabled={activeTab === 'overview'}
+            value={selected ?? undefined}
+            placeholder={activeTab === 'overview' ? '切换到「患者报告」后选择' : '选择患者'}
             options={patients.map(p => ({ value: p.id, label: `${p.display_name} (${p.patient_code})` }))}
             onChange={setSelected}
             showSearch optionFilterProp="label"
@@ -230,205 +233,239 @@ export default function StatsPage() {
           >
             重置为近 7 日
           </Button>
-          <Button type="primary" onClick={fetchStats} disabled={!selected} loading={loading}>查询</Button>
+          <Button
+            type="primary"
+            onClick={() => { void fetchStats() }}
+            disabled={activeTab === 'overview' || !selected}
+            loading={loading}
+          >
+            查询
+          </Button>
         </div>
       </div>
 
-      <section className="page-section">
-        <div className="section-head">
-          <h2 className="section-title">覆盖矩阵（负责患者 × 日期）</h2>
-          <span className="section-extra">仅统计已到期时点</span>
-        </div>
-        {matrix ? (
-          <CoverageHeatmap days={matrix.days} rows={matrix.rows} />
-        ) : (
-          <p className="muted" style={{ margin: 0 }}>加载中…</p>
-        )}
-      </section>
+      <Tabs
+        activeKey={activeTab}
+        onChange={(key) => setActiveTab(key as 'overview' | 'report')}
+        items={[
+          {
+            key: 'overview',
+            label: '团队概览',
+            children: (
+              <>
+                <section className="page-section">
+                  <div className="section-head">
+                    <h2 className="section-title">覆盖矩阵（负责患者 × 日期）</h2>
+                    <span className="section-extra">仅统计已到期时点</span>
+                  </div>
+                  {matrix ? (
+                    <CoverageHeatmap days={matrix.days} rows={matrix.rows} />
+                  ) : (
+                    <p className="muted" style={{ margin: 0 }}>加载中…</p>
+                  )}
+                </section>
 
-      {/* 患者登记情况排行（随所选区间） */}
-      {overviewRows.length > 0 && (
-        <section className="page-section">
-          <div className="section-head">
-            <h2 className="section-title">患者登记情况（缺失多在前）</h2>
-            <span className="section-extra">随所选区间 · 点击行查看详情</span>
-          </div>
-          <Table
-            rowKey="patient_id"
-            pagination={false}
-            dataSource={[...overviewRows].sort((a, b) => b.missing_count - a.missing_count)}
-            locale={{ emptyText: '暂无数据' }}
-            onRow={(r) => ({ onClick: () => navigate(`/patients/${r.patient_id}`), style: { cursor: 'pointer' } })}
-            columns={[
-              {
-                title: '患者', dataIndex: 'display_name', width: 200,
-                render: (_: string, r: CoverageRow) => (
-                  <span className="task-name">{r.display_name}<span className="task-code">{r.patient_code}</span></span>
-                ),
-              },
-              { title: '应记录 N', dataIndex: 'N', width: 100, align: 'right' as const },
-              { title: '已登记 M', dataIndex: 'M', width: 100, align: 'right' as const },
-              {
-                title: '缺失', dataIndex: 'missing_count', width: 90, align: 'right' as const,
-                render: (v: number) => v > 0 ? <span style={{ color: 'var(--bad)', fontWeight: 500 }}>{v}</span> : <span style={{ color: 'var(--ok)' }}>0</span>,
-              },
-              {
-                title: '覆盖率', dataIndex: 'coverage_rate', width: 220,
-                render: (v: number | null) => (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-                    <MiniBar rate={v} />
-                    <span style={{ fontSize: 13, color: '#24243E', fontWeight: 500 }}>{v === null ? '暂无计划' : `${v}%`}</span>
-                  </span>
-                ),
-                align: 'right' as const,
-              },
-            ]}
-          />
-        </section>
-      )}
+                {overviewRows.length > 0 && (
+                  <section className="page-section">
+                    <div className="section-head">
+                      <h2 className="section-title">患者登记情况（缺失多在前）</h2>
+                      <span className="section-extra">随所选区间 · 点击行进入患者报告</span>
+                    </div>
+                    <Table
+                      rowKey="patient_id"
+                      pagination={false}
+                      dataSource={[...overviewRows].sort((a, b) => b.missing_count - a.missing_count)}
+                      locale={{ emptyText: '暂无数据' }}
+                      onRow={(r) => ({
+                        onClick: () => {
+                          setSelected(r.patient_id)
+                          setActiveTab('report')
+                          void fetchStats(r.patient_id)
+                        },
+                        style: { cursor: 'pointer' },
+                      })}
+                      columns={[
+                        {
+                          title: '患者', dataIndex: 'display_name', width: 200,
+                          render: (_: string, r: CoverageRow) => (
+                            <span className="task-name">{r.display_name}<span className="task-code">{r.patient_code}</span></span>
+                          ),
+                        },
+                        { title: '应记录 N', dataIndex: 'N', width: 100, align: 'right' as const },
+                        { title: '已登记 M', dataIndex: 'M', width: 100, align: 'right' as const },
+                        {
+                          title: '缺失', dataIndex: 'missing_count', width: 90, align: 'right' as const,
+                          render: (v: number) => v > 0 ? <span style={{ color: 'var(--bad)', fontWeight: 500 }}>{v}</span> : <span style={{ color: 'var(--ok)' }}>0</span>,
+                        },
+                        {
+                          title: '覆盖率', dataIndex: 'coverage_rate', width: 220,
+                          render: (v: number | null) => (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                              <MiniBar rate={v} />
+                              <span style={{ fontSize: 13, color: '#24243E', fontWeight: 500 }}>{v === null ? '暂无计划' : `${v}%`}</span>
+                            </span>
+                          ),
+                          align: 'right' as const,
+                        },
+                      ]}
+                    />
+                  </section>
+                )}
+              </>
+            ),
+          },
+          {
+            key: 'report',
+            label: '患者报告',
+            children: (
+              <>
+                {!stats && (
+                  <section className="page-section" style={{ borderBottom: 'none' }}>
+                    <EmptyState
+                      title="先选择一位患者"
+                      hint="上方选择患者与统计区间后点击「查询」，查看该患者的覆盖率、缺失时点与随访摘要；也可在「团队概览」点击患者行直接进入报告。"
+                    />
+                  </section>
+                )}
 
-      {!stats && (
-        <section className="page-section" style={{ borderBottom: 'none' }}>
-          <EmptyState
-            title="先选择一位患者"
-            hint="上方选择患者与统计区间后点击「查询」，查看该患者的覆盖率与缺失时点；覆盖矩阵与排行不依赖患者选择，已随区间展示。"
-          />
-        </section>
-      )}
+                {stats && (
+                  <>
+                    <section className="page-section">
+                      <div className="section-head">
+                        <h2 className="section-title">基础管理报告</h2>
+                        <span className="section-extra">
+                          患者：{selectedPatient?.display_name ?? '—'}（{selectedPatient?.patient_code ?? '—'}）｜
+                          周期：{stats.from_} 至 {stats.to}（左闭右开）｜ 时区：{stats.timezone}
+                        </span>
+                      </div>
+                      <div className="stats-summary">
+                        <CoverageRing rate={stats.coverage_rate} M={stats.M} N={stats.N} />
+                        <div className="stats-numbers">
+                          <Statistic title="应记录时点 N" value={stats.N} />
+                          <Statistic title="有效已登记时点 M" value={stats.M} />
+                          <Statistic
+                            title="缺失时点"
+                            value={stats.missing_slots.length}
+                            styles={{ content: { color: stats.missing_slots.length ? 'var(--missed)' : 'var(--progress)' } }}
+                          />
+                        </div>
+                      </div>
+                      <p className="muted" style={{ margin: '16px 0 0' }}>
+                        {stats.disclaimer}。数据来源：固定计划时点与用药登记记录；{stats.source_note}。
+                        重复登记 {duplicateSlots.length} 个时点，同一时点仅计一次、不增加 M。
+                      </p>
+                    </section>
 
-      {stats && (
-        <>
-          <section className="page-section">
-            <div className="section-head">
-              <h2 className="section-title">基础管理报告</h2>
-              <span className="section-extra">
-                患者：{selectedPatient?.display_name ?? '—'}（{selectedPatient?.patient_code ?? '—'}）｜
-                周期：{stats.from_} 至 {stats.to}（左闭右开）｜ 时区：{stats.timezone}
-              </span>
-            </div>
-            <div className="stats-summary">
-              <CoverageRing rate={stats.coverage_rate} M={stats.M} N={stats.N} />
-              <div className="stats-numbers">
-                <Statistic title="应记录时点 N" value={stats.N} />
-                <Statistic title="有效已登记时点 M" value={stats.M} />
-                <Statistic
-                  title="缺失时点"
-                  value={stats.missing_slots.length}
-                  styles={{ content: { color: stats.missing_slots.length ? 'var(--missed)' : 'var(--progress)' } }}
-                />
-              </div>
-            </div>
-            <p className="muted" style={{ margin: '16px 0 0' }}>
-              {stats.disclaimer}。数据来源：固定计划时点与用药登记记录；{stats.source_note}。
-              重复登记 {duplicateSlots.length} 个时点，同一时点仅计一次、不增加 M。
-            </p>
-          </section>
+                    <section className="page-section">
+                      <div className="section-head">
+                        <h2 className="section-title">逐日覆盖率趋势</h2>
+                      </div>
+                      <CoverageTrendChart trend={trend} />
+                    </section>
 
-          <section className="page-section">
-            <div className="section-head">
-              <h2 className="section-title">逐日覆盖率趋势</h2>
-            </div>
-            <CoverageTrendChart trend={trend} />
-          </section>
+                    <div className="stats-grid page-section">
+                      <div>
+                        <div className="section-head">
+                          <h2 className="section-title">缺失时点按日分布</h2>
+                        </div>
+                        <MissingBars missing={stats.missing_slots} />
+                      </div>
 
-          <div className="stats-grid page-section">
-            <div>
-              <div className="section-head">
-                <h2 className="section-title">缺失时点按日分布</h2>
-              </div>
-              <MissingBars missing={stats.missing_slots} />
-            </div>
+                      <div>
+                        <div className="section-head">
+                          <h2 className="section-title">来源分布</h2>
+                          <span className="section-extra">按有效登记事件数统计（非去重时点数）</span>
+                        </div>
+                        <Table
+                          rowKey="source"
+                          dataSource={Object.entries(stats.source_breakdown).map(([k, v]) => ({ source: k, count: v }))}
+                          pagination={false}
+                          columns={[
+                            {
+                              title: '来源', dataIndex: 'source',
+                              render: (v: string) => v === 'PATIENT_REPORT' ? (
+                                <span>
+                                  患者自述
+                                  <Tag variant="filled" style={{ marginLeft: 8, color: 'var(--warn)' }}>未由设备验证</Tag>
+                                </span>
+                              ) : v === 'CLINICIAN_OBSERVED' ? '医护观察' : v,
+                            },
+                            { title: '事件数', dataIndex: 'count' },
+                          ]}
+                        />
+                        <p className="muted" style={{ margin: '12px 0 0' }}>{stats.source_note}；来源按有效登记事件计数，非去重时点数。</p>
+                      </div>
+                    </div>
 
-            <div>
-              <div className="section-head">
-                <h2 className="section-title">来源分布</h2>
-                <span className="section-extra">按有效登记事件数统计（非去重时点数）</span>
-              </div>
-              <Table
-                rowKey="source"
-                dataSource={Object.entries(stats.source_breakdown).map(([k, v]) => ({ source: k, count: v }))}
-                pagination={false}
-                columns={[
-                  {
-                    title: '来源', dataIndex: 'source',
-                    render: (v: string) => v === 'PATIENT_REPORT' ? (
-                      <span>
-                        患者自述
-                        <Tag bordered={false} style={{ marginLeft: 8, color: 'var(--warn)' }}>未由设备验证</Tag>
-                      </span>
-                    ) : v === 'CLINICIAN_OBSERVED' ? '医护观察' : v,
-                  },
-                  { title: '事件数', dataIndex: 'count' },
-                ]}
-              />
-              <p className="muted" style={{ margin: '12px 0 0' }}>{stats.source_note}；来源按有效登记事件计数，非去重时点数。</p>
-            </div>
-          </div>
+                    <section className="page-section">
+                      <div className="section-head">
+                        <h2 className="section-title">随访摘要（统计周期内）</h2>
+                        <span className="section-extra">共 {periodFollowups.length} 次 · 关联任务 {taskFollowupCount} 条</span>
+                      </div>
+                      {periodFollowups.length === 0 ? (
+                        <p className="muted" style={{ margin: 0 }}>统计周期内暂无随访记录</p>
+                      ) : (
+                        <ul className="record-list">
+                          {periodFollowups.slice(0, 3).map((f) => (
+                            <li key={f.id} className="record-row">
+                              <span className="record-main">
+                                <span className="strong tabular">{new Date(f.followed_at).toLocaleString('zh-CN')}</span>
+                                <span className="record-meta">
+                                  {f.feedback ? `反馈：${f.feedback}` : '无反馈记录'}
+                                  {f.task_id ? ' · 已关联任务' : ''}
+                                </span>
+                              </span>
+                              <span className="record-meta">{f.action_taken ? `措施：${f.action_taken}` : ''}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {periodFollowups.length > 3 && (
+                        <p className="muted" style={{ margin: '8px 0 0' }}>仅展示最近 3 条，完整记录见「随访中心」。</p>
+                      )}
+                    </section>
 
-          <section className="page-section">
-            <div className="section-head">
-              <h2 className="section-title">随访摘要（统计周期内）</h2>
-              <span className="section-extra">共 {periodFollowups.length} 次 · 关联任务 {taskFollowupCount} 条</span>
-            </div>
-            {periodFollowups.length === 0 ? (
-              <p className="muted" style={{ margin: 0 }}>统计周期内暂无随访记录</p>
-            ) : (
-              <ul className="record-list">
-                {periodFollowups.slice(0, 3).map((f) => (
-                  <li key={f.id} className="record-row">
-                    <span className="record-main">
-                      <span className="strong tabular">{new Date(f.followed_at).toLocaleString('zh-CN')}</span>
-                      <span className="record-meta">
-                        {f.feedback ? `反馈：${f.feedback}` : '无反馈记录'}
-                        {f.task_id ? ' · 已关联任务' : ''}
-                      </span>
-                    </span>
-                    <span className="record-meta">{f.action_taken ? `措施：${f.action_taken}` : ''}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {periodFollowups.length > 3 && (
-              <p className="muted" style={{ margin: '8px 0 0' }}>仅展示最近 3 条，完整记录见「随访中心」。</p>
-            )}
-          </section>
+                    {duplicateSlots.length > 0 && (
+                      <section className="page-section">
+                        <div className="section-head">
+                          <h2 className="section-title">重复登记（{duplicateSlots.length} 个时点）</h2>
+                          <span className="section-extra">同一时点多条有效记录，覆盖率仅计一次</span>
+                        </div>
+                        <Table
+                          rowKey="slot_id"
+                          dataSource={duplicateSlots}
+                          pagination={false}
+                          columns={[
+                            { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
+                            { title: '有效登记条数', dataIndex: 'active_event_count', width: 140, align: 'right' as const },
+                            { title: '说明', render: () => '记录保留供核对，M 不重复增加' },
+                          ]}
+                        />
+                      </section>
+                    )}
 
-          {duplicateSlots.length > 0 && (
-            <section className="page-section">
-              <div className="section-head">
-                <h2 className="section-title">重复登记（{duplicateSlots.length} 个时点）</h2>
-                <span className="section-extra">同一时点多条有效记录，覆盖率仅计一次</span>
-              </div>
-              <Table
-                rowKey="slot_id"
-                dataSource={duplicateSlots}
-                pagination={false}
-                columns={[
-                  { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
-                  { title: '有效登记条数', dataIndex: 'active_event_count', width: 140, align: 'right' as const },
-                  { title: '说明', render: () => '记录保留供核对，M 不重复增加' },
-                ]}
-              />
-            </section>
-          )}
-
-          <section className="page-section" style={{ borderBottom: 'none' }}>
-            <div className="section-head">
-              <h2 className="section-title">缺失时点（{stats.missing_slots.length} 个）</h2>
-              <span className="section-extra">仅表示「未发现登记」，不等于漏药</span>
-            </div>
-            <Table
-              rowKey="slot_id"
-              dataSource={stats.missing_slots}
-              pagination={{ pageSize: 10 }}
-              columns={[
-                { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
-                { title: '状态', render: () => '无有效登记' },
-              ]}
-            />
-          </section>
-        </>
-      )}
+                    <section className="page-section" style={{ borderBottom: 'none' }}>
+                      <div className="section-head">
+                        <h2 className="section-title">缺失时点（{stats.missing_slots.length} 个）</h2>
+                        <span className="section-extra">仅表示「未发现登记」，不等于漏药</span>
+                      </div>
+                      <Table
+                        rowKey="slot_id"
+                        dataSource={stats.missing_slots}
+                        pagination={{ pageSize: 10 }}
+                        columns={[
+                          { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
+                          { title: '状态', render: () => '无有效登记' },
+                        ]}
+                      />
+                    </section>
+                  </>
+                )}
+              </>
+            ),
+          },
+        ]}
+      />
     </div>
   )
 }
