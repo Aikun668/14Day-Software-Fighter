@@ -752,6 +752,52 @@ body,
   overflow-wrap: anywhere;
 }
 
+/* 侧栏：菜单占满 + 底部用户区（填补下方空白，退出入口常驻） */
+.side-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.sider-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.sider-user {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.sider-name {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sider-role {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* 菜单分组标题：弱化处理，只做分区提示 */
+.ant-menu-item-group-title {
+  padding: 12px 16px 4px !important;
+  color: var(--muted) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
 /* 补登用药：时点平铺点选（漏登记的时点一眼可见） */
 .slot-pick-list {
   margin: 0;

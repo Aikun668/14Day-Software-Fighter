@@ -58,6 +58,17 @@ export function IconStats(props: IconProps) {
   )
 }
 
+/** 用药计划：日历 + 时点刻度 */
+export function IconPlans(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+      <path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" />
+      <path d="M8 13h3M8 16.5h6" />
+    </Svg>
+  )
+}
+
 /** 随访中心：对话气泡 */
 export function IconFollowups(props: IconProps) {
   return (

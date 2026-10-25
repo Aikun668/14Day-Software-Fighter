@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, Checkbox, DatePicker, Form, Input, message, Select, Space, Tag, Typography } from 'antd'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
+import TaskCloseModal from '../../components/TaskCloseModal'
 
 const { Text } = Typography
 
@@ -17,6 +18,7 @@ export default function FollowupPage() {
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null)
   const [form] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
+  const [closing, setClosing] = useState<{ id: string; patientId: string; patientName: string } | null>(null)
 
   const loadPatients = async () => {
     try {
@@ -96,9 +98,12 @@ export default function FollowupPage() {
                       </span>
                       <Space size={12}>
                         <Tag className="tag-brand">待核查</Tag>
+                        <Button size="small" onClick={() => {
+                          setClosing({ id: t.id, patientId: t.patient_id, patientName: p?.display_name || t.patient_id })
+                        }}>快速处理</Button>
                         <Button type="link" size="small" onClick={() => {
                           if (p) { setSelectedPatient(p.id); loadFollowups(p.id); form.setFieldValue('task_id', t.id) }
-                        }}>处理此任务</Button>
+                        }}>填写完整随访</Button>
                       </Space>
                     </li>
                   )
@@ -169,6 +174,16 @@ export default function FollowupPage() {
           </Form>
         </div>
       </div>
+
+      <TaskCloseModal
+        open={!!closing}
+        task={closing}
+        onClose={() => setClosing(null)}
+        onSuccess={() => {
+          void loadTasks()
+          if (selectedPatient) void loadFollowups(selectedPatient)
+        }}
+      />
     </div>
   )
 }

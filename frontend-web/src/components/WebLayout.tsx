@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { AutoComplete, Badge, Button, Avatar, Dropdown, Layout, Menu, Typography } from 'antd'
+import { AutoComplete, Badge, Button, Avatar, Dropdown, Layout, Menu, Typography, type MenuProps } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
 import { apiFetch } from '../api/client'
 import BrandMark from './BrandMark'
-import { IconFollowups, IconPatients, IconStats, IconWorkbench } from './navIcons'
+import { IconFollowups, IconPatients, IconPlans, IconStats, IconWorkbench } from './navIcons'
 
 const { Header, Sider, Content } = Layout
 
@@ -69,10 +69,13 @@ export default function WebLayout({ children }: { children: ReactNode }) {
   )
 
   // 按角色区分菜单（PRD：管理员不继承患者临床数据访问权）
+  // 医护菜单按 PRD 的 M01–M05 分组：临床工作（工作台/患者/计划）+ 核查与随访（统计/随访）
   const isAdmin = user?.role === 'ADMIN'
-  const items: { key: string; label: ReactNode; icon?: ReactNode }[] = isAdmin
-    ? [{ key: '/admin', label: '内容与账号管理' }]
-    : [
+  const clinicianItems: MenuProps['items'] = [
+    {
+      type: 'group',
+      label: '临床工作',
+      children: [
         {
           key: '/workbench',
           icon: <IconWorkbench />,
@@ -84,13 +87,29 @@ export default function WebLayout({ children }: { children: ReactNode }) {
           ),
         },
         { key: '/patients', label: '患者管理', icon: <IconPatients /> },
+        { key: '/plans', label: '用药计划', icon: <IconPlans /> },
+      ],
+    },
+    {
+      type: 'group',
+      label: '核查与随访',
+      children: [
         { key: '/stats', label: '统计与核查', icon: <IconStats /> },
         { key: '/followups', label: '随访中心', icon: <IconFollowups /> },
-      ]
+      ],
+    },
+  ]
+  const items: MenuProps['items'] = isAdmin
+    ? [{ key: '/admin', label: '内容与账号管理' }]
+    : clinicianItems
 
-  // 子页面（如 /patients/:id）高亮所属菜单项
+  // 菜单扁平化后用于匹配子页面（如 /patients/:id）高亮所属菜单项
+  const flatKeys = (items ?? []).flatMap((i) =>
+    i && 'children' in i && Array.isArray(i.children) ? i.children.map((c) => String(c?.key)) : [String(i?.key)],
+  )
   const selectedKey =
-    items.find((i) => location.pathname === i.key || location.pathname.startsWith(`${i.key}/`))?.key ?? location.pathname
+    flatKeys.find((k) => location.pathname === k || location.pathname.startsWith(`${k}/`)) ?? location.pathname
+  const roleLabel = isAdmin ? '管理员' : '医护'
 
   return (
     <Layout style={{ minHeight: '100vh', width: '100%' }}>
@@ -130,35 +149,52 @@ export default function WebLayout({ children }: { children: ReactNode }) {
           />
         )}
 
-        <Dropdown
-          menu={{
-            items: [
-              { key: 'logout', label: '退出登录', onClick: async () => { await logout(); navigate('/login') } },
-            ],
-          }}
-        >
-          <Button type="text" style={{ height: 40, padding: '0 8px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <Avatar size={28} style={{ background: 'var(--brand-soft)', color: 'var(--brand-ink)', fontWeight: 600 }}>
-                {(user?.account || '?').slice(0, 1).toUpperCase()}
-              </Avatar>
-              <span style={{ color: 'var(--ink-2)' }}>{user?.account}</span>
-            </span>
-          </Button>
-        </Dropdown>
+        {/* 医护的用户区固定在侧栏底部；管理员无侧栏，保留顶栏下拉 */}
+        {isAdmin && (
+          <Dropdown
+            menu={{
+              items: [
+                { key: 'logout', label: '退出登录', onClick: async () => { await logout(); navigate('/login') } },
+              ],
+            }}
+          >
+            <Button type="text" style={{ height: 40, padding: '0 8px' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <Avatar size={28} style={{ background: 'var(--brand-soft)', color: 'var(--brand-ink)', fontWeight: 600 }}>
+                  {(user?.account || '?').slice(0, 1).toUpperCase()}
+                </Avatar>
+                <span style={{ color: 'var(--ink-2)' }}>{user?.account}</span>
+              </span>
+            </Button>
+          </Dropdown>
+        )}
       </Header>
 
       <Layout style={{ width: '100%' }}>
         {/* 只有一个菜单项时（管理员）不占用侧栏宽度 */}
         {items.length > 1 && (
           <Sider width={232} theme="light" style={{ borderRight: '1px solid var(--line)' }}>
-            <Menu
-              mode="inline"
-              selectedKeys={[selectedKey]}
-              items={items}
-              onClick={({ key }) => navigate(key)}
-              style={{ borderInlineEnd: 'none', paddingTop: 12 }}
-            />
+            <div className="side-menu">
+              <Menu
+                mode="inline"
+                selectedKeys={[selectedKey]}
+                items={items}
+                onClick={({ key }) => navigate(key)}
+                style={{ borderInlineEnd: 'none', paddingTop: 12, flex: 1, overflowY: 'auto' }}
+              />
+              <div className="sider-foot">
+                <Avatar size={28} style={{ background: 'var(--brand-soft)', color: 'var(--brand-ink)', fontWeight: 600 }}>
+                  {(user?.account || '?').slice(0, 1).toUpperCase()}
+                </Avatar>
+                <div className="sider-user">
+                  <span className="sider-name">{user?.account}</span>
+                  <span className="sider-role">{roleLabel}</span>
+                </div>
+                <Button size="small" onClick={async () => { await logout(); navigate('/login') }}>
+                  退出
+                </Button>
+              </div>
+            </div>
           </Sider>
         )}
         <Content style={{ background: 'var(--bg)', padding: 28, flex: 1, minWidth: 0 }}>

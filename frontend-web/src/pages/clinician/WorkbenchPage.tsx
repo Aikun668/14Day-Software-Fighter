@@ -5,6 +5,7 @@ import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
 import EmptyState from '../../components/EmptyState'
 import MedicationBackfillModal from '../../components/MedicationBackfillModal'
+import TaskCloseModal from '../../components/TaskCloseModal'
 import { summarizeDay, type DaySummary, type MatrixResponse } from '../../components/todayCoverage'
 
 interface Task {
@@ -54,6 +55,7 @@ export default function WorkbenchPage() {
   const [today] = useState(() => new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
   // 补登弹窗：记录当前操作的患者；refreshKey 用于补登成功后重拉数据
   const [backfill, setBackfill] = useState<{ id: string; name: string } | null>(null)
+  const [closing, setClosing] = useState<{ id: string; patientId: string; patientName: string } | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -185,9 +187,12 @@ export default function WorkbenchPage() {
                   </Button>
                   <Button
                     size="small"
-                    onClick={(e) => { e.stopPropagation(); navigate('/followups') }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setClosing({ id: t.id, patientId: t.patient_id, patientName: patientName(t.patient_id) })
+                    }}
                   >
-                    记录随访
+                    处理任务
                   </Button>
                 </div>
               </li>
@@ -271,6 +276,13 @@ export default function WorkbenchPage() {
         patientId={backfill?.id ?? null}
         patientName={backfill?.name ?? ''}
         onClose={() => setBackfill(null)}
+        onSuccess={() => setRefreshKey((k) => k + 1)}
+      />
+
+      <TaskCloseModal
+        open={!!closing}
+        task={closing}
+        onClose={() => setClosing(null)}
         onSuccess={() => setRefreshKey((k) => k + 1)}
       />
     </div>
