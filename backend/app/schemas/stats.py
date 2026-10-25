@@ -1,12 +1,20 @@
 """统计 Schema（J031）。"""
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class MissingSlot(BaseModel):
     slot_id: str
     scheduled_at: datetime
+
+
+class DuplicateSlot(BaseModel):
+    """同一时点存在多条有效登记的核对项（PRD STAT-02）。M 只计一次。"""
+
+    slot_id: str
+    scheduled_at: datetime
+    active_event_count: int
 
 
 class StatsResponse(BaseModel):
@@ -17,9 +25,11 @@ class StatsResponse(BaseModel):
     M: int
     coverage_rate: float | None
     missing_slots: list[MissingSlot]
+    duplicate_slots: list[DuplicateSlot] = Field(default_factory=list)
     source_breakdown: dict[str, int]
     source_breakdown_basis: str = "ACTIVE_EVENT_COUNTS"
-    disclaimer: str = "基于登记记录的覆盖率，不等于实际服药依从性"
+    source_note: str = "患者自述数据未由设备验证"
+    disclaimer: str = "记录覆盖率≠真实用药依从性：基于登记记录统计，不等于实际服药依从性"
 
 
 class PatientCoverageRow(BaseModel):

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, DatePicker, message, Select, Statistic, Table, Typography } from 'antd'
+import { Button, DatePicker, message, Select, Statistic, Table, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
@@ -33,12 +33,19 @@ function MiniBar({ rate }: { rate: number | null }) {
 }
 
 interface Patient { id: string; patient_code: string; display_name: string }
+interface DuplicateSlot { slot_id: string; scheduled_at: string; active_event_count: number }
 interface Stats {
   from_: string; to: string; timezone: string; N: number; M: number; coverage_rate: number | null;
   missing_slots: { slot_id: string; scheduled_at: string }[];
+  duplicate_slots: DuplicateSlot[];
   source_breakdown: Record<string, number>;
   source_breakdown_basis: string;
+  source_note: string;
   disclaimer: string;
+}
+interface Followup {
+  id: string; followed_at: string; task_id: string | null
+  feedback: string | null; action_taken: string | null; next_plan: string | null
 }
 
 interface TrendPoint {
@@ -128,6 +135,7 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(false)
   const [matrix, setMatrix] = useState<MatrixResponse | null>(null)
   const [overviewRows, setOverviewRows] = useState<CoverageRow[]>([])
+  const [periodFollowups, setPeriodFollowups] = useState<Followup[]>([])
 
   const fetchPatients = async () => {
     try {
@@ -154,17 +162,31 @@ export default function StatsPage() {
     if (!selected) return
     setLoading(true)
     try {
-      const [r, t] = await Promise.all([
+      const [r, t, f] = await Promise.all([
         apiFetch<Stats>(`/api/patients/${selected}/stats?from=${from}&to=${to}`),
         // 逐日趋势由服务端一次查询返回（此前是前端按天并发发 N 个请求）
         apiFetch<TrendResp>(`/api/patients/${selected}/stats/trend?from=${from}&to=${to}`)
           .then((x) => x.points)
           .catch(() => [] as TrendPoint[]),
+        // REP-01：随访摘要复用既有接口，前端按统计周期（Asia/Shanghai，左闭右开）过滤
+        apiFetch<{ items: Followup[] }>(`/api/patients/${selected}/followups?page_size=100`)
+          .then((x) => x.items)
+          .catch(() => [] as Followup[]),
       ])
+      const startMs = Date.parse(`${from}T00:00:00+08:00`)
+      const endMs = Date.parse(`${to}T00:00:00+08:00`)
       setStats(r)
       setTrend(t)
+      setPeriodFollowups(f.filter((x) => {
+        const at = Date.parse(x.followed_at)
+        return at >= startMs && at < endMs
+      }))
     } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
   }
+
+  const selectedPatient = patients.find((p) => p.id === selected)
+  const duplicateSlots = stats?.duplicate_slots ?? []
+  const taskFollowupCount = periodFollowups.filter((f) => f.task_id).length
 
   return (
     <div>
@@ -278,8 +300,11 @@ export default function StatsPage() {
         <>
           <section className="page-section">
             <div className="section-head">
-              <h2 className="section-title">覆盖率汇总</h2>
-              <span className="section-extra">区间：{stats.from_} 至 {stats.to}（左闭右开）｜ 时区：{stats.timezone}</span>
+              <h2 className="section-title">基础管理报告</h2>
+              <span className="section-extra">
+                患者：{selectedPatient?.display_name ?? '—'}（{selectedPatient?.patient_code ?? '—'}）｜
+                周期：{stats.from_} 至 {stats.to}（左闭右开）｜ 时区：{stats.timezone}
+              </span>
             </div>
             <div className="stats-summary">
               <CoverageRing rate={stats.coverage_rate} M={stats.M} N={stats.N} />
@@ -293,7 +318,10 @@ export default function StatsPage() {
                 />
               </div>
             </div>
-            <p className="muted" style={{ margin: '16px 0 0' }}>{stats.disclaimer}</p>
+            <p className="muted" style={{ margin: '16px 0 0' }}>
+              {stats.disclaimer}。数据来源：固定计划时点与用药登记记录；{stats.source_note}。
+              重复登记 {duplicateSlots.length} 个时点，同一时点仅计一次、不增加 M。
+            </p>
           </section>
 
           <section className="page-section">
@@ -321,16 +349,73 @@ export default function StatsPage() {
                 dataSource={Object.entries(stats.source_breakdown).map(([k, v]) => ({ source: k, count: v }))}
                 pagination={false}
                 columns={[
-                  { title: '来源', dataIndex: 'source', render: (v: string) => v === 'PATIENT_REPORT' ? '患者自述' : v === 'CLINICIAN_OBSERVED' ? '医护观察' : v },
+                  {
+                    title: '来源', dataIndex: 'source',
+                    render: (v: string) => v === 'PATIENT_REPORT' ? (
+                      <span>
+                        患者自述
+                        <Tag bordered={false} style={{ marginLeft: 8, color: 'var(--warn)' }}>未由设备验证</Tag>
+                      </span>
+                    ) : v === 'CLINICIAN_OBSERVED' ? '医护观察' : v,
+                  },
                   { title: '事件数', dataIndex: 'count' },
                 ]}
               />
+              <p className="muted" style={{ margin: '12px 0 0' }}>{stats.source_note}；来源按有效登记事件计数，非去重时点数。</p>
             </div>
           </div>
+
+          <section className="page-section">
+            <div className="section-head">
+              <h2 className="section-title">随访摘要（统计周期内）</h2>
+              <span className="section-extra">共 {periodFollowups.length} 次 · 关联任务 {taskFollowupCount} 条</span>
+            </div>
+            {periodFollowups.length === 0 ? (
+              <p className="muted" style={{ margin: 0 }}>统计周期内暂无随访记录</p>
+            ) : (
+              <ul className="record-list">
+                {periodFollowups.slice(0, 3).map((f) => (
+                  <li key={f.id} className="record-row">
+                    <span className="record-main">
+                      <span className="strong tabular">{new Date(f.followed_at).toLocaleString('zh-CN')}</span>
+                      <span className="record-meta">
+                        {f.feedback ? `反馈：${f.feedback}` : '无反馈记录'}
+                        {f.task_id ? ' · 已关联任务' : ''}
+                      </span>
+                    </span>
+                    <span className="record-meta">{f.action_taken ? `措施：${f.action_taken}` : ''}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {periodFollowups.length > 3 && (
+              <p className="muted" style={{ margin: '8px 0 0' }}>仅展示最近 3 条，完整记录见「随访中心」。</p>
+            )}
+          </section>
+
+          {duplicateSlots.length > 0 && (
+            <section className="page-section">
+              <div className="section-head">
+                <h2 className="section-title">重复登记（{duplicateSlots.length} 个时点）</h2>
+                <span className="section-extra">同一时点多条有效记录，覆盖率仅计一次</span>
+              </div>
+              <Table
+                rowKey="slot_id"
+                dataSource={duplicateSlots}
+                pagination={false}
+                columns={[
+                  { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
+                  { title: '有效登记条数', dataIndex: 'active_event_count', width: 140, align: 'right' as const },
+                  { title: '说明', render: () => '记录保留供核对，M 不重复增加' },
+                ]}
+              />
+            </section>
+          )}
 
           <section className="page-section" style={{ borderBottom: 'none' }}>
             <div className="section-head">
               <h2 className="section-title">缺失时点（{stats.missing_slots.length} 个）</h2>
+              <span className="section-extra">仅表示「未发现登记」，不等于漏药</span>
             </div>
             <Table
               rowKey="slot_id"

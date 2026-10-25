@@ -7,7 +7,7 @@ coverage_rate = ROUND(M/N*100, 1)（N=0 时 null）
 source_breakdown = 有效登记事件按来源计数（非去重时点数、不含撤销）
 """
 import uuid
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -19,6 +19,7 @@ from app.auth.dependencies import get_current_user
 from app.core.database import get_db
 from app.models import MedicationEvent, Patient, PlannedSlot, User
 from app.schemas.stats import (
+    DuplicateSlot,
     MatrixResponse,
     MissingSlot,
     OverviewResponse,
@@ -137,6 +138,22 @@ def _compute_stats(db: Session, patient_id: uuid.UUID, from_date: str, to_date: 
         if e.slot_id in slot_ids:  # 只统计属于分母集合的
             source_breakdown[e.source] = source_breakdown.get(e.source, 0) + 1
 
+    # 重复登记：同一时点多条 ACTIVE 记录，仅提示核对，不增加 M（PRD STAT-02）
+    slot_by_id = {s.id: s for s in slots}
+    per_slot_events = Counter(e.slot_id for e in active_events if e.slot_id is not None)
+    duplicate_slots = sorted(
+        (
+            DuplicateSlot(
+                slot_id=str(slot_id),
+                scheduled_at=slot_by_id[slot_id].scheduled_at,
+                active_event_count=count,
+            )
+            for slot_id, count in per_slot_events.items()
+            if count > 1 and slot_id in slot_by_id
+        ),
+        key=lambda d: d.scheduled_at,
+    )
+
     return StatsResponse(
         from_=from_date,
         to=to_date,
@@ -145,6 +162,7 @@ def _compute_stats(db: Session, patient_id: uuid.UUID, from_date: str, to_date: 
         M=M,
         coverage_rate=coverage_rate,
         missing_slots=missing_slots,
+        duplicate_slots=duplicate_slots,
         source_breakdown=source_breakdown,
     )
 
