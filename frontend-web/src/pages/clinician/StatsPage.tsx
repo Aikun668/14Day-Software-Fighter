@@ -191,22 +191,25 @@ export default function StatsPage() {
 
   return (
     <div>
-      <PageHeader title="统计与核查" subtitle="团队覆盖概览与单患者基础管理报告" />
+      <PageHeader title="统计与核查" />
 
       {/* 工具行：左筛选，右操作 */}
       <div className="page-toolbar">
         <div className="page-toolbar-left">
-          <label htmlFor="stats-patient" className="field-label">患者</label>
-          <Select
-            id="stats-patient"
-            style={{ width: 240 }}
-            disabled={activeTab === 'overview'}
-            value={selected ?? undefined}
-            placeholder={activeTab === 'overview' ? '切换到「患者报告」后选择' : '选择患者'}
-            options={patients.map(p => ({ value: p.id, label: `${p.display_name} (${p.patient_code})` }))}
-            onChange={setSelected}
-            showSearch optionFilterProp="label"
-          />
+          {activeTab === 'report' && (
+            <>
+              <label htmlFor="stats-patient" className="field-label">患者</label>
+              <Select
+                id="stats-patient"
+                style={{ width: 240 }}
+                value={selected ?? undefined}
+                placeholder="选择患者"
+                options={patients.map(p => ({ value: p.id, label: `${p.display_name} (${p.patient_code})` }))}
+                onChange={setSelected}
+                showSearch optionFilterProp="label"
+              />
+            </>
+          )}
           <span className="field-label">开始</span>
           <DatePicker
             value={dayjs(from)}
@@ -233,14 +236,16 @@ export default function StatsPage() {
           >
             重置为近 7 日
           </Button>
-          <Button
-            type="primary"
-            onClick={() => { void fetchStats() }}
-            disabled={activeTab === 'overview' || !selected}
-            loading={loading}
-          >
-            查询
-          </Button>
+          {activeTab === 'report' && (
+            <Button
+              type="primary"
+              onClick={() => { void fetchStats() }}
+              disabled={!selected}
+              loading={loading}
+            >
+              查询
+            </Button>
+          )}
         </div>
       </div>
 
@@ -261,7 +266,7 @@ export default function StatsPage() {
                         {overview?.coverage_rate == null ? '—' : `${overview.coverage_rate}%`}
                       </div>
                       <div className="stats-hero-caption">
-                        团队覆盖率 · {overview ? `${overview.from_} 至 ${overview.to}（左闭右开）` : '加载中…'}
+                        团队覆盖率 · {overview ? `${overview.from_} 至 ${overview.to}` : '加载中…'}
                       </div>
                     </div>
                     <div className="stats-hero-facts">
@@ -295,7 +300,7 @@ export default function StatsPage() {
                   <section className="page-section">
                     <div className="section-head">
                       <h2 className="section-title">患者登记情况（缺失多在前）</h2>
-                      <span className="section-extra">随所选区间 · 点击行进入患者报告</span>
+                      <span className="section-extra">点击行进入患者报告</span>
                     </div>
                     <Table
                       rowKey="patient_id"
@@ -361,7 +366,7 @@ export default function StatsPage() {
                         <h2 className="section-title">基础管理报告</h2>
                         <span className="section-extra">
                           患者：{selectedPatient?.display_name ?? '—'}（{selectedPatient?.patient_code ?? '—'}）｜
-                          周期：{stats.from_} 至 {stats.to}（左闭右开）｜ 时区：{stats.timezone}
+                          周期：{stats.from_} 至 {stats.to} ｜ 时区：{stats.timezone}
                         </span>
                       </div>
                       <div className="stats-summary">
@@ -376,10 +381,7 @@ export default function StatsPage() {
                           />
                         </div>
                       </div>
-                      <p className="muted" style={{ margin: '16px 0 0' }}>
-                        {stats.disclaimer}。数据来源：固定计划时点与用药登记记录；{stats.source_note}。
-                        重复登记 {duplicateSlots.length} 个时点，同一时点仅计一次、不增加 M。
-                      </p>
+                      <p className="muted" style={{ margin: '16px 0 0' }}>{stats.disclaimer}</p>
                     </section>
 
                     <section className="page-section">
@@ -400,7 +402,6 @@ export default function StatsPage() {
                       <div>
                         <div className="section-head">
                           <h2 className="section-title">来源分布</h2>
-                          <span className="section-extra">按有效登记事件数统计（非去重时点数）</span>
                         </div>
                         <Table
                           rowKey="source"
@@ -419,7 +420,9 @@ export default function StatsPage() {
                             { title: '事件数', dataIndex: 'count' },
                           ]}
                         />
-                        <p className="muted" style={{ margin: '12px 0 0' }}>{stats.source_note}；来源按有效登记事件计数，非去重时点数。</p>
+                        <p className="muted" style={{ margin: '12px 0 0' }}>
+                          数据来源：固定计划时点与用药登记记录；{stats.source_note}；来源按有效登记事件计数（非去重）。
+                        </p>
                       </div>
                     </div>
 
@@ -455,7 +458,7 @@ export default function StatsPage() {
                       <section className="page-section">
                         <div className="section-head">
                           <h2 className="section-title">重复登记（{duplicateSlots.length} 个时点）</h2>
-                          <span className="section-extra">同一时点多条有效记录，覆盖率仅计一次</span>
+                          <span className="section-extra">同一时点只计一次</span>
                         </div>
                         <Table
                           rowKey="slot_id"
@@ -464,7 +467,6 @@ export default function StatsPage() {
                           columns={[
                             { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
                             { title: '有效登记条数', dataIndex: 'active_event_count', width: 140, align: 'right' as const },
-                            { title: '说明', render: () => '记录保留供核对，M 不重复增加' },
                           ]}
                         />
                       </section>
@@ -481,7 +483,6 @@ export default function StatsPage() {
                         pagination={{ pageSize: 10 }}
                         columns={[
                           { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
-                          { title: '状态', render: () => '无有效登记' },
                         ]}
                       />
                     </section>

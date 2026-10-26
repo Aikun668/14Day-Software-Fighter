@@ -62,7 +62,7 @@ function buildOption(trend: TrendPoint[]): EChartsOption {
         symbolSize: 8,
         itemStyle: { color: PURPLE },
         lineStyle: { color: PURPLE, width: 2.5 },
-        label: { show: true, position: 'top', fontSize: 11, color: '#24243E', formatter: '{c}%' },
+        label: { show: false },
       },
       {
         name: '无到期时点',
@@ -119,7 +119,7 @@ export default function CoverageTrendChart({ trend }: Props) {
           区间变化：<b style={{ color: delta > 0 ? '#14938E' : delta < 0 ? '#B02A2A' : undefined }}>
             {delta > 0 ? `+${delta}` : delta}
           </b>{' '}
-          个百分点（{valid[0]?.day} → {valid[valid.length - 1]?.day}）｜ 仅统计已到期时点
+          个百分点（{valid[0]?.day} → {valid[valid.length - 1]?.day}）
         </p>
       )}
       {/* 容器始终挂载：图表实例依赖它在首次渲染时初始化；空数据时只隐藏 */}

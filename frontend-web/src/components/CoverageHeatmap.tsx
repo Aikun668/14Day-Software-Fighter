@@ -103,21 +103,15 @@ function cellLabel(row: MatrixRow, cell: MatrixCell): string {
 }
 
 function Legend() {
-  const items: { state: CellState; note?: string }[] = [
-    { state: 'solid' },
-    { state: 'partial', note: '按已登记比例填充' },
-    { state: 'hollow' },
-    { state: 'blank' },
-  ]
+  const items: CellState[] = ['solid', 'partial', 'hollow', 'blank']
   return (
     <ul className="heatmap-legend" style={{ display: 'flex', gap: 16, listStyle: 'none', padding: 0, margin: '12px 0 0', flexWrap: 'wrap', fontSize: 13, color: '#6B6E7F' }}>
-      {items.map(({ state, note }) => (
+      {items.map((state) => (
         <li key={state} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span aria-hidden="true" style={cellBox()}>
             <CellMark state={state} ratio={0.5} />
           </span>
           {STATE_TEXT[state]}
-          {note && <span style={{ fontSize: 12 }}>({note})</span>}
         </li>
       ))}
     </ul>
@@ -142,9 +136,6 @@ export default function CoverageHeatmap({ days, rows }: Props) {
     <div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ borderCollapse: 'separate', borderSpacing: 4 }}>
-          <caption style={{ textAlign: 'left', marginBottom: 8, color: '#6B6E7F', fontSize: 13 }}>
-            覆盖矩阵：行为负责患者，列为日期（仅统计已到期时点）
-          </caption>
           <thead>
             <tr>
               <th scope="col" style={{ minWidth: 120, textAlign: 'left', fontWeight: 500 }}>患者</th>
