@@ -354,7 +354,7 @@ export default function StatsPage() {
                   <section className="page-section" style={{ borderBottom: 'none' }}>
                     <EmptyState
                       title="先选择一位患者"
-                      hint="上方选择患者与统计区间后点击「查询」，查看该患者的覆盖率、缺失时点与随访摘要；也可在「团队概览」点击患者行直接进入报告。"
+                      hint="选择患者与统计区间后点击「查询」。"
                     />
                   </section>
                 )}
@@ -428,8 +428,11 @@ export default function StatsPage() {
 
                     <section className="page-section">
                       <div className="section-head">
-                        <h2 className="section-title">随访摘要（统计周期内）</h2>
-                        <span className="section-extra">共 {periodFollowups.length} 次 · 关联任务 {taskFollowupCount} 条</span>
+                        <h2 className="section-title">随访摘要</h2>
+                        <span className="section-extra">
+                          共 {periodFollowups.length} 次
+                          {taskFollowupCount > 0 ? ` · 关联任务 ${taskFollowupCount} 条` : ''}
+                        </span>
                       </div>
                       {periodFollowups.length === 0 ? (
                         <p className="muted" style={{ margin: 0 }}>统计周期内暂无随访记录</p>
@@ -477,14 +480,19 @@ export default function StatsPage() {
                         <h2 className="section-title">缺失时点（{stats.missing_slots.length} 个）</h2>
                         <span className="section-extra">仅表示「未发现登记」，不等于漏药</span>
                       </div>
-                      <Table
-                        rowKey="slot_id"
-                        dataSource={stats.missing_slots}
-                        pagination={{ pageSize: 10 }}
-                        columns={[
-                          { title: '应记录时间', dataIndex: 'scheduled_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
-                        ]}
-                      />
+                      {stats.missing_slots.length === 0 ? (
+                        <p className="muted" style={{ margin: 0 }}>该区间内无缺失时点</p>
+                      ) : (
+                        <ul className="missing-times">
+                          {stats.missing_slots.map((m) => (
+                            <li key={m.slot_id} className="missing-time">
+                              {new Date(m.scheduled_at).toLocaleString('zh-CN', {
+                                month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
+                              })}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </section>
                   </>
                 )}

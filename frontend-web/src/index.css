@@ -1027,3 +1027,23 @@ body,
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+
+/* 缺失时点：紧凑时间标签，替代单列表格 */
+.missing-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.missing-time {
+  padding: 4px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+}
