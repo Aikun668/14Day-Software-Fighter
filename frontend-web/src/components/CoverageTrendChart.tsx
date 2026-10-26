@@ -106,22 +106,10 @@ export default function CoverageTrendChart({ trend }: Props) {
     chartRef.current?.setOption(buildOption(trend), { notMerge: true })
   }, [trend])
 
-  const valid = trend.filter((t) => t.coverage_rate !== null)
-  const first = valid[0]?.coverage_rate ?? null
-  const last = valid[valid.length - 1]?.coverage_rate ?? null
-  const delta = first !== null && last !== null ? Math.round((last - first) * 10) / 10 : null
   const n = trend.length
 
   return (
     <div>
-      {delta !== null && n > 1 && (
-        <p className="muted" style={{ margin: '0 0 8px' }}>
-          区间变化：<b style={{ color: delta > 0 ? '#14938E' : delta < 0 ? '#B02A2A' : undefined }}>
-            {delta > 0 ? `+${delta}` : delta}
-          </b>{' '}
-          个百分点（{valid[0]?.day} → {valid[valid.length - 1]?.day}）
-        </p>
-      )}
       {/* 容器始终挂载：图表实例依赖它在首次渲染时初始化；空数据时只隐藏 */}
       <div
         ref={containerRef}

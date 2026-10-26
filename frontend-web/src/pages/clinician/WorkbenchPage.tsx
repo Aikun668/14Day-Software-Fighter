@@ -149,7 +149,6 @@ export default function WorkbenchPage() {
       <section className="page-section" aria-label="待核查任务">
         <div className="section-head">
           <h2 className="section-title">待核查（{tasks.length}）</h2>
-          <span className="section-extra">连续 3 个固定时点无登记才会生成</span>
         </div>
         {loading ? (
           <p className="muted" style={{ margin: 0 }}>加载中…</p>

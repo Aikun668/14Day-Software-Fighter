@@ -84,7 +84,6 @@ export default function FollowupPage() {
           <section className="page-section">
             <div className="section-head">
               <h2 className="section-title">待处理任务（{tasks.length}）</h2>
-              <span className="section-extra">连续多次未登记生成</span>
             </div>
             {tasks.length === 0 ? <Text type="secondary">暂无待处理任务</Text> : (
               <ul className="record-list">

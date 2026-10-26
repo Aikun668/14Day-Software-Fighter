@@ -187,7 +187,6 @@ export default function StatsPage() {
   const selectedPatient = patients.find((p) => p.id === selected)
   const overviewRows = overview?.rows ?? []
   const duplicateSlots = stats?.duplicate_slots ?? []
-  const taskFollowupCount = periodFollowups.filter((f) => f.task_id).length
 
   return (
     <div>
@@ -421,7 +420,7 @@ export default function StatsPage() {
                           ]}
                         />
                         <p className="muted" style={{ margin: '12px 0 0' }}>
-                          数据来源：固定计划时点与用药登记记录；{stats.source_note}；来源按有效登记事件计数（非去重）。
+                          来源：计划时点 + 用药登记；按有效登记事件计数（非去重）。
                         </p>
                       </div>
                     </div>
@@ -429,10 +428,6 @@ export default function StatsPage() {
                     <section className="page-section">
                       <div className="section-head">
                         <h2 className="section-title">随访摘要</h2>
-                        <span className="section-extra">
-                          共 {periodFollowups.length} 次
-                          {taskFollowupCount > 0 ? ` · 关联任务 ${taskFollowupCount} 条` : ''}
-                        </span>
                       </div>
                       {periodFollowups.length === 0 ? (
                         <p className="muted" style={{ margin: 0 }}>统计周期内暂无随访记录</p>
@@ -461,7 +456,6 @@ export default function StatsPage() {
                       <section className="page-section">
                         <div className="section-head">
                           <h2 className="section-title">重复登记（{duplicateSlots.length} 个时点）</h2>
-                          <span className="section-extra">同一时点只计一次</span>
                         </div>
                         <Table
                           rowKey="slot_id"
