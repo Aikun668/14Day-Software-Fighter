@@ -20,13 +20,12 @@ interface Overview {
   rows: CoverageRow[]
 }
 
-/** 小型进度条（患者覆盖率行内，仅统计页排行表使用） */
+/** 小型进度条（患者覆盖率行内，仅统计页排行表使用；统一品牌紫） */
 function MiniBar({ rate }: { rate: number | null }) {
   const v = rate === null ? 0 : Math.min(rate, 100)
-  const color = rate === null ? '#C9CDD8' : v >= 80 ? '#14938E' : v >= 60 ? '#573BF4' : '#C7681F'
   return (
     <div style={{ width: 96, height: 6, background: '#F0F2F7', borderRadius: 3, overflow: 'hidden' }} aria-hidden>
-      <div style={{ width: `${v}%`, height: '100%', background: color, borderRadius: 3 }} />
+      <div style={{ width: `${v}%`, height: '100%', background: 'var(--brand)', borderRadius: 3 }} />
     </div>
   )
 }
@@ -75,10 +74,10 @@ function CoverageRing({ rate, M, N }: { rate: number | null; M: number; N: numbe
         />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <span className="num" style={{ fontSize: 24, fontWeight: 600, color: '#573BF4' }}>
+        <span className="num stats-ring-value">
           {rate === null ? '—' : `${rate}%`}
         </span>
-        <span className="num" style={{ fontSize: 13, color: '#6B6E7F' }}>{M} / {N}</span>
+        <span className="num stats-ring-sub">{M} / {N}</span>
       </div>
     </div>
   )
@@ -133,7 +132,7 @@ export default function StatsPage() {
   const [trend, setTrend] = useState<TrendPoint[]>([])
   const [loading, setLoading] = useState(false)
   const [matrix, setMatrix] = useState<MatrixResponse | null>(null)
-  const [overviewRows, setOverviewRows] = useState<CoverageRow[]>([])
+  const [overview, setOverview] = useState<Overview | null>(null)
   const [periodFollowups, setPeriodFollowups] = useState<Followup[]>([])
 
   const fetchPatients = async () => {
@@ -152,8 +151,8 @@ export default function StatsPage() {
       .then((r) => { if (!cancelled) setMatrix(r) })
       .catch((e) => { if (!cancelled) message.error((e as Error).message) })
     apiFetch<Overview>(`/api/stats/overview?from=${from}&to=${to}`)
-      .then((r) => { if (!cancelled) setOverviewRows(r.rows) })
-      .catch(() => { if (!cancelled) setOverviewRows([]) })
+      .then((r) => { if (!cancelled) setOverview(r) })
+      .catch(() => { if (!cancelled) setOverview(null) })
     return () => { cancelled = true }
   }, [from, to])
 
@@ -186,6 +185,7 @@ export default function StatsPage() {
   }
 
   const selectedPatient = patients.find((p) => p.id === selected)
+  const overviewRows = overview?.rows ?? []
   const duplicateSlots = stats?.duplicate_slots ?? []
   const taskFollowupCount = periodFollowups.filter((f) => f.task_id).length
 
@@ -254,6 +254,32 @@ export default function StatsPage() {
             children: (
               <>
                 <section className="page-section">
+                  {/* 团队概览的视觉主角：团队覆盖率 */}
+                  <div className="stats-hero">
+                    <div>
+                      <div className="stats-hero-value">
+                        {overview?.coverage_rate == null ? '—' : `${overview.coverage_rate}%`}
+                      </div>
+                      <div className="stats-hero-caption">
+                        团队覆盖率 · {overview ? `${overview.from_} 至 ${overview.to}（左闭右开）` : '加载中…'}
+                      </div>
+                    </div>
+                    <div className="stats-hero-facts">
+                      <div className="stats-hero-fact">
+                        <b>{overview?.total_M ?? 0} / {overview?.total_N ?? 0}</b>
+                        <span>有效登记 / 应记录</span>
+                      </div>
+                      <div className="stats-hero-fact">
+                        <b>{overview?.planned_count ?? 0}</b>
+                        <span>有固定计划患者</span>
+                      </div>
+                      <div className="stats-hero-fact">
+                        <b>{overview?.patient_count ?? 0}</b>
+                        <span>负责患者</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="section-head">
                     <h2 className="section-title">覆盖矩阵（负责患者 × 日期）</h2>
                     <span className="section-extra">仅统计已到期时点</span>
@@ -300,9 +326,9 @@ export default function StatsPage() {
                         {
                           title: '覆盖率', dataIndex: 'coverage_rate', width: 220,
                           render: (v: number | null) => (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                            <span className="coverage-cell">
                               <MiniBar rate={v} />
-                              <span style={{ fontSize: 13, color: '#24243E', fontWeight: 500 }}>{v === null ? '暂无计划' : `${v}%`}</span>
+                              <span className="coverage-value">{v === null ? '暂无计划' : `${v}%`}</span>
                             </span>
                           ),
                           align: 'right' as const,
