@@ -33,6 +33,13 @@ export const webTheme: ThemeConfig = {
       'Inter, PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, -apple-system, sans-serif',
   },
   components: {
+    Modal: {
+      // 弹窗只用一层阴影，跟内容卡同一把尺；antd 默认那套三层叠出来的
+      // 大范围光晕太重（0 9px 28px 8px），在浅底上像贴了张黑纸。
+      boxShadow: '0 8px 24px rgba(26, 29, 38, 0.06)',
+      contentBg: '#FFFFFF',
+      headerBg: '#FFFFFF',
+    },
     Button: {
       primaryShadow: 'none',
       defaultShadow: 'none',

@@ -3,6 +3,31 @@
    Hero 留白 → 摘要卡带 → 双栏内容 → 收页高。
    结构（几列、间距、等高）在这里定；每屏显示什么内容由各页面自己决定。 */
 
+/* ── 弹层遮罩：Clinic Comfort 用浅底 + 模糊，不用死灰压暗 ──
+   antd 默认是 rgba(0,0,0,0.45)，在浅底上背景全看得见、跟弹窗抢注意力。
+   改成同色系的浅底半透明 + backdrop 模糊：注意力落在弹窗上，
+   背景仍在但退到后面。 */
+.ant-modal-mask,
+.ant-drawer-mask {
+  background: rgba(244, 246, 249, 0.72) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* 不支持 backdrop-filter 的浏览器退回浅色遮罩，不要退回死灰 */
+@supports not (backdrop-filter: blur(1px)) {
+  .ant-modal-mask,
+  .ant-drawer-mask {
+    background: rgba(226, 231, 239, 0.86) !important;
+  }
+}
+
+/* 弹窗本体：只留一层轻阴影，跟内容卡同一把尺 */
+.ant-modal-container,
+.ant-drawer-content {
+  box-shadow: 0 8px 24px rgba(26, 29, 38, 0.06) !important;
+}
+
 /* ── 认证页（登录 / 改密）：Clinic Comfort 的「一层内容」形态 ──
    登录页只有一件事，没有第二层内容带，所以不套 Hero/双栏；
    落的是同一套视觉语汇：浅底大留白、20px 圆角白卡、轻阴影、诊所蓝、收页高。 */
@@ -463,6 +488,35 @@
   border-top: 1px solid var(--line-soft);
 }
 
+/* ── 展开/收起：窄屏长列表收住用 ── */
+.cc-expand-toggle {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--primary-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.cc-expand-toggle:hover {
+  background: var(--primary-soft);
+}
+
+/* 行尾「⋯」：窄屏把多个动作收进浮层 */
+.cc-queue-more {
+  min-width: 34px;
+  padding-inline: 8px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .cc-empty-line {
   margin: 0;
   color: var(--muted);
@@ -779,14 +833,9 @@ body:has(.cc-shell),
     font-size: 11px;
   }
 
-  /* 队列行：窄屏改为两行——名字一行，动作一行，避免名字被挤成一列字 */
+  /* 队列行：窄屏下动作收进「⋯」浮层，一行放得下 */
   .cc-queue-row {
-    flex-wrap: wrap;
-    row-gap: 8px;
-  }
-
-  .cc-row-link {
-    flex: 1 1 100%;
+    gap: 8px;
   }
 
   .cc-row-name {
@@ -794,6 +843,10 @@ body:has(.cc-shell),
   }
 
   .cc-row-extra {
-    margin-left: 20px;
+    font-size: 11px;
+  }
+
+  .cc-row-meta {
+    margin-left: 6px;
   }
 }

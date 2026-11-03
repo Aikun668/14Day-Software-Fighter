@@ -9,6 +9,7 @@ import { summarizeDay, type DaySummary, type MatrixResponse } from '../../compon
 import {
   AttentionPanel,
   Card,
+  CollapsibleList,
   HeroBar,
   QueueRow,
   StatBand,
@@ -248,16 +249,19 @@ export default function WorkbenchPage() {
             {recentFollowups.length > 0 && (
               <Card title="近期随访" hint={`${recentFollowups.length} 条`}>
                 <ul className="cc-followup-list">
-                  {recentFollowups.map((f) => (
-                    <li key={f.id}>
-                      <QueueRow
-                        tone="ok"
-                        name={patientName(f.patient_id)}
-                        extra={fmt(f.followed_at)}
-                        onClick={goPatient(f.patient_id)}
-                      />
-                    </li>
-                  ))}
+                  <CollapsibleList
+                    collapseAt={4}
+                    items={recentFollowups.map((f) => (
+                      <li key={f.id}>
+                        <QueueRow
+                          tone="ok"
+                          name={patientName(f.patient_id)}
+                          extra={fmt(f.followed_at)}
+                          onClick={goPatient(f.patient_id)}
+                        />
+                      </li>
+                    ))}
+                  />
                 </ul>
               </Card>
             )}
@@ -282,28 +286,31 @@ export default function WorkbenchPage() {
             />
           ) : (
             <ul className="cc-task-list">
-              {tasks.map((t) => (
-                <li key={t.id}>
-                  <QueueRow
-                    name={patientName(t.patient_id)}
-                    meta={patientCode(t.patient_id)}
-                    extra={fmt(t.created_at)}
-                    onClick={goPatient(t.patient_id)}
-                    actions={[
-                      {
-                        key: 'backfill',
-                        label: '补登用药',
-                        onClick: () => setBackfill({ id: t.patient_id, name: patientName(t.patient_id) }),
-                      },
-                      {
-                        key: 'close',
-                        label: '处理任务',
-                        onClick: () => setClosing({ id: t.id, patientId: t.patient_id, patientName: patientName(t.patient_id) }),
-                      },
-                    ]}
-                  />
-                </li>
-              ))}
+              <CollapsibleList
+                collapseAt={4}
+                items={tasks.map((t) => (
+                  <li key={t.id}>
+                    <QueueRow
+                      name={patientName(t.patient_id)}
+                      meta={patientCode(t.patient_id)}
+                      extra={fmt(t.created_at)}
+                      onClick={goPatient(t.patient_id)}
+                      actions={[
+                        {
+                          key: 'backfill',
+                          label: '补登用药',
+                          onClick: () => setBackfill({ id: t.patient_id, name: patientName(t.patient_id) }),
+                        },
+                        {
+                          key: 'close',
+                          label: '处理任务',
+                          onClick: () => setClosing({ id: t.id, patientId: t.patient_id, patientName: patientName(t.patient_id) }),
+                        },
+                      ]}
+                    />
+                  </li>
+                ))}
+              />
             </ul>
           )}
         </Card>

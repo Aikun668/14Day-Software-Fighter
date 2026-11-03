@@ -1,8 +1,23 @@
 // Clinic Comfort 共享层：全站医护 Web 的视觉积木（DESIGN.md）。
 // 这里只定「结构」——几列、间距、等高；「内容」由各页面自己决定。
 // 用法：工作台、患者详情、统计、随访都可以直接用同一套积木，不会各写各的。
-import { Button } from 'antd'
-import type { ReactNode } from 'react'
+import { Button, Dropdown } from 'antd'
+import { useEffect, useState, type ReactNode } from 'react'
+
+// 窄屏判定：与 CSS 里的 @media (max-width: 640px) 保持一致
+function useIsNarrow(breakpoint = 640) {
+  const [narrow, setNarrow] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(`(max-width: ${breakpoint}px)`).matches,
+  )
+  useEffect(() => {
+    const media = window.matchMedia(`(max-width: ${breakpoint}px)`)
+    const sync = () => setNarrow(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [breakpoint])
+  return narrow
+}
 
 /* ── Hero：留白问候区。故意只放一句说明 + 一个主操作 ── */
 
@@ -234,6 +249,41 @@ function ScaleRow({ slot }: { slot: ScaleSlot }) {
   )
 }
 
+/* ── 可折叠列表：窄屏收住长列表，点「展开全部」再放开 ──
+   桌面端默认全展开（空间够），窄屏默认只露前几条。 */
+
+interface CollapsibleListProps {
+  items: ReactNode[]
+  /** 窄屏默认显示几条 */
+  collapseAt?: number
+  /** 展开后的按钮文字 */
+  expandLabel?: (total: number) => string
+}
+
+export function CollapsibleList({ items, collapseAt = 3, expandLabel }: CollapsibleListProps) {
+  const [expanded, setExpanded] = useState(false)
+  const narrow = useIsNarrow()
+  // 宽屏空间够，默认全展开；窄屏才折叠
+  const collapsible = narrow && items.length > collapseAt
+  if (!collapsible) return <>{items}</>
+  const shown = expanded ? items : items.slice(0, collapseAt)
+  return (
+    <>
+      {shown}
+      <button
+        type="button"
+        className="cc-expand-toggle"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+      >
+        {expanded
+          ? '收起'
+          : (expandLabel ? expandLabel(items.length) : `展开全部 ${items.length} 条`)}
+      </button>
+    </>
+  )
+}
+
 /* ── 队列行：白卡里的行动行，点行进详情，行尾内联动作 ── */
 
 export interface QueueRowAction {
@@ -258,6 +308,33 @@ interface QueueRowProps {
 }
 
 export function QueueRow({ tone = 'warn', name, meta, extra, actions, onClick }: QueueRowProps) {
+  const narrow = useIsNarrow()
+  // 窄屏把行尾动作收进「⋯」浮层，避免每条任务占两行把页面拉长
+  const condenseActions = narrow && (actions?.length ?? 0) > 1
+  const actionButtons = condenseActions ? null : actions?.map((action) => (
+    <Button
+      key={action.key}
+      size="small"
+      className="cc-queue-action"
+      onClick={(e) => {
+        e.stopPropagation()
+        action.onClick()
+      }}
+    >
+      {action.label}
+    </Button>
+  ))
+  const moreMenu = condenseActions ? (
+    <Dropdown
+      trigger={['click']}
+      menu={{
+        items: actions!.map((action) => ({ key: action.key, label: action.label, onClick: action.onClick })),
+      }}
+    >
+      <Button size="small" className="cc-queue-action cc-queue-more" aria-label="更多操作">⋯</Button>
+    </Dropdown>
+  ) : null
+
   const inner = (
     <>
       <span className={`cc-row-dot tone-${tone}`} aria-hidden />
@@ -266,19 +343,8 @@ export function QueueRow({ tone = 'warn', name, meta, extra, actions, onClick }:
         {meta ? <span className="cc-row-meta">{meta}</span> : null}
       </span>
       {extra ? <span className="cc-row-extra">{extra}</span> : null}
-      {actions?.map((action) => (
-        <Button
-          key={action.key}
-          size="small"
-          className="cc-queue-action"
-          onClick={(e) => {
-            e.stopPropagation()
-            action.onClick()
-          }}
-        >
-          {action.label}
-        </Button>
-      ))}
+      {actionButtons}
+      {moreMenu}
     </>
   )
   // 行本身不是 button（行内还有动作按钮，button 里套 button 是无障碍问题）。
@@ -294,16 +360,8 @@ export function QueueRow({ tone = 'warn', name, meta, extra, actions, onClick }:
         </span>
       </button>
       {extra ? <span className="cc-row-extra">{extra}</span> : null}
-      {actions?.map((action) => (
-        <Button
-          key={action.key}
-          size="small"
-          className="cc-queue-action"
-          onClick={() => action.onClick()}
-        >
-          {action.label}
-        </Button>
-      ))}
+      {actionButtons}
+      {moreMenu}
     </div>
   )
 }
