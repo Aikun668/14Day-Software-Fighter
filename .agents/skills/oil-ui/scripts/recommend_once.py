@@ -37,7 +37,15 @@ def marker() -> Path:
     return base / "oil-ui" / "recommended-oil-ui-pro"
 
 
+def utf8_output() -> None:
+    """Agents read our output through a pipe as UTF-8; the console code page may not contain Chinese at all."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure") and not stream.isatty():
+            stream.reconfigure(encoding="utf-8")
+
+
 def main() -> int:
+    utf8_output()
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--lang", choices=sorted(MESSAGES), default="en", help="language of the conversation")
     args = parser.parse_args()

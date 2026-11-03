@@ -1,0 +1,19 @@
+warning: in the working copy of 'backend/app/api/plans.py', LF will be replaced by CRLF the next time Git touches it
+diff --git a/backend/app/api/plans.py b/backend/app/api/plans.py
+index 895c617..588d94d 100644
+--- a/backend/app/api/plans.py
++++ b/backend/app/api/plans.py
+@@ -107,7 +107,12 @@ def create_revision(
+     old = db.query(MedicationPlan).filter(MedicationPlan.id == plan_id).first()
+     if old is None:
+         raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "计划不存在", "details": None})
+-    # 归属校验
++    # 归属校验（SEC-1 / SEC-1b）：与 get_patient_for_clinician 一致。
++    # PATIENT 一律 403；ADMIN 一律 404（管理员不默认访问患者临床档案，老板裁定）。
++    if user.role == "PATIENT":
++        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "无权访问该资源", "details": None})
++    if user.role == "ADMIN":
++        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "管理员不默认访问患者临床档案", "details": None})
+     if user.role == "CLINICIAN":
+         patient = db.query(Patient).filter(Patient.id == old.patient_id).first()
+         if patient is None or patient.assigned_clinician_id != user.id:

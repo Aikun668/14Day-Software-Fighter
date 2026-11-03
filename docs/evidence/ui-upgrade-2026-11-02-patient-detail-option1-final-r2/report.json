@@ -1,0 +1,42 @@
+[
+  {
+    "file": "page-概览-1440x900.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "概览",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-历史记录-1440x900.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "历史记录",
+    "animationWaitMs": 138,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-概览-390x844.png",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "概览",
+    "animationWaitMs": 71,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-历史记录-390x844.png",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "历史记录",
+    "animationWaitMs": 137,
+    "issues": [],
+    "lint": []
+  }
+]

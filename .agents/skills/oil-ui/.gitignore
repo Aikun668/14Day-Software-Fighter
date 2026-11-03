@@ -2,3 +2,7 @@
 __pycache__/
 .env*
 !.env.example
+
+.curate-cache.json
+.curate-cache.json.lock/
+.curate-cache.json.*.tmp

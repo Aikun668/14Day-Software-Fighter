@@ -1,0 +1,12 @@
+matrix(from=2026-10-19,to=2026-10-20) day=2026-10-19 N=0 M=0 missing=0 rate=None
+
+通过 | 今日卡 已登记/已到期 与 matrix 一致 | card M=0 N=0 | matrix M=0 N=0
+通过 | 今日卡 完成率文本 与 matrix 一致 | card='—' expected='—'
+通过 | 今日卡 状态文案 与 matrix 一致 | expected contains '今日暂无已到期时点'
+通过 | 今日卡 位于页面顶部（先于 7 日概览） | card y vs overview label y
+通过 | 保留区块可见: 待核查任务 | visible
+通过 | 保留区块可见: 近期随访 | visible
+通过 | 保留区块可见: 患者登记情况（缺失多在前） | visible
+
+--- console error/warning ---
+(none)

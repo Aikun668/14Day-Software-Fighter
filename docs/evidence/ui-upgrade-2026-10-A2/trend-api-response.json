@@ -1,0 +1,52 @@
+{
+  "http://localhost:5181/api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/stats/trend?from=2026-10-12&to=2026-10-19": {
+    "from_": "2026-10-12",
+    "to": "2026-10-19",
+    "timezone": "Asia/Shanghai",
+    "points": [
+      {
+        "day": "2026-10-12",
+        "N": 4,
+        "M": 4,
+        "coverage_rate": 100.0
+      },
+      {
+        "day": "2026-10-13",
+        "N": 4,
+        "M": 4,
+        "coverage_rate": 100.0
+      },
+      {
+        "day": "2026-10-14",
+        "N": 4,
+        "M": 3,
+        "coverage_rate": 75.0
+      },
+      {
+        "day": "2026-10-15",
+        "N": 4,
+        "M": 4,
+        "coverage_rate": 100.0
+      },
+      {
+        "day": "2026-10-16",
+        "N": 4,
+        "M": 3,
+        "coverage_rate": 75.0
+      },
+      {
+        "day": "2026-10-17",
+        "N": 4,
+        "M": 2,
+        "coverage_rate": 50.0
+      },
+      {
+        "day": "2026-10-18",
+        "N": 4,
+        "M": 0,
+        "coverage_rate": 0.0
+      }
+    ],
+    "disclaimer": "基于登记记录的覆盖率，不等于实际服药依从性"
+  }
+}

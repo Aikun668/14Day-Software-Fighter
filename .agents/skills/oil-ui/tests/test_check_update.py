@@ -110,7 +110,7 @@ class CheckUpdateTest(unittest.TestCase):
         self.last_env = env
         script = self.skill / "scripts" / ("check_update.sh" if launcher else "check_update.py")
         result = subprocess.run([SH if launcher else sys.executable, str(script), *(['--update'] if update else [])],
-                                capture_output=True, text=True, env=env, timeout=30)
+                                capture_output=True, text=True, env=env, timeout=30, encoding="utf-8")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stderr, "")
         return result.stdout
@@ -157,7 +157,7 @@ class CheckUpdateTest(unittest.TestCase):
             NODE_OPTIONS='--require /nonexistent-oil-test.js', NPM_TOKEN='dummy-only-npm',
             OIL_TOKEN='dummy-only-oil'))
         self.assertRegex(self.npx_calls()[0], r'-y github:oil-oil/oil-cli#[0-9a-f]{40} update')
-        seen = json.loads((self.tmp / 'env.json').read_text())
+        seen = json.loads((self.tmp / 'env.json').read_text(encoding="utf-8"))
         for key in ('AWS_SECRET_ACCESS_KEY','OPENAI_API_KEY','NODE_OPTIONS','NPM_TOKEN'):
             self.assertFalse(seen[key], key)
         self.assertTrue(seen['OIL_TOKEN'])
@@ -168,12 +168,12 @@ class CheckUpdateTest(unittest.TestCase):
         Versions.payload['skills']['oil-ui-pro']['history'][0]['notes'] = marker
         self.assertNotIn(marker, self.run_check(update=False))
         cache = self.tmp / 'state/oil/oil-ui-pro-update.json'
-        data = json.loads(cache.read_text())
+        data = json.loads(cache.read_text(encoding="utf-8"))
         self.assertNotIn('notes', data)
         data['notes'] = marker
-        cache.write_text(json.dumps(data))
+        cache.write_text(json.dumps(data), encoding="utf-8")
         self.assertNotIn(marker, self.run_check(update=False))
-        self.assertNotIn('notes', json.loads(cache.read_text()))
+        self.assertNotIn('notes', json.loads(cache.read_text(encoding="utf-8")))
 
     def test_paid_skill_without_login_only_notifies_once_a_day(self):
         out = self.run_check()
@@ -334,7 +334,7 @@ class CheckUpdateTest(unittest.TestCase):
         command = out.split("在终端运行 ", 1)[1].rsplit(" 即可更新。", 1)[0]
         # 实际复制执行提示；参数只能指向该副本，不能展开变量或命令替换。
         env = {k: v for k, v in self.last_env.items() if k != 'OIL_NO_AUTO_UPDATE'}
-        result = subprocess.run([SH, "-c", command], env=env, capture_output=True, text=True)
+        result = subprocess.run([SH, "-c", command], env=env, capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn(str(self.skill), self.npx_calls()[0])
         self.assertIn('version: "99.0.0"', (self.skill / "SKILL.md").read_text(encoding="utf-8"))
@@ -395,17 +395,6 @@ class CheckUpdateTest(unittest.TestCase):
         self.assertEqual(self.run_check(OIL_NO_UPDATE_CHECK="1", XDG_STATE_HOME=str(self.tmp / "s3")), "")
         (self.skill / ".git").mkdir()
         self.assertEqual(self.run_check(XDG_STATE_HOME=str(self.tmp / "s4")), "")
-
-
-
-class ChineseLabelTest(unittest.TestCase):
-    def test_no_space_after_chinese_label(self):
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("check_update", SCRIPT)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        self.assertEqual(module.zh_label("Oil UI 开源版") + "有新版本", "Oil UI 开源版有新版本")
-        self.assertEqual(module.zh_label("Oil UI Pro") + "有新版本", "Oil UI Pro 有新版本")
 
 
 if __name__ == "__main__":

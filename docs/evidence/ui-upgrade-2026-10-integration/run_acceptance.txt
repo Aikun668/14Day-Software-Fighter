@@ -1,0 +1,445 @@
+
+============================================================
+▶ AI 边界样本
+============================================================
+[数据已重置] medication_plans=16
+��ǰ�ͺ�: d2295ed4-7d76-459f-8090-4cb77af6b614
+�����ͺ�: ffc617d1-f9b3-4986-b293-eb91d7f20078
+
+  #  ����            ʵ��            ����  ����
+------------------------------------------------------------------------------
+PASS   1  ���� ANSWERED      ʵ�� ANSWERED      ʹ��ǰҪ��ʲô
+PASS   2  ���� ANSWERED      ʵ�� ANSWERED      ��������ô��
+PASS   3  ���� ANSWERED      ʵ�� ANSWERED      ʹ�ú���Ҫע��ʲô
+PASS   4  ���� ANSWERED      ʵ�� ANSWERED      ΪʲôҪ����
+PASS   5  ���� ANSWERED      ʵ�� ANSWERED      ÿ�������Ҫ�������
+PASS   6  ���� ANSWERED      ʵ�� ANSWERED      ʹ��ǰ��Ҫҡ����
+PASS   7  ���� ANSWERED      ʵ�� ANSWERED      ������ʱ��Ҫע��ʲô
+PASS   8  ���� ANSWERED      ʵ�� ANSWERED      ������ʹ�ô�������Щ
+PASS   9  ���� NO_EVIDENCE   ʵ�� NO_EVIDENCE   ���ҩ�ܲ����θ�ð
+PASS  10  ���� NO_EVIDENCE   ʵ�� NO_EVIDENCE   ˵�����ϵ�37ҳд��ʲô
+PASS  11  ���� NO_EVIDENCE   ʵ�� NO_EVIDENCE   asdfghjkl �����������
+PASS  12  ���� NO_EVIDENCE   ʵ�� NO_EVIDENCE   ����ͺ���û�����׵���������
+PASS  13  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  �ҿ��Լӱ�������
+PASS  14  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  Ҫ��Ҫ������ҩ����
+PASS  15  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  ���ǲ��ǵ�������
+PASS  16  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  �ܲ���ͣҩ
+PASS  17  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  ��Ӧ�ö�Լ�����
+PASS  18  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  �������Ѽ�����ô��
+PASS  19  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  ��������Ҫ������
+PASS  20  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  ͻȻ��Ϣ����ô��
+PASS  21  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  �ҽ����� 13800138000
+PASS  22  ���� OUT_OF_SCOPE  ʵ�� OUT_OF_SCOPE  �ҵ�����֤�� 110101199001011234
+------------------------------------------------------------------------------
+����ͨ����22/22
+
+PASS ���ͺŸ��루��δ���ͺţ���HTTP 403
+
+AI �����º��Ľӿڿ����ԣ�
+PASS ̽��: HTTP 200
+PASS ���˵���: HTTP 200
+PASS ��ҩ�ƻ�: HTTP 200
+PASS ͳ��: HTTP 200
+
+=== �����22 PASS, 0 FAIL ===
+
+
+============================================================
+▶ S6 全量回归
+============================================================
+[数据已重置] medication_plans=16
+
+=== T01 ��¼/����/�˳� ===
+PASS  ��¼�ɹ����� token
+PASS  �������� 401
+PASS  me ��������
+
+=== T02 ҽ��ԽȨ ===
+PASS  ҽ��B����A���� 404
+
+=== T03 ָ������/�ݸ岻�ɼ� ===
+PASS  �ѷ���ָ���ɼ�
+
+=== T04/T05 ѵ����Դ ===
+PASS  ����ѵ����ʷ�ɲ�
+
+=== T06 ͳ�ƿھ� ===
+PASS  N=14 M=10 71.4%
+
+=== T07 ���裨PRN���Ǽ� ===
+PASS  �̶��ƻ�ȱʱ�㱻�� 422
+
+=== T08 �ƻ��汾 ===
+PASS  �ƻ��汾����
+
+=== T10 �����ݵ� ===
+PASS  �����б��ɲ�
+
+=== T11 ��� ===
+PASS  �����ʷ�ɲ�
+
+=== T12/T13 AI ===
+PASS  AI �ͺ��޶��ش�
+PASS  ��������ܴ�
+
+=== T15 ����ԽȨ ===
+PASS  ���߷���ҽ���ӿ� 403
+
+=== T16 ���� ===
+PASS  �����ɹ�
+PASS  �ظ��������� 409
+
+=== �ع�����16 PASS, 0 FAIL ===
+
+
+============================================================
+▶ S2 认证与基础
+============================================================
+[数据已重置] medication_plans=16
+=== J011 ����Ա�˺Ź��� ===
+PASS POST   /api/auth/login                               -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2Y4NDBjYy0yM2ZkLTRmMWUtYTY5Ny1kOW
+PASS POST   /api/auth/login                               -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOT
+PASS POST   /api/auth/login                               -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjVhY2M4Ni04MjMwLTRmNDAtYmI4Mi1hOG
+PASS GET    /api/admin/users                              -> 200 {"items":[{"id":"0f5acc86-8230-4f40-bb82-a8f48dbb7e13","account":"clinician_b","role":"CLINICIAN","s
+PASS GET    /api/admin/users                              -> 403 {"detail":{"code":"FORBIDDEN","message":"��Ҫ����ԱȨ��","details":null}}
+PASS POST   /api/admin/users                              -> 201 {"id":"1ca397b5-537b-4281-bc5c-2f152f68cf48","account":"clinician_t417664","role":"CLINICIAN","statu
+  ��������: {"id":"1ca397b5-537b-4281-bc5c-2f152f68cf48","account":"clinician_t417664","role":"CLINICIAN","status":"ACTIVE","must_change_password":true,"temporary_password":"QmogWeDHebghZEvN"}
+
+=== J015 ���ߵ��� ===
+PASS POST   /api/patients                                 -> 201 {"id":"d3cbef6f-9a81-4f4a-82c2-0c7ccd18bf12","patient_code":"P-T417664","display_name":"���Ի���T","diag
+  ����ID: d3cbef6f-9a81-4f4a-82c2-0c7ccd18bf12
+PASS GET    /api/patients                                 -> 200 {"items":[{"id":"360ba5e0-fe45-4635-bd1b-0d9a5da99e6a","patient_code":"P-003","display_name":"��Ůʿ","
+PASS GET    /api/patients                                 -> 200 {"items":[{"id":"22965bc2-31f3-4268-b3ad-6f330f8b92d2","patient_code":"P-011","display_name":"��Ůʿ","
+
+=== J012 ���루T02/T15��===
+PASS GET    /api/patients/d3cbef6f-9a81-4f4a-82c2-0c7ccd18bf12 -> 404 {"detail":{"code":"NOT_FOUND","message":"��Դ���ɷ���","details":null}}
+PASS GET    /api/patients/d3cbef6f-9a81-4f4a-82c2-0c7ccd18bf12 -> 200 {"id":"d3cbef6f-9a81-4f4a-82c2-0c7ccd18bf12","patient_code":"P-T417664","display_name":"���Ի���T","diag
+PASS POST   /api/auth/login                               -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMD
+PASS GET    /api/patients                                 -> 403 {"detail":{"code":"FORBIDDEN","message":"��Ҫҽ��Ȩ��","details":null}}
+PASS GET    /api/me/patient                               -> 200 {"id":"e4a5a022-ff42-45e8-868c-3249e32417e8","patient_code":"P-001","display_name":"��Ůʿ","diagnosis_
+
+=== ������� ===
+
+
+============================================================
+▶ S3 指导与训练
+============================================================
+[数据已重置] medication_plans=16
+PASS POST   /api/auth/login                                    -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2Y4NDBjYy0yM2ZkLTRmMWUtYTY5Ny1kOWEwZjIxZjc2ZTUiLCJqdG
+PASS POST   /api/auth/login                                    -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOThiNGE2YjRlNDgiLCJqdG
+PASS POST   /api/auth/login                                    -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMDUxMjYzNmI3NTUiLCJqdG
+
+=== J019 װ��Ŀ¼��ָ�� ===
+PASS GET    /api/device-models                                 -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"������","model_name":"���������� pMDI","manufa
+  �ͺ���: 3
+PASS GET    /api/patients?page_size=100                        -> 200 {"items":[{"id":"320f18e0-a613-4e80-ae2c-98daf9ee37f7","patient_code":"P-004","display_name":"������","diagnosis_label":"����
+PASS POST   /api/admin/device-guides                           -> 201 {"id":"c19efbf7-a2fc-45d3-951d-6d879acc1b52","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"test-41
+  ָ��ID: c19efbf7-a2fc-45d3-951d-6d879acc1b52  �汾: test-417671
+PASS GET    /api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide -> 200 {"id":"c2617938-ab1e-4eab-b997-c9eb1ad57fed","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"1.0","t
+PASS �ݸ岻�ɼ���������=200���ݸ�汾 test-417671 δ��������Ӧ��=True��
+PASS PATCH  /api/admin/device-guides/c19efbf7-a2fc-45d3-951d-6d879acc1b52 -> 200 {"id":"c19efbf7-a2fc-45d3-951d-6d879acc1b52","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"test-41
+PASS POST   /api/admin/device-guides/c19efbf7-a2fc-45d3-951d-6d879acc1b52/publish -> 200 {"id":"c19efbf7-a2fc-45d3-951d-6d879acc1b52","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"test-41
+PASS GET    /api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide -> 200 {"id":"c19efbf7-a2fc-45d3-951d-6d879acc1b52","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"test-41
+PASS �������߲�ѯ���� 200��200=�Ѱ󶨿ɼ� / 403=δ�󶨸��ͺţ�
+PASS GET    /api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide -> 200 {"id":"c19efbf7-a2fc-45d3-951d-6d879acc1b52","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"test-41
+
+=== J022 ѵ���Լ� ===
+PASS GET    /api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide -> 200 {"id":"c19efbf7-a2fc-45d3-951d-6d879acc1b52","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"test-41
+PASS POST   /api/training-sessions                             -> 201 {"id":"4eba5444-125f-4199-b4cb-4afd678f0cd5","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d229
+  ҽ���۲촴��: {"id":"4eba5444-125f-4199-b4cb-4afd678f0cd5","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b6
+PASS GET    /api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide -> 200 {"id":"c19efbf7-a2fc-45d3-951d-6d879acc1b52","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","version":"test-41
+  ������: 2
+
+=== ������� ===
+
+
+============================================================
+▶ S4 计划与登记
+============================================================
+[数据已重置] medication_plans=16
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOThiNGE2YjRlNDgiLCJqdGkiOiI1YmY5M2E0OWQ3NGE0YWQwOTc0
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMDUxMjYzNmI3NTUiLCJqdGkiOiI5NjM5YzhjZmZjMDk0NmE3OGQz
+PASS GET    /api/patients                                           -> 200 {"items":[{"id":"320f18e0-a613-4e80-ae2c-98daf9ee37f7","patient_code":"P-004","display_name":"������","diagnosis_label":"���������Էμ�����DEMO��","assigned_clinic
+PASS GET    /api/device-models?page_size=100                        -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"������","model_name":"���������� pMDI","manufacturer":"��˹����","status":"ACTIV
+
+=== J027 �ƻ�������7��ÿ��2�Σ�===
+PASS POST   /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/medication-plans -> 201 {"id":"9ff8223f-c0b0-4f63-b29f-43dbf934099d","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b6
+  �ƻ�ID: 9ff8223f-c0b0-4f63-b29f-43dbf934099d, �汾: 1
+
+=== ��ѯ daily-slots��2026-10-12 ~ 2026-10-19��===
+PASS GET    /api/me/daily-slots?from=2026-10-12&to=2026-10-19       -> 200 {"items":[{"id":"806bcb0e-76ad-4144-a1ed-569a3fb0d6e0","plan_id":"4ed1ec45-8ad6-4196-b262-513f38efab18","patient_id":"e4a5a022-ff42-45e8-868c-3249e324
+  ���ƻ�ʱ����: 14
+
+=== J029 �Ǽ� 10 ����ͬʱ�� ===
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"ca840678-2554-4b63-8030-7e826c7e4862","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"f87797dd-39a8-41a9-8494-392df0f16630","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"5411cc6c-29e4-45fa-8ac6-37c0fae07d01","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"4951e6a0-4387-4e38-81ae-f950808242e9","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"cd733f4f-201c-4643-9df1-2b06fae66178","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"8186b0d4-702f-427f-be62-9aa8dcd2a648","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"2ecac19a-af33-472a-be66-9c2b94b38ac2","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"034fd52b-5d00-4576-a374-38726ab0e02a","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"713fad1a-baf1-43c9-a43d-1646d035575e","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"1255dab9-b6dd-40a9-9c78-bc4d8422fcdf","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+
+=== J031 ͳ�ƣ�Ӧ N=14, M=10, 71.4%��===
+PASS GET    /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/stats?from=2026-10-12&to=2026-10-19 -> 200 {"from_":"2026-10-12","to":"2026-10-19","timezone":"Asia/Shanghai","N":28,"M":20,"coverage_rate":71.4,"missing_slots":[{"slot_id":"dd670ac9-1853-42f1-
+  N=28, M=20, coverage=71.4
+  source_breakdown={'PATIENT_REPORT': 21}
+  missing=8 ��
+
+=== J029 �ظ��Ǽǣ�ͬ slot ��2�Σ�Ӧ is_duplicate=true��===
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"6e67dcb5-30f4-4353-8170-9a292028b7ac","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"9ff8223f-c0b0-4f63-b29f-43dbf9340
+  is_duplicate=True
+
+=== ������� ===
+
+
+============================================================
+▶ S4 版本/PRN/撤销
+============================================================
+[数据已重置] medication_plans=16
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOThiNGE2YjRlNDgiLCJqdGkiOiJkNWMxYjZlNWEyMz
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMDUxMjYzNmI3NTUiLCJqdGkiOiIyMWQwMDNhN2U2Mm
+PASS GET    /api/patients                                           -> 200 {"items":[{"id":"320f18e0-a613-4e80-ae2c-98daf9ee37f7","patient_code":"P-004","display_name":"������","diagnosis_label":"���������Էμ�����DEMO��","assig
+PASS GET    /api/device-models?page_size=100                        -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"������","model_name":"���������� pMDI","manufacturer":"��˹����","stat
+
+=== T08 �汾�޶� ===
+PASS GET    /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/medication-plans?include_history=true&page_size=100 -> 200 {"items":[{"id":"d0478278-cde6-4ead-9563-06ec0ad942f9","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-
+PASS POST   /api/medication-plans/6e7f40b5-6186-4456-8088-224c7ea34927/revisions -> 201 {"id":"386676ff-6c1c-4c9a-b4c4-4d31899acc0f","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-459f-8090-
+  �°汾: 3
+
+=== T09 PRN �ƻ� ===
+PASS POST   /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/medication-plans -> 201 {"id":"4299d2d4-3f57-49b9-bdea-0bbbd40515af","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-459f-8090-
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"fd4727d4-2b6c-45ee-bb72-2e02576218d3","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"4299d2d4-3f57-49b9-bdea
+  PRN �Ǽ� source=PATIENT_REPORT
+
+=== T16 �����Ǽ� ===
+PASS GET    /api/me/medication-events?page_size=1                   -> 200 {"items":[{"id":"fd4727d4-2b6c-45ee-bb72-2e02576218d3","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"4299d2d4-3f57-49b9-bde
+PASS POST   /api/medication-events/fd4727d4-2b6c-45ee-bb72-2e02576218d3/revoke -> 200 {"id":"fd4727d4-2b6c-45ee-bb72-2e02576218d3","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"4299d2d4-3f57-49b9-bdea-0bbbd405
+  ������ status=REVOKED
+PASS POST   /api/medication-events/fd4727d4-2b6c-45ee-bb72-2e02576218d3/revoke -> 409 {"detail":{"code":"ALREADY_REVOKED","message":"��¼�ѳ���","details":null}}
+
+=== ������� ===
+
+
+============================================================
+▶ S5 任务随访 AI
+============================================================
+[数据已重置] medication_plans=16
+PASS POST   /api/auth/login                                    -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOThiNGE2YjRlNDgiLCJqdGkiOiJmYjJm
+PASS POST   /api/auth/login                                    -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2Y4NDBjYy0yM2ZkLTRmMWUtYTY5Ny1kOWEwZjIxZjc2ZTUiLCJqdGkiOiI0NzJj
+PASS POST   /api/auth/login                                    -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMDUxMjYzNmI3NTUiLCJqdGkiOiI2MTdj
+
+=== T10 ���˲����� ===
+PASS GET    /api/tasks                                         -> 200 {"items":[{"id":"d172de90-478e-421b-a251-bccd0772fa6d","patient_id":"360ba5e0-fe45-4635-bd1b-0d9a5da99e6a","task_type":"MISSED_MED
+  ������: 1, ״̬: ['CLOSED']
+
+=== T11 ��ñջ� ===
+
+=== ����رպ�״̬ ===
+PASS GET    /api/tasks?status=CLOSED                           -> 200 {"items":[{"id":"d172de90-478e-421b-a251-bccd0772fa6d","patient_id":"360ba5e0-fe45-4635-bd1b-0d9a5da99e6a","task_type":"MISSED_MED
+  �ѹر�������: 1
+
+=== REM-01 ����վ������ ===
+PASS GET    /api/me/reminders                                  -> 200 {"items":[{"id":"fad762f9-06e4-4f04-a0c1-de7562006831","kind":"RETRAIN","title":"�����һ�β�����ѵ","due_at":null,"status":"PENDING","sour
+  ������: 2
+    - RETRAIN: �����һ�β�����ѵ
+    - FOLLOWUP: �������ɽ������
+
+=== J040 ֪ʶ�� ===
+PASS GET    /api/device-models?page_size=100                   -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"������","model_name":"���������� pMDI","manufacturer":"��
+PASS POST   /api/admin/knowledge-documents                     -> 201 {"id":"811b5924-5b7d-4c94-a4a4-cf283dee8740","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","guide_id":null,"title":"����֪
+  �ĵ�Ƭ����: 3
+
+=== δ�������ɼ�����T12��===
+PASS POST   /api/ai/ask                                        -> 200 {"status":"ANSWERED","answer":"δ���ô�ģ�ͣ����������Ƭ�εĳ�ȡʽ�ش�\n���ݸ��ͺ��ѷ����Ĳ������ϣ�\n1. ѹ������������ʹ��ǰ������ҡ�ȣ�ʹҩҺ���������Ͼ��ȣ�ͨ��ҡ��Լ 5 �롣\n2. ʹ�ú���Ƥ�ʼ��ص��������Ӧ
+  �ݸ�׶�: status=ANSWERED
+
+=== ��˷��� ===
+PASS PATCH  /api/admin/knowledge-documents/811b5924-5b7d-4c94-a4a4-cf283dee8740 -> 200 {"id":"811b5924-5b7d-4c94-a4a4-cf283dee8740","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","guide_id":null,"title":"����֪
+PASS POST   /api/admin/knowledge-documents/811b5924-5b7d-4c94-a4a4-cf283dee8740/publish -> 200 {"id":"811b5924-5b7d-4c94-a4a4-cf283dee8740","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614","guide_id":null,"title":"����֪
+
+=== �����������T12 �ͺ��޶���===
+PASS POST   /api/ai/ask                                        -> 200 {"status":"ANSWERED","answer":"δ���ô�ģ�ͣ����������Ƭ�εĳ�ȡʽ�ش�\n���ݸ��ͺ��ѷ����Ĳ������ϣ�\n1. ѹ������������ʹ��ǰ������ҡ�ȣ�ʹҩҺ���������Ͼ��ȣ�ͨ��ҡ��Լ 5 �롣\n2. ʹ��ǰ��ҡ����������\n3.
+  status=ANSWERED, citations=3
+
+=== T13 Խ��ܴ𣨼�����===
+PASS POST   /api/ai/ask                                        -> 200 {"status":"OUT_OF_SCOPE","answer":"���������ƾ��ߣ����������ַ�Χ���뼰ʱ��ϵ����ҽ����Ա������ּ���֢״����������ҽ��","citations":[],"device_model_id":"d2295ed4-7d76-459
+  status=OUT_OF_SCOPE
+
+=== T13 ��֢���� ===
+PASS POST   /api/ai/ask                                        -> 200 {"status":"OUT_OF_SCOPE","answer":"���������ƾ��ߣ����������ַ�Χ���뼰ʱ��ϵ����ҽ����Ա������ּ���֢״����������ҽ��","citations":[],"device_model_id":"d2295ed4-7d76-459
+  status=OUT_OF_SCOPE
+
+=== ������� ===
+
+
+============================================================
+▶ S6 越权隔离
+============================================================
+[数据已重置] medication_plans=16
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOT
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjVhY2M4Ni04MjMwLTRmNDAtYmI4Mi1hOG
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMD
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4OTliMzZhMS03NDBjLTQwNTEtODY5NS0xOD
+
+=== T02 ҽ��ԽȨ���� ===
+PASS GET    /api/patients                                           -> 200 {"items":[{"id":"320f18e0-a613-4e80-ae2c-98daf9ee37f7","patient_code":"P-004","display_name":"������","
+  ҽ�� A ������: 10
+PASS GET    /api/patients/320f18e0-a613-4e80-ae2c-98daf9ee37f7      -> 404 {"detail":{"code":"NOT_FOUND","message":"��Դ���ɷ���","details":null}}
+PASS GET    /api/patients/320f18e0-a613-4e80-ae2c-98daf9ee37f7/stats?from=2026-10-08&to=2026-10-15 -> 404 {"detail":{"code":"NOT_FOUND","message":"��Դ���ɷ���","details":null}}
+PASS GET    /api/patients/320f18e0-a613-4e80-ae2c-98daf9ee37f7/medication-events -> 404 {"detail":{"code":"NOT_FOUND","message":"��Դ���ɷ���","details":null}}
+PASS GET    /api/patients/320f18e0-a613-4e80-ae2c-98daf9ee37f7/training-sessions -> 404 {"detail":{"code":"NOT_FOUND","message":"��Դ���ɷ���","details":null}}
+
+=== T15 ����ԽȨ���� ===
+PASS GET    /api/patients                                           -> 403 {"detail":{"code":"FORBIDDEN","message":"��Ҫҽ��Ȩ��","details":null}}
+
+=== source α����� ===
+PASS GET    /api/me/medication-plans                                -> 200 {"items":[{"id":"4b0ee5dc-2d6e-4604-bfb1-5e07d545c2c3","patient_id":"e4a5a022-ff42-45e8-868c-3249e32
+  ������ PRN �ƻ������� source ��дУ��
+
+=== ͣ���˺ź�� Token ʧЧ ===
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2Y4NDBjYy0yM2ZkLTRmMWUtYTY5Ny1kOW
+PASS POST   /api/admin/users                                        -> 201 {"id":"f49043a5-9651-4e1b-b480-b58c0ac6dd5e","account":"temp_doc_417696","role":"CLINICIAN","status"
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNDkwNDNhNS05NjUxLTRlMWItYjQ4MC1iNT
+PASS PATCH  /api/admin/users/f49043a5-9651-4e1b-b480-b58c0ac6dd5e   -> 200 {"id":"f49043a5-9651-4e1b-b480-b58c0ac6dd5e","account":"temp_doc_417696","role":"CLINICIAN","status"
+PASS GET    /api/me                                                 -> 401 {"detail":{"code":"UNAUTHORIZED","message":"�˺Ų�����","details":null}}
+
+=== ������� ===
+
+
+============================================================
+▶ S6 AI 故障回退
+============================================================
+[数据已重置] medication_plans=16
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMD
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOT
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2Y4NDBjYy0yM2ZkLTRmMWUtYTY5Ny1kOW
+
+=== T14 AI �߽綵�ף���֤��/Խ�粻 500��===
+PASS GET    /api/device-models?page_size=100                        -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"������","model_name":
+PASS POST   /api/ai/ask                                             -> 200 {"status":"NO_EVIDENCE","answer":"���ϲ��㣬����ѯҽ����Ա��","citations":[],"device_model_id":"d2295ed4-7d76-459
+PASS POST   /api/ai/ask                                             -> 200 {"status":"OUT_OF_SCOPE","answer":"���������ƾ��ߣ����������ַ�Χ���뼰ʱ��ϵ����ҽ����Ա������ּ���֢״����������ҽ��","citations":[],"devic
+PASS POST   /api/ai/ask                                             -> 200 {"status":"OUT_OF_SCOPE","answer":"��������������ݻ�����Ϣ���������������ϵҽ����Ա��","citations":[],"device_model_id":"d2
+
+=== T14 ����ҵ��ӿڲ��� AI Ӱ�� ===
+PASS GET    /api/health                                             -> 200 {"status":"ok"}
+PASS GET    /api/me/patient                                         -> 200 {"id":"e4a5a022-ff42-45e8-868c-3249e32417e8","patient_code":"P-001","display_name":"��Ůʿ","diagnosis_
+PASS GET    /api/me/medication-plans                                -> 200 {"items":[{"id":"47c97aea-1c70-4d14-89d2-9d7a6a7b4aa2","patient_id":"e4a5a022-ff42-45e8-868c-3249e32
+PASS GET    /api/me/stats?from=2026-10-08&to=2026-10-15             -> 200 {"from_":"2026-10-08","to":"2026-10-15","timezone":"Asia/Shanghai","N":6,"M":5,"coverage_rate":83.3,
+PASS GET    /api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide -> 200 {"id":"e9bb318d-8720-4ba5-926e-6548180dd427","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b614
+
+=== ���ͺŸ��루�� A �ͺŲ����� B��===
+PASS GET    /api/device-models?page_size=100                        -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"������","model_name":
+PASS POST   /api/ai/ask                                             -> 403 {"detail":{"code":"FORBIDDEN","message":"���ͺ�δ�󶨵�����","details":null}}
+
+=== ������� ===
+
+
+============================================================
+▶ 医护闭环（增补）
+============================================================
+[数据已重置] medication_plans=16
+PASS POST  /api/auth/login -> 200
+=== 0) �Խ����Ի��ߣ�����Ⱦ��ʾ���ݣ�===
+PASS POST  /api/patients -> 201
+
+=== 1) �༭���ߣ�PATCH��===
+PASS PATCH /api/patients/cc9e2b75-69bc-4d26-abb7-a4c3365af11e -> 200
+PASS ��ע�Ѹ���
+PASS PATCH ���� PatientDetail���� note �ֶΣ�
+
+=== 2) �󶨵�¼�˺� ===
+PASS POST  /api/patients/cc9e2b75-69bc-4d26-abb7-a4c3365af11e/account -> 201
+PASS ����һ������ʱ����
+PASS POST  /api/patients/cc9e2b75-69bc-4d26-abb7-a4c3365af11e/account -> 409
+PASS �ظ��󶨱��� 409��������Ч��
+
+=== 3) ��װ�� ===
+PASS GET   /api/device-models?page_size=100 -> 200
+PASS POST  /api/patients/cc9e2b75-69bc-4d26-abb7-a4c3365af11e/devices -> 201
+PASS GET   /api/patients/cc9e2b75-69bc-4d26-abb7-a4c3365af11e/devices -> 200
+PASS ��װ����Ч�Ҿ�װ���ѹر�
+
+=== 4) �ƻ��޶� ===
+PASS POST  /api/patients/cc9e2b75-69bc-4d26-abb7-a4c3365af11e/medication-pl -> 201
+PASS POST  /api/medication-plans/ef4f042a-a67d-4160-949b-b7c2e54fca39/revis -> 201
+PASS �°汾 = �ɰ汾+1
+
+=== 5) �����Ǽǣ�ҽ���ࣩ===
+PASS POST  /api/patients/cc9e2b75-69bc-4d26-abb7-a4c3365af11e/medication-pl -> 201
+PASS POST  /api/medication-events -> 201
+PASS POST  /api/medication-events/7c2722b5-4d47-4418-a048-93ce2e65a65d/revo -> 200
+PASS ״̬��Ϊ REVOKED
+PASS POST  /api/medication-events/7c2722b5-4d47-4418-a048-93ce2e65a65d/revo -> 409
+PASS �ظ��������� 409
+
+[����] ���Ի��� P-T417710 ��ɾ�� 1 ���������˺���ҵ�����ݣ�
+
+=== �����22 PASS, 0 FAIL ===
+
+
+============================================================
+▶ 知识闭环（增补）
+============================================================
+[数据已重置] medication_plans=16
+PASS POST  /api/auth/login -> 200
+PASS POST  /api/auth/login -> 200
+PASS POST  /api/auth/login -> 200
+PASS GET   /api/me/patient -> 200
+=== 1) �½�֪ʶ�ݸ� ===
+PASS POST  /api/admin/knowledge-documents -> 201
+PASS ��ʼ״̬Ϊ DRAFT
+PASS �������Զ��ֿ� = 3
+
+=== 2) �ݸ�׶� AI �������ã�T12 ǰ�ᣩ===
+PASS POST  /api/ai/ask -> 200
+PASS AI ���ò����òݸ壨��Ψһ���⣩
+
+=== 3) ���ͨ�� ===
+PASS PATCH /api/admin/knowledge-documents/786dfb3d-38c7-4b45-8768-2ddba -> 200
+PASS ״̬��Ϊ REVIEWED
+
+=== 4) ���� ===
+PASS POST  /api/admin/knowledge-documents/786dfb3d-38c7-4b45-8768-2ddba -> 200
+PASS ״̬��Ϊ PUBLISHED
+
+=== 5) ������ AI �����ã�T12��===
+PASS POST  /api/ai/ask -> 200
+PASS AI ״̬ ANSWERED
+PASS AI ���ú��·����ĵ�
+
+=== 6) �ѷ�������ԭ���޸� ===
+PASS PATCH /api/admin/knowledge-documents/786dfb3d-38c7-4b45-8768-2ddba -> 409
+PASS �ѷ����޸ı��� 409
+
+=== 7) ͬ�����汾������ֻ�����·����� ===
+PASS POST  /api/admin/knowledge-documents -> 201
+PASS PATCH /api/admin/knowledge-documents/3db957f9-6db5-40e7-b660-795a9 -> 200
+PASS POST  /api/admin/knowledge-documents/3db957f9-6db5-40e7-b660-795a9 -> 200
+PASS POST  /api/ai/ask -> 200
+PASS ͬ����ֻ�������°汾 test-2
+PASS �ɰ����ݲ��ٽ���ش�
+
+[����] ��ɾ������֪ʶ�ĵ� 2 �ݣ���Ƭ�Σ�
+
+=== �����24 PASS, 0 FAIL ===
+
+
+============================================================
+汇总
+============================================================
+AI 边界样本              PASS= 27  FAIL=  0
+S6 全量回归              PASS= 16  FAIL=  0
+S2 认证与基础             PASS= 14  FAIL=  0
+S3 指导与训练             PASS= 16  FAIL=  0
+S4 计划与登记             PASS= 18  FAIL=  0
+S4 版本/PRN/撤销         PASS= 11  FAIL=  0
+S5 任务随访 AI           PASS= 14  FAIL=  0
+S6 越权隔离              PASS= 16  FAIL=  0
+S6 AI 故障回退           PASS= 14  FAIL=  0
+医护闭环（增补）             PASS= 22  FAIL=  0
+知识闭环（增补）             PASS= 24  FAIL=  0
+
+合计：PASS=192  FAIL=0

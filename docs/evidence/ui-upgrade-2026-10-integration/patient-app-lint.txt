@@ -1,0 +1,8 @@
+
+> patient-app@0.0.0 lint D:\My_Grand_Projects2026\14Day-Software-Fighter\patient-app
+> oxlint
+
+src/features/auth/AuthContext.tsx:70:17: warning react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+src/pages/patient/MedicationPage.tsx:58:24: warning react(purity): Cannot call impure function during render help: `Date` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+src/pages/patient/MedicationPage.tsx:43:21: warning react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+src/pages/patient/TodayPage.tsx:77:15: warning react(purity): Cannot call impure function during render help: `Date` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders

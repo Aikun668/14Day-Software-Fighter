@@ -20,9 +20,23 @@ export default function WebLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuth()
+  const isPatientDetailPage = location.pathname.startsWith('/patients/')
+  const [isCompactViewport, setIsCompactViewport] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches,
+  )
   const [openTasks, setOpenTasks] = useState(0)
   const [hits, setHits] = useState<PatientHit[]>([])
   const [keyword, setKeyword] = useState('')
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 640px)')
+    const syncViewport = () => setIsCompactViewport(media.matches)
+    syncViewport()
+    media.addEventListener('change', syncViewport)
+    return () => media.removeEventListener('change', syncViewport)
+  }, [])
+
+  const compactPatientDetail = isPatientDetailPage && isCompactViewport
 
   // 侧栏待办数角标：仅医护拉取 OPEN 任务数（管理员无此菜单）
   useEffect(() => {
@@ -112,8 +126,9 @@ export default function WebLayout({ children }: { children: ReactNode }) {
   const roleLabel = isAdmin ? '管理员' : '医护'
 
   return (
-    <Layout style={{ minHeight: '100vh', width: '100%' }}>
+    <Layout className={isPatientDetailPage ? 'patient-detail-layout' : undefined} style={{ minHeight: '100vh', width: '100%' }}>
       <Header
+        className="patient-detail-header"
         style={{
           height: 56,
           lineHeight: '56px',
@@ -125,9 +140,9 @@ export default function WebLayout({ children }: { children: ReactNode }) {
           justifyContent: 'space-between',
         }}
       >
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+        <span className="patient-detail-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
           <BrandMark size={22} />
-          <Typography.Text strong style={{ fontSize: 15, color: 'var(--ink)' }}>
+          <Typography.Text className="patient-detail-brand-title" strong style={{ fontSize: 15, color: 'var(--ink)' }}>
             吸入治疗指导与依从性辅助管理软件
           </Typography.Text>
         </span>
@@ -135,6 +150,7 @@ export default function WebLayout({ children }: { children: ReactNode }) {
         {/* 顶栏全局搜索（仅医护）：输入编号或姓名，选择后直达患者详情 */}
         {user?.role === 'CLINICIAN' && (
           <AutoComplete
+            className="patient-detail-search"
             style={{ width: 320 }}
             value={keyword}
             options={searchOptions}
@@ -173,10 +189,17 @@ export default function WebLayout({ children }: { children: ReactNode }) {
       <Layout style={{ width: '100%' }}>
         {/* 只有一个菜单项时（管理员）不占用侧栏宽度 */}
         {items.length > 1 && (
-          <Sider width={232} theme="light" style={{ borderRight: '1px solid var(--line)' }}>
+          <Sider
+            width={232}
+            collapsed={compactPatientDetail}
+            collapsedWidth={64}
+            theme="light"
+            style={{ borderRight: '1px solid var(--line)' }}
+          >
             <div className="side-menu">
               <Menu
                 mode="inline"
+                inlineCollapsed={compactPatientDetail}
                 selectedKeys={[selectedKey]}
                 items={items}
                 onClick={({ key }) => navigate(key)}
@@ -197,7 +220,7 @@ export default function WebLayout({ children }: { children: ReactNode }) {
             </div>
           </Sider>
         )}
-        <Content style={{ background: 'var(--bg)', padding: 28, flex: 1, minWidth: 0 }}>
+        <Content className="patient-detail-content" style={{ background: 'var(--bg)', padding: 28, flex: 1, minWidth: 0 }}>
           <div style={{ width: '100%' }}>{children}</div>
         </Content>
       </Layout>

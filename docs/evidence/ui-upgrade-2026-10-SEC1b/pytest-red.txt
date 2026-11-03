@@ -1,0 +1,48 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\My_Grand_Projects2026\14Day-Software-Fighter\backend
+configfile: pytest.ini
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 11 items
+
+tests/test_plan_revision.py::test_revision_creates_next_version_and_closes_previous PASSED [  9%]
+tests/test_plan_revision.py::test_revision_on_unknown_plan_returns_404 PASSED [ 18%]
+tests/test_plan_revision.py::test_prn_plan_event_has_patient_source_and_no_slot PASSED [ 27%]
+tests/test_plan_revision.py::test_prn_event_rejects_slot_id PASSED       [ 36%]
+tests/test_plan_revision.py::test_revoke_marks_event_revoked PASSED      [ 45%]
+tests/test_plan_revision.py::test_second_revoke_returns_409 PASSED       [ 54%]
+tests/test_plan_revision.py::test_patient_cannot_revise_own_plan_returns_403 PASSED [ 63%]
+tests/test_plan_revision.py::test_patient_cannot_revise_other_patient_plan_returns_403 PASSED [ 72%]
+tests/test_plan_revision.py::test_clinician_cannot_revise_unassigned_patient_plan_returns_404 PASSED [ 81%]
+tests/test_plan_revision.py::test_assigned_clinician_can_revise_plan_returns_201 PASSED [ 90%]
+tests/test_plan_revision.py::test_admin_cannot_revise_any_plan_returns_404 FAILED [100%]
+
+================================== FAILURES ===================================
+________________ test_admin_cannot_revise_any_plan_returns_404 ________________
+
+client = <starlette.testclient.TestClient object at 0x0000028C40E2F740>
+admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3ZGRhYzVjZi1jYmViLTQ2YWYtYTk1YS0yNzg0ZTE0NTF...2U0OTdmZTZiYjMxMTU2ZTIxOCIsImlhdCI6MTc5MjQyMjMzNiwiZXhwIjoxNzkyNDI1OTM2fQ.xmAhA5sSLnfRmyd_FgGbRUN2CiYgpnR0MQemWpjS6-U'}
+regular_plan = {'id': 'b7c16c92-fc4b-43d7-a1d6-08e56343bdc4', 'patient_id': 'cd0080f6-2ac2-4697-aa80-6ca2a9e015bc', 'device_model_id': '2c974efc-afdb-4090-a1b7-d76f1e08f0cb', 'plan_group_id': '987d48b6-b66e-456e-9ff4-2c92e0a26c5c', ...}
+
+    def test_admin_cannot_revise_any_plan_returns_404(client, admin_headers, regular_plan):
+        resp = client.post(
+            f"/api/medication-plans/{regular_plan['id']}/revisions",
+            json=_revision_body(),
+            headers=admin_headers,
+        )
+>       assert resp.status_code == 404, resp.text
+E       AssertionError: {"id":"c295aa07-b193-49c1-9ac8-817606d9fb88","patient_id":"cd0080f6-2ac2-4697-aa80-6ca2a9e015bc","device_model_id":"2c974efc-afdb-4090-a1b7-d76f1e08f0cb","plan_group_id":"987d48b6-b66e-456e-9ff4-2c92e0a26c5c","version":2,"drug_label":"≤‚ ‘“©","plan_type":"REGULAR","timezone":"Asia/Shanghai","starts_at":"2026-10-16T00:00:00+08:00","ends_at":null,"daily_times":[]}
+E       assert 201 == 404
+E        +  where 201 = <Response [201 Created]>.status_code
+
+tests\test_plan_revision.py:288: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_plan_revision.py::test_admin_cannot_revise_any_plan_returns_404
+============= 1 failed, 10 passed, 1 warning in 60.54s (0:01:00) ==============

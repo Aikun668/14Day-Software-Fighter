@@ -48,5 +48,8 @@ temp/
 .playwright-cli/
 .ruff_cache/
 
+# 本地服务运行日志（后端/前端托管输出的 stdout/stderr）
+.runlogs/
+
 # 多会话运行时锁（本地状态，不入库）
 docs/planning/handoff/LOCK.md

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>医护 Web 全站截图 · 2026-10-26</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --line: #e5e9f2;
+    --line-soft: #f0f2f7;
+    --ink: #101828;
+    --ink-2: #3d3d56;
+    --muted: #6b6e7f;
+    --brand: #573bf4;
+    --brand-soft: #efecfe;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 36px 40px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  .sub { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .meta span {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--brand-soft);
+    color: #4d3ba7;
+    font-size: 12px;
+  }
+  main { padding: 8px 40px 56px; max-width: 1440px; margin: 0 auto; }
+  section { margin-top: 34px; }
+  h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .shot {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  }
+  .shot:hover {
+    border-color: #cfc6ff;
+    box-shadow: 0 8px 24px rgba(87, 59, 244, .12);
+    transform: translateY(-2px);
+  }
+  .thumb {
+    position: relative;
+    height: 460px;
+    background: #f0f2f7;
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 55%, rgba(255,255,255,.9) 100%);
+    pointer-events: none;
+  }
+  .zoom {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(16, 24, 40, .72);
+    color: #fff;
+    font-size: 12px;
+  }
+  .cap { padding: 14px 16px 16px; }
+  .cap b { display: block; font-size: 14px; font-weight: 600; }
+  .cap span { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
+  .tall .thumb { height: 560px; }
+  .modal .thumb { height: 360px; background: #eef0f6; }
+  footer {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  @media (max-width: 900px) {
+    header, main, footer { padding-left: 18px; padding-right: 18px; }
+    .grid { grid-template-columns: 1fr; }
+    .thumb { height: 420px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>吸入治疗指导与依从性辅助管理软件 · 医护 Web 全站截图</h1>
+  <p class="sub">登录、工作台、患者管理、患者详情、用药计划、统计与核查、随访中心、管理端，共 15 张。</p>
+  <div class="meta">
+    <span>2026-10-26</span>
+    <span>1440 × 900 视口</span>
+    <span>clinician_a / admin</span>
+    <span>除弹窗外均为整页长图</span>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>认证</h2>
+    <div class="grid">
+      <a class="shot" href="01-login.png" target="_blank">
+        <div class="thumb"><img src="01-login.png" alt="登录页" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>01 · 登录页</b><span>账号密码登录入口</span></div>
+      </a>
+      <a class="shot" href="02-workbench.png" target="_blank">
+        <div class="thumb"><img src="02-workbench.png" alt="工作台" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>02 · 工作台</b><span>今日状态、待核查任务、需要关注的患者、近期随访</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>患者与计划</h2>
+    <div class="grid">
+      <a class="shot" href="03-patients.png" target="_blank">
+        <div class="thumb"><img src="03-patients.png" alt="患者管理" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>03 · 患者管理</b><span>负责患者列表、筛选、建档与现场评估入口</span></div>
+      </a>
+      <a class="shot tall" href="04-patient-detail.png" target="_blank">
+        <div class="thumb"><img src="04-patient-detail.png" alt="患者详情" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>04 · 患者详情</b><span>P-004 李先生：档案、动态、装置、计划、登记、训练与随访</span></div>
+      </a>
+      <a class="shot" href="05-plans.png" target="_blank">
+        <div class="thumb"><img src="05-plans.png" alt="用药计划" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>05 · 用药计划编辑</b><span>P-004 的新建计划表单与历史版本</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>统计与核查</h2>
+    <div class="grid">
+      <a class="shot" href="06-stats-overview.png" target="_blank">
+        <div class="thumb"><img src="06-stats-overview.png" alt="统计与核查 · 团队概览" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>06 · 团队概览</b><span>团队覆盖率、覆盖矩阵、患者登记情况排行</span></div>
+      </a>
+      <a class="shot tall" href="07-stats-report.png" target="_blank">
+        <div class="thumb"><img src="07-stats-report.png" alt="统计与核查 · 患者报告" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>07 · 患者报告</b><span>P-004：覆盖率、趋势、来源、随访摘要、重复登记、缺失时点</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>随访与任务闭环</h2>
+    <div class="grid">
+      <a class="shot" href="08-followups.png" target="_blank">
+        <div class="thumb"><img src="08-followups.png" alt="随访中心" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>08 · 随访中心</b><span>待处理任务、随访历史与记录表单</span></div>
+      </a>
+      <a class="shot modal" href="09-task-close-modal.png" target="_blank">
+        <div class="thumb"><img src="09-task-close-modal.png" alt="任务处理弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>09 · 任务处理弹窗</b><span>必填处理说明，可选安排复训提醒</span></div>
+      </a>
+      <a class="shot modal" href="10-medication-backfill-modal.png" target="_blank">
+        <div class="thumb"><img src="10-medication-backfill-modal.png" alt="补登用药弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>10 · 补登用药弹窗</b><span>时点平铺点选，支持按需用药与历史补登</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>管理端</h2>
+    <div class="grid">
+      <a class="shot" href="11-admin-device-models.png" target="_blank">
+        <div class="thumb"><img src="11-admin-device-models.png" alt="装置型号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>11 · 装置型号</b><span>pMDI / DPI / SMI 型号目录</span></div>
+      </a>
+      <a class="shot" href="12-admin-guides.png" target="_blank">
+        <div class="thumb"><img src="12-admin-guides.png" alt="指导版本" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>12 · 指导版本</b><span>指导稿审核与发布状态</span></div>
+      </a>
+      <a class="shot" href="13-admin-accounts.png" target="_blank">
+        <div class="thumb"><img src="13-admin-accounts.png" alt="账号管理" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>13 · 账号</b><span>医护、管理员与患者账号</span></div>
+      </a>
+      <a class="shot" href="14-admin-knowledge.png" target="_blank">
+        <div class="thumb"><img src="14-admin-knowledge.png" alt="知识内容" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>14 · 知识内容</b><span>知识源与引用内容</span></div>
+      </a>
+      <a class="shot tall" href="15-admin-audit.png" target="_blank">
+        <div class="thumb"><img src="15-admin-audit.png" alt="审计日志" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>15 · 审计日志</b><span>登录、登记、随访、任务等关键操作留痕</span></div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  截图目录：docs/evidence/full-ui-2026-10-26 · 点击任意卡片可在新标签页查看原始长图。
+</footer>
+</body>
+</html>

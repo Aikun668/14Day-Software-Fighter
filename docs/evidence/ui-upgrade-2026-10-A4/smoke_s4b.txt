@@ -1,0 +1,22 @@
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOThiNGE2YjRlNDgiLCJqdGkiOiIyYzRlYWY0NDZlYj
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMDUxMjYzNmI3NTUiLCJqdGkiOiIyYTI0MmUxNzQzNW
+PASS GET    /api/patients                                           -> 200 {"items":[{"id":"320f18e0-a613-4e80-ae2c-98daf9ee37f7","patient_code":"P-004","display_name":"李先生","diagnosis_label":"慢性阻塞性肺疾病（DEMO）","assig
+PASS GET    /api/device-models?page_size=100                        -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"万托林","model_name":"吸入气雾剂 pMDI","manufacturer":"阿斯利康","stat
+
+=== T08 版本修订 ===
+PASS GET    /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/medication-plans?include_history=true&page_size=100 -> 200 {"items":[{"id":"f30f8947-d45e-48a6-99dc-762a634b5477","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-
+PASS POST   /api/medication-plans/cda9ef27-a779-4c88-a106-53ccadbad958/revisions -> 201 {"id":"aee63347-d357-4ce3-a5f3-16d209d2c69f","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-459f-8090-
+  新版本: 4
+
+=== T09 PRN 计划 ===
+PASS POST   /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/medication-plans -> 201 {"id":"438a9b8d-b59e-46ed-b579-a2c19e739e45","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-459f-8090-
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"009281a1-5c3f-4787-b857-632c44d932be","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"438a9b8d-b59e-46ed-b579
+  PRN 登记 source=PATIENT_REPORT
+
+=== T16 撤销登记 ===
+PASS GET    /api/me/medication-events?page_size=1                   -> 200 {"items":[{"id":"009281a1-5c3f-4787-b857-632c44d932be","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"438a9b8d-b59e-46ed-b57
+PASS POST   /api/medication-events/009281a1-5c3f-4787-b857-632c44d932be/revoke -> 200 {"id":"009281a1-5c3f-4787-b857-632c44d932be","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"438a9b8d-b59e-46ed-b579-a2c19e73
+  撤销后 status=REVOKED
+PASS POST   /api/medication-events/009281a1-5c3f-4787-b857-632c44d932be/revoke -> 409 {"detail":{"code":"ALREADY_REVOKED","message":"记录已撤销","details":null}}
+
+=== 测试完成 ===

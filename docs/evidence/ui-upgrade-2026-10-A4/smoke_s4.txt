@@ -1,0 +1,36 @@
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjODczNWJmNy04M2M3LTQyY2ItODBlZi1jOThiNGE2YjRlNDgiLCJqdGkiOiI2MzIwYWQyZjQwZTY0ZmFmYmU3
+PASS POST   /api/auth/login                                         -> 200 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmI3YWY4My03M2QwLTRmZmQtOTBlMC1iMDUxMjYzNmI3NTUiLCJqdGkiOiI3NjVmZGUzYTZmYTQ0ZTE4YjQ5
+PASS GET    /api/patients                                           -> 200 {"items":[{"id":"320f18e0-a613-4e80-ae2c-98daf9ee37f7","patient_code":"P-004","display_name":"李先生","diagnosis_label":"慢性阻塞性肺疾病（DEMO）","assigned_clinic
+PASS GET    /api/device-models?page_size=100                        -> 200 {"items":[{"id":"d2295ed4-7d76-459f-8090-4cb77af6b614","category":"pMDI","brand":"万托林","model_name":"吸入气雾剂 pMDI","manufacturer":"阿斯利康","status":"ACTIV
+
+=== J027 计划创建（7天每天2次）===
+PASS POST   /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/medication-plans -> 201 {"id":"f30f8947-d45e-48a6-99dc-762a634b5477","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","device_model_id":"d2295ed4-7d76-459f-8090-4cb77af6b6
+  计划ID: f30f8947-d45e-48a6-99dc-762a634b5477, 版本: 1
+
+=== 查询 daily-slots（2026-10-12 ~ 2026-10-19）===
+PASS GET    /api/me/daily-slots?from=2026-10-12&to=2026-10-19       -> 200 {"items":[{"id":"905c5d81-b6cd-4e26-9d79-8da27f4dc419","plan_id":"03dff62f-3d3b-4bef-9c1f-16b3c4064425","patient_id":"e4a5a022-ff42-45e8-868c-3249e324
+  本计划时点数: 14
+
+=== J029 登记 10 个不同时点 ===
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"b22866b1-59b8-4df8-bef0-63f7a597d697","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"665705c9-e48e-4512-abcd-93061ee70f4c","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"c24d3afa-e286-4681-879e-448a7a3cbc65","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"91a169dd-225e-4b8e-830f-5229b15031fc","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"7f2af255-b605-4c46-b261-8aeca853a563","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"8facb22d-8760-47d7-94e5-3213dea4723d","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"9bf16b6e-04df-495c-85c8-1f62e4d19906","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"368c648b-660a-4f0b-a04f-c73c117a6518","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"40e59711-41dd-4243-90a3-0dad853e01e4","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"5693e37f-3e4a-4218-9f9b-c64aba63ff25","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+
+=== J031 统计（应 N=14, M=10, 71.4%）===
+PASS GET    /api/patients/e4a5a022-ff42-45e8-868c-3249e32417e8/stats?from=2026-10-12&to=2026-10-19 -> 200 {"from_":"2026-10-12","to":"2026-10-19","timezone":"Asia/Shanghai","N":42,"M":30,"coverage_rate":71.4,"missing_slots":[{"slot_id":"ead59f7a-781d-4807-
+  N=42, M=30, coverage=71.4
+  source_breakdown={'PATIENT_REPORT': 32}
+  missing=12 个
+
+=== J029 重复登记（同 slot 第2次，应 is_duplicate=true）===
+PASS POST   /api/medication-events                                  -> 201 {"event":{"id":"38392c31-1f7d-4cc8-83cf-0d7aad66d8b9","patient_id":"e4a5a022-ff42-45e8-868c-3249e32417e8","plan_id":"f30f8947-d45e-48a6-99dc-762a634b5
+  is_duplicate=True
+
+=== 测试完成 ===

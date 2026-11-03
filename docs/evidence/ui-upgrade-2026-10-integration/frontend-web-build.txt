@@ -1,0 +1,11 @@
+
+> frontend-web@0.0.0 build D:\My_Grand_Projects2026\14Day-Software-Fighter\frontend-web
+> tsc -b && vite build
+
+src/components/CoverageTrendChart.tsx(2,26): error TS2307: Cannot find module 'echarts/core' or its corresponding type declarations.
+src/components/CoverageTrendChart.tsx(3,41): error TS2307: Cannot find module 'echarts/charts' or its corresponding type declarations.
+src/components/CoverageTrendChart.tsx(4,49): error TS2307: Cannot find module 'echarts/components' or its corresponding type declarations.
+src/components/CoverageTrendChart.tsx(5,32): error TS2307: Cannot find module 'echarts/renderers' or its corresponding type declarations.
+src/components/CoverageTrendChart.tsx(6,36): error TS2307: Cannot find module 'echarts' or its corresponding type declarations.
+src/components/CoverageTrendChart.tsx(32,19): error TS7006: Parameter 'params' implicitly has an 'any' type.
+ ELIFECYCLE  Command failed with exit code 2.

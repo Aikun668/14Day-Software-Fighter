@@ -1,0 +1,15 @@
+
+> patient-app@0.0.0 build D:\My_Grand_Projects2026\14Day-Software-Fighter\patient-app
+> tsc -b && vite build
+
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.51 kB │ gzip:  0.36 kB
+dist/assets/index-D8XgUMiu.css    0.83 kB │ gzip:  0.50 kB
+dist/assets/web-CRuFhpqk.js       0.84 kB │ gzip:  0.40 kB
+dist/assets/index-CWqJL4Lw.js   303.77 kB │ gzip: 94.34 kB
+
+[32m✓ built in 1.78s[39m

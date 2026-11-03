@@ -1,0 +1,76 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Scripts\python.exe
+rootdir: D:\My_Grand_Projects2026\14Day-Software-Fighter\backend
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 51 items
+
+tests/test_infra.py::test_tests_are_bound_to_test_database_only PASSED   [  1%]
+tests/test_infra.py::test_health_endpoint_reachable_through_client PASSED [  3%]
+tests/test_llm_answer.py::test_llm_answer_returns_model_text PASSED      [  5%]
+tests/test_llm_answer.py::test_request_body_contains_only_question_and_hit_texts PASSED [  7%]
+tests/test_llm_answer.py::test_system_prompt_forbids_dosage_diagnosis_and_emergency PASSED [  9%]
+tests/test_llm_answer.py::test_unsafe_model_output_is_replaced_with_refusal[\u5efa\u8bae\u60a8\u52a0\u5927\u5242\u91cf\u3002] PASSED [ 11%]
+tests/test_llm_answer.py::test_unsafe_model_output_is_replaced_with_refusal[\u8bca\u65ad\u4e3a\u54ee\u5598\u3002] PASSED [ 13%]
+tests/test_llm_answer.py::test_unsafe_model_output_is_replaced_with_refusal[\u51fa\u73b0\u8fd9\u79cd\u60c5\u51b5\u8bf7\u6025\u8bca\u5c31\u533b\u3002] PASSED [ 15%]
+tests/test_llm_answer.py::test_empty_model_output_raises PASSED          [ 17%]
+tests/test_llm_answer.py::test_missing_base_url_raises_before_any_request PASSED [ 19%]
+tests/test_llm_answer.py::test_timeout_propagates_to_caller PASSED       [ 21%]
+tests/test_llm_answer.py::test_post_chat_uses_stdlib_urlopen_with_configured_timeout PASSED [ 23%]
+tests/test_llm_answer.py::test_redirect_is_refused_so_key_is_never_forwarded PASSED [ 25%]
+tests/test_llm_answer.py::test_ask_with_key_uses_llm_and_server_side_citations PASSED [ 27%]
+tests/test_llm_answer.py::test_model_output_refusal_is_reported_as_out_of_scope_without_citations PASSED [ 29%]
+tests/test_llm_answer.py::test_ask_without_key_labels_extractive_answer_and_skips_llm PASSED [ 31%]
+tests/test_llm_answer.py::test_out_of_scope_question_is_refused_before_llm[\u6211\u53ef\u4ee5\u52a0\u500d\u5242\u91cf\u5417] PASSED [ 33%]
+tests/test_llm_answer.py::test_out_of_scope_question_is_refused_before_llm[\u6211\u662f\u4e0d\u662f\u5f97\u4e86\u54ee\u5598] PASSED [ 35%]
+tests/test_llm_answer.py::test_out_of_scope_question_is_refused_before_llm[\u5598\u4e0d\u4e0a\u6c14\u8981\u6025\u6551\u5417] PASSED [ 37%]
+tests/test_llm_answer.py::test_sensitive_question_is_refused_before_llm[\u6211\u53eb\u5f20\u4e09 13800138000] PASSED [ 39%]
+tests/test_llm_answer.py::test_sensitive_question_is_refused_before_llm[13800138000 \u600e\u4e48\u7528] PASSED [ 41%]
+tests/test_llm_answer.py::test_sensitive_question_is_refused_before_llm[\u8eab\u4efd\u8bc1110101199001011234] PASSED [ 43%]
+tests/test_llm_answer.py::test_sensitive_question_is_refused_before_llm[138-0013-8000 \u600e\u4e48\u7528] PASSED [ 45%]
+tests/test_llm_answer.py::test_sensitive_question_is_refused_before_llm[138 0013 8000 \u600e\u4e48\u7528] PASSED [ 47%]
+tests/test_llm_answer.py::test_sensitive_question_is_refused_before_llm[\u6211\u59d3\u738b\uff0c\u4f7f\u7528\u524d\u8981\u505a\u4ec0\u4e48] PASSED [ 49%]
+tests/test_llm_answer.py::test_chunks_from_other_device_model_are_never_cited PASSED [ 50%]
+tests/test_llm_answer.py::test_llm_timeout_returns_503_and_core_endpoints_still_work PASSED [ 52%]
+tests/test_llm_answer.py::test_api_request_body_excludes_patient_identity PASSED [ 54%]
+tests/test_plan_revision.py::test_revision_creates_next_version_and_closes_previous PASSED [ 56%]
+tests/test_plan_revision.py::test_revision_on_unknown_plan_returns_404 PASSED [ 58%]
+tests/test_plan_revision.py::test_prn_plan_event_has_patient_source_and_no_slot PASSED [ 60%]
+tests/test_plan_revision.py::test_prn_event_rejects_slot_id PASSED       [ 62%]
+tests/test_plan_revision.py::test_revoke_marks_event_revoked PASSED      [ 64%]
+tests/test_plan_revision.py::test_second_revoke_returns_409 PASSED       [ 66%]
+tests/test_stats.py::test_j031_stats_counts_match_fixture_records PASSED [ 68%]
+tests/test_stats.py::test_duplicate_registration_flagged_without_inflating_m PASSED [ 70%]
+tests/test_stats.py::test_nonzero_completion_rate_rounding_and_missing_count PASSED [ 72%]
+tests/test_stats_matrix.py::test_coverage_rate_rounds_to_one_decimal_and_null_when_no_planned_slots PASSED [ 74%]
+tests/test_stats_matrix.py::test_build_matrix_counts_only_due_slots_and_marks_empty_days_null PASSED [ 76%]
+tests/test_stats_matrix.py::test_matrix_rejects_non_clinician PASSED     [ 78%]
+tests/test_stats_matrix.py::test_matrix_requires_authentication PASSED   [ 80%]
+tests/test_stats_matrix.py::test_matrix_only_contains_own_patients PASSED [ 82%]
+tests/test_stats_matrix.py::test_matrix_sum_matches_overview_totals PASSED [ 84%]
+tests/test_stats_matrix.py::test_p001_style_coverage_is_71_4_percent PASSED [ 86%]
+tests/test_stats_matrix.py::test_cells_mark_missing_and_empty_days_correctly PASSED [ 88%]
+tests/test_stats_matrix.py::test_patient_without_plan_returns_null_rates_not_zero PASSED [ 90%]
+tests/test_stats_matrix.py::test_rows_sorted_missing_first_and_no_plan_last PASSED [ 92%]
+tests/test_stats_matrix.py::test_invalid_range_is_rejected PASSED        [ 94%]
+tests/test_stats_matrix.py::test_range_too_large_is_rejected PASSED      [ 96%]
+tests/test_stats_matrix.py::test_build_matrix_buckets_by_shanghai_day_not_utc PASSED [ 98%]
+tests/test_stats_matrix.py::test_window_is_half_open_in_business_timezone_and_ignores_cancelled_slots PASSED [100%]
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.12.14-final-0 _______________
+
+Name                           Stmts   Miss  Cover   Missing
+------------------------------------------------------------
+app\api\stats.py                 134     28    79%   44-45, 85, 104, 159-162, 189-216, 236
+app\services\stats_matrix.py      35      0   100%
+------------------------------------------------------------
+TOTAL                            169     28    83%
+======================= 51 passed, 1 warning in 42.90s ========================

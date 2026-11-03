@@ -1,0 +1,80 @@
+===== RED（临时探针，故意写错的期望，全部应失败；运行后已删除）=====
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Scripts\python.exe
+rootdir: D:\My_Grand_Projects2026\14Day-Software-Fighter\backend
+configfile: pytest.ini
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 3 items
+
+tests/_sd1_red_probe.py::test_probe_wrong_rate_must_fail FAILED          [ 33%]
+tests/_sd1_red_probe.py::test_probe_wrong_due_count_must_fail FAILED     [ 66%]
+tests/_sd1_red_probe.py::test_probe_wrong_missing_must_fail FAILED       [100%]
+
+================================== FAILURES ===================================
+_______________________ test_probe_wrong_rate_must_fail _______________________
+
+    def test_probe_wrong_rate_must_fail():
+>       assert coverage_rate(5, 7) == 71.5  # ��ȷΪ 71.4
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 71.4 == 71.5
+E        +  where 71.4 = coverage_rate(5, 7)
+
+tests\_sd1_red_probe.py:7: AssertionError
+____________________ test_probe_wrong_due_count_must_fail _____________________
+
+    def test_probe_wrong_due_count_must_fail():
+        start, end = _window()
+>       assert len(_due_times(start, end)) == len(_due_times(start, end)) + 1
+E       AssertionError: assert 14 == (14 + 1)
+E        +  where 14 = len([datetime.datetime(2026, 10, 12, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 12, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), ...])
+E        +    where [datetime.datetime(2026, 10, 12, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 12, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), ...] = _due_times(datetime.date(2026, 10, 12), datetime.date(2026, 10, 19))
+E        +  and   14 = len([datetime.datetime(2026, 10, 12, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 12, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), ...])
+E        +    where [datetime.datetime(2026, 10, 12, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 12, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 13, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 8, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), datetime.datetime(2026, 10, 14, 20, 0, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), ...] = _due_times(datetime.date(2026, 10, 12), datetime.date(2026, 10, 19))
+
+tests\_sd1_red_probe.py:12: AssertionError
+_____________________ test_probe_wrong_missing_must_fail ______________________
+
+    def test_probe_wrong_missing_must_fail():
+        n, m = 7, 5
+>       assert (n - m) == 3  # ��ȷΪ 2
+        ^^^^^^^^^^^^^^^^^^^
+E       assert (7 - 5) == 3
+
+tests\_sd1_red_probe.py:17: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/_sd1_red_probe.py::test_probe_wrong_rate_must_fail - assert 71.4...
+FAILED tests/_sd1_red_probe.py::test_probe_wrong_due_count_must_fail - Assert...
+FAILED tests/_sd1_red_probe.py::test_probe_wrong_missing_must_fail - assert (...
+======================== 3 failed, 1 warning in 1.44s =========================
+
+===== GREEN（新增测试 SD-1，首次运行即通过，见说明）=====
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Scripts\python.exe
+rootdir: D:\My_Grand_Projects2026\14Day-Software-Fighter\backend
+configfile: pytest.ini
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 9 items
+
+tests/test_stats.py::test_j031_stats_counts_match_fixture_records PASSED [ 11%]
+tests/test_stats.py::test_duplicate_registration_flagged_without_inflating_m PASSED [ 22%]
+tests/test_stats.py::test_nonzero_completion_rate_rounding_and_missing_count PASSED [ 33%]
+tests/test_plan_revision.py::test_revision_creates_next_version_and_closes_previous PASSED [ 44%]
+tests/test_plan_revision.py::test_revision_on_unknown_plan_returns_404 PASSED [ 55%]
+tests/test_plan_revision.py::test_prn_plan_event_has_patient_source_and_no_slot PASSED [ 66%]
+tests/test_plan_revision.py::test_prn_event_rejects_slot_id PASSED       [ 77%]
+tests/test_plan_revision.py::test_revoke_marks_event_revoked PASSED      [ 88%]
+tests/test_plan_revision.py::test_second_revoke_returns_409 PASSED       [100%]
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  D:\My_Grand_Projects2026\14Day-Software-Fighter\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 9 passed, 1 warning in 14.78s ========================

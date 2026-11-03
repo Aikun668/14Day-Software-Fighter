@@ -1,0 +1,173 @@
+﻿=== feat/ui-a (wt-a frontend-web) 2026-10-19T20:29:25 pnpm=C:\Users\杨玉璋\AppData\Roaming\npm\pnpm.cmd ===
+
+===== CMD: pnpm install --frozen-lockfile =====
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Done in 619ms using pnpm v10.12.4
+
+===== EXIT CODE: 0 =====
+
+===== CMD: pnpm build =====
+
+> frontend-web@0.0.0 build D:\My_Grand_Projects2026\wt-a\frontend-web
+> tsc -b && vite build
+
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 2102 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                     0.52 kB │ gzip:   0.39 kB
+dist/assets/index-DpbVUp3u.css      7.20 kB │ gzip:   2.07 kB
+dist/assets/index-C9Tf6KVx.js   1,767.57 kB │ gzip: 571.65 kB
+
+pnpm.cmd : [33m[plugin builtin:vite-reporter] 
+At line:15 char:2419
++ ... pend -Encoding utf8; Push-Location $dir; $o = & $pnpm @c 2>&1; $code= ...
++                                                   ~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([33m[plugin builtin:vite-reporter] :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeS
+plitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 867ms[39m
+
+===== EXIT CODE: 0 =====
+
+===== CMD: pnpm lint =====
+
+> frontend-web@0.0.0 lint D:\My_Grand_Projects2026\wt-a\frontend-web
+> oxlint
+
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.[0m
+    ╭─[[38;2;92;157;255;1msrc/features/auth/AuthContext.tsx[0m:84:17]
+ [2m83[0m │ 
+ [2m84[0m │ export function useAuth() {
+    · [38;2;246;87;248m                ───────[0m
+ [2m85[0m │   const ctx = useContext(AuthContext)
+    ╰────
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders[0m
+    ╭─[[38;2;92;157;255;1msrc/features/auth/AuthContext.tsx[0m:50:7]
+ [2m30[0m │ 
+ [2m31[0m │   useEffect(() => {
+    · [38;2;246;87;248m  ────┬────[0m
+    ·       [38;2;246;87;248m╰── [38;2;246;87;248mThis is the containing effect[0m[0m
+ [2m32[0m │     setTokenGetter(() => memoryToken)
+ [2m33[0m │     // 401 时清内存 token 并跳登录页
+ [2m34[0m │     setUnauthorizedHandler(() => {
+ [2m35[0m │       memoryToken = null
+ [2m36[0m │       setToken(null)
+ [2m37[0m │       setUser(null)
+ [2m38[0m │       window.location.href = '/login'
+ [2m39[0m │     })
+ [2m40[0m │     // 启动时若有内存 token 则尝试恢复身份
+ [2m41[0m │     if (memoryToken) {
+ [2m42[0m │       apiFetch<User>('/api/me')
+ [2m43[0m │         .then(setUser)
+ [2m44[0m │         .catch(() => {
+ [2m45[0m │           memoryToken = null
+ [2m46[0m │           setToken(null)
+ [2m47[0m │         })
+ [2m48[0m │         .finally(() => setLoading(false))
+ [2m49[0m │     } else {
+ [2m50[0m │       setLoading(false)
+    · [38;2;30;201;212m      ─────┬────[0m
+    ·            [38;2;30;201;212m╰── [38;2;30;201;212mAvoid calling setState() directly within an effect[0m[0m
+ [2m51[0m │     }
+    ╰────
+[38;2;106;159;181m  help: [0mEffects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+[38;2;106;159;181m  note: [0mReact Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders[0m
+    ╭─[[38;2;92;157;255;1msrc/pages/clinician/PatientListPage.tsx[0m:69:21]
+ [2m68[0m │ 
+ [2m69[0m │   useEffect(() => { fetchList(page, search) }, [page])  // eslint-disable-line react-hooks/exhaustive-deps
+    · [38;2;246;87;248m  ────┬────[0m[38;2;30;201;212m         ────┬────[0m
+    ·       [38;2;246;87;248m│[0m                 [38;2;30;201;212m╰── [38;2;30;201;212mAvoid calling setState() directly within an effect[0m[0m
+    ·       [38;2;246;87;248m╰── [38;2;246;87;248mThis is the containing effect[0m[0m
+ [2m70[0m │ 
+    ╰────
+[38;2;106;159;181m  help: [0mEffects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+[38;2;106;159;181m  note: [0mReact Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders[0m
+     ╭─[[38;2;92;157;255;1msrc/pages/clinician/StatsPage.tsx[0m:113:21]
+ [2m112[0m │ 
+ [2m113[0m │   useEffect(() => { fetchPatients() }, [])
+     · [38;2;246;87;248m  ────┬────[0m[38;2;30;201;212m         ──────┬──────[0m
+     ·       [38;2;246;87;248m│[0m                   [38;2;30;201;212m╰── [38;2;30;201;212mAvoid calling setState() directly within an effect[0m[0m
+     ·       [38;2;246;87;248m╰── [38;2;246;87;248mThis is the containing effect[0m[0m
+ [2m114[0m │ 
+     ╰────
+[38;2;106;159;181m  help: [0mEffects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+[38;2;106;159;181m  note: [0mReact Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders[0m
+    ╭─[[38;2;92;157;255;1msrc/pages/clinician/PlanEditPage.tsx[0m:44:21]
+ [2m43[0m │ 
+ [2m44[0m │   useEffect(() => { fetchPatients(); fetchModels() }, [])
+    · [38;2;246;87;248m  ────┬────[0m[38;2;30;201;212m         ──────┬──────[0m
+    ·       [38;2;246;87;248m│[0m                   [38;2;30;201;212m╰── [38;2;30;201;212mAvoid calling setState() directly within an effect[0m[0m
+    ·       [38;2;246;87;248m╰── [38;2;246;87;248mThis is the containing effect[0m[0m
+ [2m45[0m │ 
+    ╰────
+[38;2;106;159;181m  help: [0mEffects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+[38;2;106;159;181m  note: [0mReact Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders[0m
+    ╭─[[38;2;92;157;255;1msrc/components/WebLayout.tsx[0m:49:16]
+ [2m46[0m │ 
+ [2m47[0m │   useEffect(() => {
+    · [38;2;246;87;248m  ────┬────[0m
+    ·       [38;2;246;87;248m╰── [38;2;246;87;248mThis is the containing effect[0m[0m
+ [2m48[0m │     const kw = keyword.trim().toLowerCase()
+ [2m49[0m │     if (!kw) { setHits([]); return }
+    · [38;2;30;201;212m               ───┬───[0m
+    ·                   [38;2;30;201;212m╰── [38;2;30;201;212mAvoid calling setState() directly within an effect[0m[0m
+ [2m50[0m │     setHits(roster.filter(
+    ╰────
+[38;2;106;159;181m  help: [0mEffects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+[38;2;106;159;181m  note: [0mReact Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders[0m
+    ╭─[[38;2;92;157;255;1msrc/pages/clinician/FollowupPage.tsx[0m:42:21]
+ [2m41[0m │ 
+ [2m42[0m │   useEffect(() => { loadPatients(); loadTasks() }, [])
+    · [38;2;246;87;248m  ────┬────[0m[38;2;30;201;212m         ──────┬─────[0m
+    ·       [38;2;246;87;248m│[0m                   [38;2;30;201;212m╰── [38;2;30;201;212mAvoid calling setState() directly within an effect[0m[0m
+    ·       [38;2;246;87;248m╰── [38;2;246;87;248mThis is the containing effect[0m[0m
+ [2m43[0m │ 
+    ╰────
+[38;2;106;159;181m  help: [0mEffects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+[38;2;106;159;181m  note: [0mReact Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.[0m
+    ╭─[[38;2;92;157;255;1msrc/components/CoverageHeatmap.tsx[0m:27:17]
+ [2m26[0m │ /** 单格状态：空白（无时点）/ 实心（全部已登记）/ 半实心（部分登记）/ 空心（未发现登记） */
+ [2m27[0m │ export function cellState(cell: MatrixCell): CellState {
+    · [38;2;246;87;248m                ─────────[0m
+ [2m28[0m │   if (cell.N === 0) return 'blank'
+    ╰────
+
+  [38;2;244;191;117;1m⚠[0m [38;2;244;191;117;1mreact(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders[0m
+    ╭─[[38;2;92;157;255;1msrc/pages/admin/AdminPage.tsx[0m:92:21]
+ [2m91[0m │ 
+ [2m92[0m │   useEffect(() => { fetchAll() }, [])
+    · [38;2;246;87;248m  ────┬────[0m[38;2;30;201;212m         ────┬───[0m
+    ·       [38;2;246;87;248m│[0m                 [38;2;30;201;212m╰── [38;2;30;201;212mAvoid calling setState() directly within an effect[0m[0m
+    ·       [38;2;246;87;248m╰── [38;2;246;87;248mThis is the containing effect[0m[0m
+ [2m93[0m │ 
+    ╰────
+[38;2;106;159;181m  help: [0mEffects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+[38;2;106;159;181m  note: [0mReact Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+Found 9 warnings and 0 errors.
+Finished in 39ms on 23 files with 116 rules using 18 threads.
+
+===== EXIT CODE: 0 =====

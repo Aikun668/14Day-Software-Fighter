@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, DatePicker, Empty, Form, Input, Modal, Select, Space, Spin, Tabs, Tag, message } from 'antd'
+import { Button, Collapse, DatePicker, Dropdown, Empty, Form, Input, Modal, Select, Space, Spin, Tabs, Tag, message } from 'antd'
 import dayjs from 'dayjs'
 import { apiFetch } from '../../api/client'
 import PageHeader from '../../components/PageHeader'
@@ -57,6 +57,12 @@ interface Followup {
   next_plan: string | null
 }
 
+interface CoverageStats {
+  N: number
+  M: number
+  coverage_rate: number | null
+}
+
 // M02 患者详情（J016 补充）：档案 / 装置 / 计划 / 记录 / 训练 / 随访
 export default function PatientDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -68,6 +74,9 @@ export default function PatientDetailPage() {
   const [trainings, setTrainings] = useState<Training[]>([])
   const [followups, setFollowups] = useState<Followup[]>([])
   const [modelNames, setModelNames] = useState<Record<string, string>>({})
+  const [modelCategories, setModelCategories] = useState<Record<string, string>>({})
+  const [coverageStats, setCoverageStats] = useState<CoverageStats | null>(null)
+  const [activeRecordTab, setActiveRecordTab] = useState('overview')
   // 各列表的服务端总数（页面上只取前 50 条，计数要显示真实总数）
   const [totals, setTotals] = useState({ events: 0, trainings: 0, followups: 0, plans: 0 })
   const [loading, setLoading] = useState(true)
@@ -77,15 +86,19 @@ export default function PatientDetailPage() {
     if (!id) return
     const load = async () => {
       setLoading(true)
+      setActiveRecordTab('overview')
       try {
-        const [p, d, pl, ev, tr, fu, models] = await Promise.all([
+        const from = dayjs().subtract(7, 'day').format('YYYY-MM-DD')
+        const to = dayjs().format('YYYY-MM-DD')
+        const [p, d, pl, ev, tr, fu, models, coverage] = await Promise.all([
           apiFetch<PatientDetail>(`/api/patients/${id}`),
           apiFetch<{ items: Device[] }>(`/api/patients/${id}/devices`).catch(() => ({ items: [] })),
           apiFetch<{ items: Plan[] }>(`/api/patients/${id}/medication-plans?include_history=true&page_size=100`).catch(() => ({ items: [] })),
           apiFetch<{ items: Event[]; total: number }>(`/api/patients/${id}/medication-events?page_size=50`).catch(() => ({ items: [], total: 0 })),
           apiFetch<{ items: Training[]; total: number }>(`/api/patients/${id}/training-sessions?page_size=50`).catch(() => ({ items: [], total: 0 })),
           apiFetch<{ items: Followup[]; total: number }>(`/api/patients/${id}/followups?page_size=50`).catch(() => ({ items: [], total: 0 })),
-          apiFetch<{ items: { id: string; model_name: string }[] }>('/api/device-models?page_size=100').catch(() => ({ items: [] })),
+          apiFetch<{ items: { id: string; category: string; model_name: string }[] }>('/api/device-models?page_size=100').catch(() => ({ items: [] })),
+          apiFetch<CoverageStats>(`/api/patients/${id}/stats?from=${from}&to=${to}`).catch(() => null),
         ])
         setPatient(p)
         setDevices(d.items)
@@ -96,6 +109,8 @@ export default function PatientDetailPage() {
         // 服务端总数（列表只取了前 50 条，标签计数不能直接用数组长度）
         setTotals({ events: ev.total, trainings: tr.total, followups: fu.total, plans: pl.items.length })
         setModelNames(Object.fromEntries(models.items.map((m) => [m.id, m.model_name])))
+        setModelCategories(Object.fromEntries(models.items.map((m) => [m.id, m.category])))
+        setCoverageStats(coverage)
       } catch (e) {
         message.error((e as Error).message)
       } finally {
@@ -107,6 +122,7 @@ export default function PatientDetailPage() {
 
   const dt = (s: string) => new Date(s).toLocaleString('zh-CN')
   const d = (s: string) => new Date(s).toLocaleDateString('zh-CN')
+  const cleanDemoMarker = (value: string) => value.replace(/\s*[(（]DEMO[)）]/gi, '').trim()
 
   // ---- 动态时间线：把计划/登记/训练/随访合并为一条按时间倒序的轴 ----
   type TimelineItem = {
@@ -116,11 +132,7 @@ export default function PatientDetailPage() {
     time: string
     kind: 'plan' | 'event' | 'training' | 'followup'
     title: string
-    detail: string
-    tone: 'plan' | 'ok' | 'warn' | 'bad'
-  }
-  const toneLabel: Record<TimelineItem['kind'], string> = {
-    plan: '计划', event: '登记', training: '训练', followup: '随访',
+    details: string[]
   }
   const timeline: TimelineItem[] = [
     ...plans.map<TimelineItem>((p) => ({
@@ -128,32 +140,39 @@ export default function PatientDetailPage() {
       day: d(p.starts_at), time: new Date(p.starts_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
       kind: 'plan',
       title: `用药计划更新为 v${p.version}（${p.plan_type === 'REGULAR' ? '固定' : '按需'}）`,
-      detail: `${p.drug_label}｜每日时点：${p.daily_times?.length ? p.daily_times.map((t) => String(t.local_time).slice(0, 5)).join(' / ') : '—'}`,
-      tone: 'plan',
+      details: [
+        p.drug_label,
+        `每日时点：${p.daily_times?.length ? p.daily_times.map((t) => String(t.local_time).slice(0, 5)).join(' / ') : '—'}`,
+      ],
     })),
     ...events.map<TimelineItem>((e) => ({
       key: `e-${e.id}`, at: new Date(e.occurred_at).getTime(),
       day: d(e.occurred_at), time: new Date(e.occurred_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
       kind: 'event',
       title: e.status === 'REVOKED' ? '用药登记（已撤销）' : '用药登记',
-      detail: `${e.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}${e.slot_id ? ' · 固定时点' : ' · 按需'}${e.note ? ` · ${e.note}` : ''}`,
-      tone: e.status === 'REVOKED' ? 'bad' : 'ok',
+      details: [
+        e.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察',
+        e.slot_id ? '固定时点' : '按需记录',
+        e.note ? `备注：${e.note}` : '',
+      ].filter(Boolean),
     })),
     ...trainings.map<TimelineItem>((t) => ({
       key: `t-${t.id}`, at: new Date(t.submit_at).getTime(),
       day: d(t.submit_at), time: new Date(t.submit_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
       kind: 'training',
       title: t.source === 'PATIENT_REPORT' ? '操作自检（患者自述）' : '操作评估（医护观察）',
-      detail: t.result || '—',
-      tone: t.source === 'PATIENT_REPORT' ? 'ok' : 'plan',
+      details: [t.result || '—'],
     })),
     ...followups.map<TimelineItem>((f) => ({
       key: `f-${f.id}`, at: new Date(f.followed_at).getTime(),
       day: d(f.followed_at), time: new Date(f.followed_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
       kind: 'followup',
       title: '随访记录',
-      detail: [f.feedback, f.action_taken, f.next_plan].filter(Boolean).join('｜'),
-      tone: 'warn',
+      details: [
+        f.feedback && `反馈：${f.feedback}`,
+        f.action_taken && `措施：${f.action_taken}`,
+        f.next_plan && `后续：${f.next_plan}`,
+      ].filter((value): value is string => Boolean(value)),
     })),
   ].sort((a, b) => b.at - a.at)
 
@@ -164,6 +183,29 @@ export default function PatientDetailPage() {
     else acc.push({ day: it.day, items: [it] })
     return acc
   }, [])
+
+  const eventGroups = [...events]
+    .sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
+    .reduce<{ day: string; items: Event[] }[]>((acc, event) => {
+      const day = d(event.occurred_at)
+      const last = acc[acc.length - 1]
+      if (last && last.day === day) last.items.push(event)
+      else acc.push({ day, items: [event] })
+      return acc
+    }, [])
+
+  const currentPlan = plans
+    .filter((plan) => plan.ends_at === null)
+    .sort((a, b) => b.starts_at.localeCompare(a.starts_at))[0] ?? null
+  const currentDevice = devices
+    .filter((device) => device.effective_to === null)
+    .sort((a, b) => b.effective_from.localeCompare(a.effective_from))[0] ?? null
+  const currentDeviceLabel = currentDevice
+    ? modelCategories[currentDevice.device_model_id] || modelNames[currentDevice.device_model_id] || '已绑定'
+    : '暂无装置记录'
+  const overviewUpdates = timeline
+    .filter((item) => item.kind !== 'event' || item.title.includes('已撤销') || item.details.some((detail) => detail.startsWith('备注：')))
+    .slice(0, 2)
 
   // ---- 医护闭环操作（编辑 / 绑账号 / 绑装置 / 撤销登记 / 计划修订）----
   const [editOpen, setEditOpen] = useState(false)
@@ -181,13 +223,16 @@ export default function PatientDetailPage() {
 
   const reload = async () => {
     if (!id) return
-    const [p2, d2, pl2, ev2, tr2, fu2] = await Promise.all([
+    const from = dayjs().subtract(7, 'day').format('YYYY-MM-DD')
+    const to = dayjs().format('YYYY-MM-DD')
+    const [p2, d2, pl2, ev2, tr2, fu2, coverage] = await Promise.all([
       apiFetch<PatientDetail>(`/api/patients/${id}`),
       apiFetch<{ items: Device[] }>(`/api/patients/${id}/devices`).catch(() => ({ items: [] })),
       apiFetch<{ items: Plan[] }>(`/api/patients/${id}/medication-plans?include_history=true&page_size=100`).catch(() => ({ items: [] })),
       apiFetch<{ items: Event[]; total: number }>(`/api/patients/${id}/medication-events?page_size=50`).catch(() => ({ items: [], total: 0 })),
       apiFetch<{ items: Training[]; total: number }>(`/api/patients/${id}/training-sessions?page_size=50`).catch(() => ({ items: [], total: 0 })),
       apiFetch<{ items: Followup[]; total: number }>(`/api/patients/${id}/followups?page_size=50`).catch(() => ({ items: [], total: 0 })),
+      apiFetch<CoverageStats>(`/api/patients/${id}/stats?from=${from}&to=${to}`).catch(() => null),
     ])
     setPatient(p2); setDevices(d2.items); setPlans(pl2.items)
     setEvents(ev2.items); setTrainings(tr2.items); setFollowups(fu2.items)
@@ -197,6 +242,7 @@ export default function PatientDetailPage() {
       followups: fu2.total ?? fu2.items.length,
       plans: pl2.items.length,
     })
+    setCoverageStats(coverage)
   }
 
   const openEdit = () => {
@@ -301,6 +347,11 @@ export default function PatientDetailPage() {
     return <Empty description="患者不存在或无权访问" style={{ marginTop: 64 }} />
   }
 
+  const isDemoData = [patient.diagnosis_label, patient.note, ...plans.map((plan) => plan.drug_label)]
+    .some((value) => value?.includes('DEMO'))
+  const demoBadgeLabel = '演示数据'
+  const profileNote = patient.note?.includes('DEMO 演示数据') ? null : patient.note
+
   const blank = (text: string) => <p className="card-empty" style={{ padding: 0 }}>{text}</p>
   // 列表只取前 50 条：标签显示服务端总数，超出时在列表上方给出说明，避免误以为「就这么多」
   const LIST_LIMIT = 50
@@ -315,201 +366,367 @@ export default function PatientDetailPage() {
   )
 
   return (
-    <div>
+    <div className="patient-detail-page">
       <Button type="link" style={{ paddingLeft: 0, marginBottom: 8 }} onClick={() => navigate('/patients')}>← 返回患者列表</Button>
-      <PageHeader title={`${patient.display_name} · ${patient.patient_code}`} subtitle="患者档案、动态时间线与用药计划" />
+      <PageHeader
+        title={(
+          <span className="patient-page-title">
+            <span>{patient.display_name} · {patient.patient_code}</span>
+            {isDemoData && <Tag className="patient-demo-tag">{demoBadgeLabel}</Tag>}
+          </span>
+        )}
+      />
 
-      <section className="page-section">
-        <div className="section-head">
+      <section className="page-section patient-overview">
+        <div className="section-head patient-overview-head">
           <h2 className="section-title">基本信息</h2>
-          <Space size={8}>
+          <Space className="patient-actions" size={8} wrap>
             <Button size="small" onClick={() => setBackfillOpen(true)}>补登用药</Button>
-            <Button size="small" onClick={openEdit}>编辑信息</Button>
+            <Dropdown
+              trigger={['click']}
+              menu={{
+                items: [
+                  { key: 'edit', label: '编辑信息', onClick: openEdit },
+                  { key: 'device', label: '绑定装置', onClick: () => { void openBindDev() } },
+                ],
+              }}
+            >
+              <Button size="small">更多操作</Button>
+            </Dropdown>
             {patient.account_user_id
               ? null
-              : <Button size="small" type="primary" onClick={openBindAcct}>绑定登录账号</Button>}
-            <Button size="small" onClick={openBindDev}>绑定装置</Button>
+              : <Button size="small" type="primary" onClick={openBindAcct}>绑定账号</Button>}
           </Space>
         </div>
-        <dl className="info-grid">
-          <div>
-            <dt>患者编号</dt>
-            <dd className="tabular">{patient.patient_code}</dd>
-          </div>
-          <div>
-            <dt>姓名/别名</dt>
-            <dd>{patient.display_name}</dd>
-          </div>
+        <dl className="info-grid patient-info-grid">
           <div>
             <dt>诊断标签</dt>
-            <dd>{patient.diagnosis_label || '—'}</dd>
+            <dd>{patient.diagnosis_label ? cleanDemoMarker(patient.diagnosis_label) : '—'}</dd>
           </div>
           <div>
             <dt>登录账号</dt>
             <dd>{patient.account_user_id ? <Tag className="tag-brand">已绑定</Tag> : <Tag>未绑定</Tag>}</dd>
           </div>
-          <div className="span-2">
-            <dt>备注</dt>
-            <dd>{patient.note || '—'}</dd>
-          </div>
         </dl>
+        {profileNote && (
+          <Collapse
+            ghost
+            className="patient-profile-note"
+            items={[{ key: 'note', label: '查看档案备注', children: <p>{profileNote}</p> }]}
+          />
+        )}
       </section>
 
-      <section className="page-section" style={{ borderBottom: 'none' }}>
+      <section className="page-section patient-records" style={{ borderBottom: 'none' }}>
         <Tabs
+          activeKey={activeRecordTab}
+          onChange={setActiveRecordTab}
           items={[
             {
-              key: 'timeline',
-              label: `动态（${totals.events + totals.trainings + totals.followups + totals.plans}）`,
-              children: timeline.length === 0 ? blank('暂无动态') : (
-                <div className="timeline">
-                  {(truncated('events') || truncated('trainings') || truncated('followups'))
-                    ? <p className="muted" style={{ margin: '0 0 8px' }}>{truncatedHint}</p>
-                    : null}
-                  {timelineGroups.map((g) => (
-                    <div key={g.day} className="tl-group">
-                      <div className="tl-day">{g.day}</div>
-                      <ul className="tl-list">
-                        {g.items.map((it) => (
-                          <li key={it.key} className="tl-item">
-                            <span className={`tl-dot tone-${it.tone}`} aria-hidden />
-                            <div className="tl-body">
-                              <div className="tl-head">
-                                <span className={`tl-kind kind-${it.kind}`}>{toneLabel[it.kind]}</span>
-                                <span className="tl-title">{it.title}</span>
-                                <span className="tl-time">{it.time}</span>
-                              </div>
-                              <div className="tl-detail">{it.detail}</div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
+              key: 'overview',
+              label: '概览',
+              children: (
+                <div className="patient-overview-content">
+                  <div className="patient-summary-grid">
+                    <section className="patient-summary-card">
+                      <span className="patient-summary-label">当前治疗</span>
+                      {currentPlan ? (
+                        <>
+                          <strong className="patient-summary-value">{cleanDemoMarker(currentPlan.drug_label)}</strong>
+                          <div className="patient-summary-meta">
+                            <span>
+                              {currentPlan.plan_type === 'REGULAR' ? '固定计划' : '按需计划'}
+                              {currentPlan.daily_times?.length
+                                ? ` · ${currentPlan.daily_times.map((time) => String(time.local_time).slice(0, 5)).join(' / ')}`
+                                : ''}
+                            </span>
+                            <span>
+                              装置 · {currentDeviceLabel}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <strong className="patient-summary-value">暂无当前用药计划</strong>
+                          <span className="patient-summary-meta">
+                            装置 · {currentDeviceLabel}
+                          </span>
+                        </>
+                      )}
+                    </section>
+                    <section className="patient-summary-card patient-coverage-card">
+                      <span className="patient-summary-label">近 7 天登记覆盖</span>
+                      <div className="patient-coverage-value">
+                        <strong>
+                          {coverageStats?.N
+                            ? `${coverageStats.M} / ${coverageStats.N}`
+                            : '—'}
+                        </strong>
+                        <span>
+                          {coverageStats
+                            ? coverageStats.N > 0 ? '个到期时点已登记' : '无固定计划时点'
+                            : '统计暂不可用'}
+                        </span>
+                      </div>
+                      {coverageStats?.N && (
+                        <span className="patient-summary-note">登记覆盖不等于实际服药依从性。</span>
+                      )}
+                    </section>
+                  </div>
+
+                  <section className="patient-recent-section">
+                    <div className="patient-recent-heading">
+                      <h3>近期变化</h3>
+                      <Button
+                        type="link"
+                        size="small"
+                        onClick={() => setActiveRecordTab('history')}
+                      >查看全部历史</Button>
                     </div>
-                  ))}
+                    {overviewUpdates.length === 0 ? (
+                      <p className="patient-recent-empty">暂无近期动态</p>
+                    ) : (
+                      <Collapse
+                        ghost
+                        className="patient-recent-collapse"
+                        items={overviewUpdates.map((item) => {
+                          const detail = item.kind === 'event'
+                            ? item.details.find((value) => value.startsWith('备注：')) || item.details[0]
+                            : item.details[0]
+                          return {
+                            key: item.key,
+                            label: (
+                              <div className="patient-recent-label">
+                                <strong>{item.title}</strong>
+                                <time>{item.day} · {item.time}</time>
+                              </div>
+                            ),
+                            children: detail ? <p className="patient-recent-detail">{detail}</p> : <p className="patient-recent-detail">暂无补充说明</p>,
+                          }
+                        })}
+                      />
+                    )}
+                  </section>
                 </div>
               ),
             },
             {
-              key: 'device',
-              label: `装置（${devices.length}）`,
-              children: devices.length === 0 ? blankHint('该患者暂无装置记录。', (
-                <Button size="small" type="primary" onClick={openBindDev}>立即绑定装置</Button>
-              )) : (
-                <ul className="record-list">
-                  {devices.map((dv) => (
-                    <li key={dv.id} className="record-row">
-                      <span className="strong">{modelNames[dv.device_model_id] || dv.device_model_id}</span>
-                      <span className="record-meta">生效 {d(dv.effective_from)} ~ {dv.effective_to ? d(dv.effective_to) : '至今'}</span>
-                    </li>
-                  ))}
-                </ul>
-              ),
-            },
-            {
-              key: 'plan',
-              label: `用药计划（${plans.length}）`,
-              children: plans.length === 0 ? blankHint('该患者暂无用药计划。', (
-                <Button size="small" type="primary" onClick={() => navigate('/plans')}>去创建用药计划</Button>
-              )) : (
-                <ul className="record-list">
-                  {plans.map((p) => (
-                    <li key={p.id}>
-                      <div className="record-row">
-                        <span className="strong">v{p.version} · {p.drug_label}</span>
-                        <Space size={6}>
-                          <Tag color={p.plan_type === 'REGULAR' ? 'blue' : 'default'}>
-                            {p.plan_type === 'REGULAR' ? '固定计划' : '按需计划'}
-                          </Tag>
-                          {p.ends_at === null && (
-                            <Button size="small" onClick={() => {
-                              revForm.setFieldsValue({
-                                starts_at: dayjs().format('YYYY-MM-DD'),
-                                drug_label: p.drug_label,
-                                times_text: p.daily_times?.map((t) => String(t.local_time).slice(0, 5)).join('\n') || '',
-                              })
-                              setRevOpen(p)
-                            }}>修订此计划</Button>
-                          )}
-                        </Space>
-                      </div>
-                      <div className="record-body">
-                        <span className="record-meta">生效：{d(p.starts_at)} ~ {p.ends_at ? d(p.ends_at) : '至今'}</span>
-                        {p.plan_type === 'REGULAR' && (
-                          <span>
-                            每日时点：
-                            {p.daily_times?.length
-                              ? p.daily_times.map((t, i) => <Tag key={i}>{String(t.local_time).slice(0, 5)}</Tag>)
-                              : '—'}
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ),
-            },
-            {
-              key: 'event',
-              label: `用药登记（${totals.events}）`,
-              children: events.length === 0 ? blank('暂无用药登记记录') : (
-                <ul className="record-list">
-                  {truncated('events') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
-                  {events.map((e) => (
-                    <li key={e.id} className="record-row">
-                      <span className="strong tabular">{dt(e.occurred_at)}</span>
-                      <Space size={6} wrap>
-                        <Tag>{e.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}</Tag>
-                        {e.slot_id ? <Tag color="blue">固定时点</Tag> : <Tag>按需</Tag>}
-                        {e.status === 'REVOKED'
-                          ? <Tag color="red">已撤销</Tag>
-                          : <Button size="small" onClick={() => { setRevokeTarget(e); setRevokeReason('') }}>撤销</Button>}
-                      </Space>
-                    </li>
-                  ))}
-                </ul>
-              ),
-            },
-            {
-              key: 'training',
-              label: `训练记录（${totals.trainings}）`,
-              children: trainings.length === 0 ? blankHint('暂无训练记录。患者完成操作自检或医护提交现场评估后，会显示在这里。') : (
-                <ul className="record-list">
-                  {truncated('trainings') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
-                  {trainings.map((t) => (
-                    <li key={t.id} className="record-row">
-                      <span className="strong tabular">{dt(t.submit_at)}</span>
-                      <Space size={6} wrap>
-                        <Tag color={t.source === 'PATIENT_REPORT' ? 'default' : 'purple'}>
-                          {t.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}
-                        </Tag>
-                        <span>{t.result || '—'}</span>
-                      </Space>
-                    </li>
-                  ))}
-                </ul>
-              ),
-            },
-            {
-              key: 'followup',
-              label: `随访（${totals.followups}）`,
-              children: followups.length === 0 ? blankHint('暂无随访记录。', (
-                <Button size="small" onClick={() => navigate('/followups')}>去记录随访</Button>
-              )) : (
-                <ul className="record-list">
-                  {truncated('followups') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
-                  {followups.map((f) => (
-                    <li key={f.id}>
-                      <div className="record-row">
-                        <span className="strong tabular">{dt(f.followed_at)}</span>
-                      </div>
-                      <div className="record-body">
-                        {f.feedback && <span>反馈：{f.feedback}</span>}
-                        {f.action_taken && <span>措施：{f.action_taken}</span>}
-                        {f.next_plan && <span>后续：{f.next_plan}</span>}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+              key: 'history',
+              label: '历史记录',
+              children: (
+                <Tabs
+                  defaultActiveKey="timeline"
+                  moreIcon={<span className="patient-history-more">更多分类</span>}
+                  items={[
+                    {
+                      key: 'timeline',
+                      label: `全部动态（${totals.events + totals.trainings + totals.followups + totals.plans}）`,
+                      children: timeline.length === 0 ? blank('暂无动态') : (
+                        <div className="timeline patient-timeline">
+                          {(truncated('events') || truncated('trainings') || truncated('followups'))
+                            ? <p className="muted" style={{ margin: '0 0 8px' }}>{truncatedHint}</p>
+                            : null}
+                          <Collapse
+                            ghost
+                            className="patient-timeline-collapse"
+                            items={timelineGroups.map((group) => {
+                              const kinds: TimelineItem['kind'][] = ['event', 'plan', 'training', 'followup']
+                              const kindLabels: Record<TimelineItem['kind'], string> = {
+                                event: '用药登记', plan: '计划', training: '训练', followup: '随访',
+                              }
+                              const summary = kinds
+                                .map((kind) => {
+                                  const count = group.items.filter((item) => item.kind === kind).length
+                                  return count ? `${kindLabels[kind]} ${count}` : ''
+                                })
+                                .filter(Boolean)
+                              const markers = [
+                                group.items.some((item) => item.title.includes('已撤销')) ? '含撤销' : '',
+                                group.items.some((item) => item.details.some((detail) => detail.startsWith('备注：'))) ? '含备注' : '',
+                              ].filter(Boolean)
+                              return {
+                                key: group.day,
+                                label: (
+                                  <div className="patient-day-label">
+                                    <strong>{group.day}</strong>
+                                    <span>{summary.join(' · ')}</span>
+                                    {markers.length > 0 && <span className="patient-day-markers">{markers.join(' · ')}</span>}
+                                  </div>
+                                ),
+                                children: (
+                                  <ul className="tl-list">
+                                    {group.items.map((item) => (
+                                      <li key={item.key} className="tl-item">
+                                        <span className="tl-dot" aria-hidden />
+                                        <div className="tl-body">
+                                          <div className="tl-head">
+                                            <span className="tl-title">{item.title}</span>
+                                            <span className="tl-time">{item.time}</span>
+                                          </div>
+                                          {item.details.length > 0 && (
+                                            <div className="tl-detail">
+                                              {item.details.map((detail, index) => (
+                                                <span key={`${item.key}-detail-${index}`} className="tl-detail-item">{detail}</span>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ),
+                              }
+                            })}
+                          />
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'device',
+                      label: `装置（${devices.length}）`,
+                      children: devices.length === 0 ? blankHint('该患者暂无装置记录。', (
+                        <Button size="small" type="primary" onClick={openBindDev}>立即绑定装置</Button>
+                      )) : (
+                        <ul className="record-list">
+                          {devices.map((dv) => (
+                            <li key={dv.id} className="record-row">
+                              <span className="strong">{modelNames[dv.device_model_id] || dv.device_model_id}</span>
+                              <span className="record-meta">生效 {d(dv.effective_from)} ~ {dv.effective_to ? d(dv.effective_to) : '至今'}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                    {
+                      key: 'plan',
+                      label: `用药计划（${plans.length}）`,
+                      children: plans.length === 0 ? blankHint('该患者暂无用药计划。', (
+                        <Button size="small" type="primary" onClick={() => navigate('/plans')}>去创建用药计划</Button>
+                      )) : (
+                        <ul className="record-list">
+                          {plans.map((p) => (
+                            <li key={p.id}>
+                              <div className="record-row">
+                                <span className="strong">v{p.version} · {p.drug_label}</span>
+                                <Space size={6}>
+                                  <Tag color={p.plan_type === 'REGULAR' ? 'blue' : 'default'}>
+                                    {p.plan_type === 'REGULAR' ? '固定计划' : '按需计划'}
+                                  </Tag>
+                                  {p.ends_at === null && (
+                                    <Button size="small" onClick={() => {
+                                      revForm.setFieldsValue({
+                                        starts_at: dayjs().format('YYYY-MM-DD'),
+                                        drug_label: p.drug_label,
+                                        times_text: p.daily_times?.map((t) => String(t.local_time).slice(0, 5)).join('\n') || '',
+                                      })
+                                      setRevOpen(p)
+                                    }}>修订此计划</Button>
+                                  )}
+                                </Space>
+                              </div>
+                              <div className="record-body">
+                                <span className="record-meta">生效：{d(p.starts_at)} ~ {p.ends_at ? d(p.ends_at) : '至今'}</span>
+                                {p.plan_type === 'REGULAR' && (
+                                  <span>
+                                    每日时点：
+                                    {p.daily_times?.length
+                                      ? p.daily_times.map((t, i) => <Tag key={i}>{String(t.local_time).slice(0, 5)}</Tag>)
+                                      : '—'}
+                                  </span>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                    {
+                      key: 'event',
+                      label: `用药登记（${totals.events}）`,
+                      children: events.length === 0 ? blank('暂无用药登记记录') : (
+                        <div>
+                          {truncated('events') && <p className="muted" style={{ margin: '0 0 8px' }}>{truncatedHint}</p>}
+                          <Collapse
+                            ghost
+                            className="patient-event-collapse"
+                            items={eventGroups.map((group) => {
+                              const revokedCount = group.items.filter((event) => event.status === 'REVOKED').length
+                              return {
+                                key: group.day,
+                                label: (
+                                  <div className="patient-day-label">
+                                    <strong>{group.day}</strong>
+                                    <span>{group.items.length} 条登记</span>
+                                    {revokedCount > 0 && <span className="patient-day-markers">含 {revokedCount} 条撤销</span>}
+                                  </div>
+                                ),
+                                children: (
+                                  <ul className="record-list">
+                                    {group.items.map((event) => (
+                                      <li key={event.id} className="record-row">
+                                        <span className="strong tabular">{dt(event.occurred_at)}</span>
+                                        <Space size={6} wrap>
+                                          <Tag>{event.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}</Tag>
+                                          {event.slot_id ? <Tag color="blue">固定时点</Tag> : <Tag>按需</Tag>}
+                                          {event.status === 'REVOKED'
+                                            ? <Tag color="red">已撤销</Tag>
+                                            : <Button size="small" onClick={() => { setRevokeTarget(event); setRevokeReason('') }}>撤销</Button>}
+                                        </Space>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ),
+                              }
+                            })}
+                          />
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'training',
+                      label: `训练记录（${totals.trainings}）`,
+                      children: trainings.length === 0 ? blankHint('暂无训练记录。患者完成操作自检或医护提交现场评估后，会显示在这里。') : (
+                        <ul className="record-list">
+                          {truncated('trainings') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
+                          {trainings.map((t) => (
+                            <li key={t.id} className="record-row">
+                              <span className="strong tabular">{dt(t.submit_at)}</span>
+                              <Space size={6} wrap>
+                                <Tag color={t.source === 'PATIENT_REPORT' ? 'default' : 'purple'}>
+                                  {t.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}
+                                </Tag>
+                                <span>{t.result || '—'}</span>
+                              </Space>
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                    {
+                      key: 'followup',
+                      label: `随访（${totals.followups}）`,
+                      children: followups.length === 0 ? blankHint('暂无随访记录。', (
+                        <Button size="small" onClick={() => navigate('/followups')}>去记录随访</Button>
+                      )) : (
+                        <ul className="record-list">
+                          {truncated('followups') && <li><p className="muted" style={{ margin: 0 }}>{truncatedHint}</p></li>}
+                          {followups.map((f) => (
+                            <li key={f.id}>
+                              <div className="record-row">
+                                <span className="strong tabular">{dt(f.followed_at)}</span>
+                              </div>
+                              <div className="record-body">
+                                {f.feedback && <span>反馈：{f.feedback}</span>}
+                                {f.action_taken && <span>措施：{f.action_taken}</span>}
+                                {f.next_plan && <span>后续：{f.next_plan}</span>}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                  ]}
+                />
               ),
             },
           ]}

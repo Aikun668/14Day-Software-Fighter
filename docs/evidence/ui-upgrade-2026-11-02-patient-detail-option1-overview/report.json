@@ -1,0 +1,22 @@
+[
+  {
+    "file": "page-登录并打开患者详情-1440x900.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "group": "登录并打开患者详情",
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "page-登录并打开患者详情-390x844.png",
+    "state": null,
+    "size": "390x844",
+    "zoom": 1,
+    "group": "登录并打开患者详情",
+    "animationWaitMs": 75,
+    "issues": [],
+    "lint": []
+  }
+]

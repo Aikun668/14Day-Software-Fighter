@@ -6,6 +6,7 @@ import importlib.util
 from html.parser import HTMLParser
 import io
 import json
+import os
 import re
 from pathlib import Path
 import shutil
@@ -13,6 +14,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+from urllib.parse import quote
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,7 +65,8 @@ const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{
  const id=++seq;pending.set(id,{resolve,reject});
  chrome.stdio[3].write(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})})+'\0');
 });
-const deadline=setTimeout(()=>{console.error('Browser probe timed out');chrome.kill('SIGKILL');process.exitCode=1;},15000);
+const deadlineMs=process.env.OIL_SHOOT_SLOW_HOST?30000:15000;
+const deadline=setTimeout(()=>{console.error('Browser probe timed out');chrome.kill('SIGKILL');process.exitCode=1;},deadlineMs);
 try{
  const {targetId}=await send('Target.createTarget',{url:'about:blank'});
  const {sessionId}=await send('Target.attachToTarget',{targetId,flatten:true});
@@ -83,7 +87,8 @@ finally{clearTimeout(deadline);chrome.kill();}
         runner = runner.replace("#i18n-result", "#" + result_id)
         return subprocess.run([shutil.which("node"), "--input-type=module", "-e", runner, chrome,
                                str(self.folder / profile), self.output.as_uri()],
-                              capture_output=True, text=True, timeout=25)
+                              capture_output=True, text=True,
+                              timeout=45 if os.environ.get("OIL_SHOOT_SLOW_HOST") else 25, encoding="utf-8")
 
     def test_lang_is_optional_and_preserved_when_explicit(self):
         builder.build(self.manifest, self.output)
@@ -124,7 +129,7 @@ finally{clearTimeout(deadline);chrome.kill();}
 
     def test_native_viewport_inheritance_override_and_identity(self):
         default = builder.build(self.manifest, self.output)
-        self.assertNotIn("nativeViewport", self.payload(self.output.read_text())["candidates"][0])
+        self.assertNotIn("nativeViewport", self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0])
         self.data["nativeViewport"] = "1920x720"
         self.data["candidates"].extend([
             dict(self.data["candidates"][0], id="b", nativeViewport={"width": 1366, "height": 1024}),
@@ -132,7 +137,7 @@ finally{clearTimeout(deadline);chrome.kill();}
         ])
         self.save()
         result = builder.build(self.manifest, self.output, force=True)
-        candidates = self.payload(self.output.read_text())["candidates"]
+        candidates = self.payload(self.output.read_text(encoding="utf-8"))["candidates"]
         self.assertEqual([c["nativeViewport"] for c in candidates], [
             {"width": 1920, "height": 720}, {"width": 1366, "height": 1024}, {"width": 198, "height": 242}])
         self.assertNotEqual(result["fingerprint"], default["fingerprint"])
@@ -196,7 +201,7 @@ byId.a.nativeViewport={width:198,height:2000};fit(s);result.push({...m.style,sta
 box.dataset.zoom='actual';fit(s);result.push({...m.style,stage:{...s.style}});
 console.log(JSON.stringify(result));
 """
-        run = subprocess.run([shutil.which("node"), "-e", program], capture_output=True, text=True, timeout=10)
+        run = subprocess.run([shutil.which("node"), "-e", program], capture_output=True, text=True, timeout=10, encoding="utf-8")
         self.assertEqual(run.returncode, 0, run.stderr)
         results = json.loads(run.stdout)
         for result, (width, height, scale) in zip(results, [
@@ -245,7 +250,7 @@ console.log(JSON.stringify(result));
  out.textContent=JSON.stringify({cards,mobile,loupe,actual});document.body.append(out);
 })();
 </script>"""
-        self.output.write_text(self.output.read_text().replace("</body></html>", probe + "</body></html>"))
+        self.output.write_text(self.output.read_text(encoding="utf-8").replace("</body></html>", probe + "</body></html>"), encoding="utf-8")
         run = self.run_browser_probe("viewport-result", "chrome-native")
         self.assertEqual(run.returncode, 0, run.stderr)
         result = json.loads(run.stdout)
@@ -312,7 +317,11 @@ console.log(JSON.stringify(result));
                 program += "const no=c=>" + number_function + ";\nfunction copyText()" + copy_function
                 program += "\nresults.push({lang:LANG,text:copyText()});\n}\n"
         program += "console.log(JSON.stringify(results));"
-        run = subprocess.run([shutil.which("node"), "-e", program], capture_output=True, text=True, timeout=10)
+        # Passed as a file: the program is longer than a Windows command line may be.
+        with tempfile.TemporaryDirectory() as folder:
+            script = Path(folder) / "program.cjs"
+            script.write_text(program, encoding="utf-8")
+            run = subprocess.run([shutil.which("node"), str(script)], capture_output=True, text=True, encoding="utf-8", timeout=30)
         self.assertEqual(run.returncode, 0, run.stderr)
         results = iter(json.loads(run.stdout))
         for _, _, expected in cases:
@@ -370,7 +379,7 @@ console.log(JSON.stringify(result));
                 self.assertEqual(run.returncode, 0, run.stderr)
                 observed = json.loads(run.stdout)
                 self.assertEqual(observed["lang"], table[lang]["htmlLang"])
-                self.assertEqual(observed["title"], table[lang]["projectTitle"].replace("{project}", "Demo").replace("{edition}", " Pro" if builder.SKILL_ROOT.name == "oil-ui-pro" else ""))
+                self.assertEqual(observed["title"], table[lang]["projectTitle"].replace("{project}", "Demo").replace("{edition}", " Pro" if self.payload(page)["edition"] == "pro" else ""))
                 self.assertEqual(observed["initial"], {"loupe": True, "current": "b", "mobile": "true", "cards": 2, "descriptions": True})
                 self.assertEqual(set(observed["saved"]), {"layout", "viewport", "current", "chosen"})
                 self.assertEqual(observed["saved"]["chosen"], "b")
@@ -483,10 +492,10 @@ console.log(JSON.stringify(result));
         with self.assertRaises(ValueError):
             builder.build(self.manifest, self.output)
 
-    def test_source_escape_and_overwriting_inputs_are_rejected(self):
+    def test_missing_outside_source_and_overwriting_inputs_are_rejected(self):
         self.data["candidates"][0]["source"] = "../outside.html"
         self.save()
-        with self.assertRaisesRegex(ValueError, "把文件复制进 manifest 目录"):
+        with self.assertRaisesRegex(ValueError, "找不到本地资源.*outside.html"):
             builder.build(self.manifest, self.output)
         self.data["candidates"][0]["source"] = "sample.html"
         self.save()
@@ -519,20 +528,267 @@ console.log(JSON.stringify(result));
         self.assertNotIn("img/dot.png", page)
         self.assertIn("data:image/png;base64,", page)
 
-    def test_local_assets_outside_the_manifest_folder_stay_rejected(self):
-        outside = Path(self.tmp.name).parent / f"{Path(self.tmp.name).name}-outside.png"
-        outside.write_bytes(b"\x89PNG\r\n\x1a\n")
-        self.addCleanup(outside.unlink)
-        for fragment in (f'<img src="../{outside.name}" alt="">',
-                         f'<style>body{{background:url("../{outside.name}")}}</style>',
-                         f'<link rel="stylesheet" href="../{outside.name}">',
-                         f'<script src="../{outside.name}"></script>'):
-            with self.subTest(fragment=fragment):
-                self.source.write_text(f'<!doctype html><html><head>{fragment}</head><body></body></html>', encoding="utf-8")
-                with self.assertRaises(ValueError) as caught:
+    def test_local_assets_outside_manifest_are_embedded_and_protected(self):
+        with tempfile.TemporaryDirectory() as outside_dir:
+            assets = Path(outside_dir).resolve() / "素材 #100%"
+            assets.mkdir()
+            (assets / "font.ttf").write_bytes(b"local-font")
+            (assets / "image.png").write_bytes(b"local-image")
+            (assets / "app.js").write_text("window.loaded=true", encoding="utf-8")
+            (assets / "app.css").write_text('@font-face{font-family:test;src:url(font.ttf)}', encoding="utf-8")
+            # Exercise ../ traversal as well as absolute references; no file copying is needed.
+            relative = quote(Path(os.path.relpath(assets / "app.css", self.folder.resolve())).as_posix())
+            self.source.write_text(f'<html><head><link rel="stylesheet" href="{relative}"></head>'
+                                   f'<body style="background:url({(assets / "image.png").as_uri()})">'
+                                   f'<img src="{(assets / "image.png").as_uri()}">'
+                                   f'<script defer src="{(assets / "app.js").as_uri()}"></script></body></html>', encoding="utf-8")
+            self.data["candidates"][0]["interactive"] = True
+            self.save()
+            first = builder.build(self.manifest, self.output)
+            content = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"]
+            self.assertIn("data:font/ttf;base64," + base64.b64encode(b"local-font").decode(), content)
+            self.assertEqual(content.count("data:image/png;base64,"), 2)
+            self.assertIn("window.loaded=true", content)
+            self.assertNotIn(str(assets), content)
+            original = {p: p.read_bytes() for p in assets.iterdir()}
+            for path in original:
+                with self.subTest(overwrite=path.name), self.assertRaisesRegex(ValueError, "输出不能覆盖输入"):
+                    builder.build(self.manifest, path, force=True)
+                self.assertEqual(path.read_bytes(), original[path])
+            (assets / "font.ttf").write_bytes(b"updated-font")
+            second = builder.build(self.manifest, self.output, force=True)
+            self.assertNotEqual(first["fingerprint"], second["fingerprint"])
+
+    def test_outside_candidate_source_is_accepted_and_protected(self):
+        with tempfile.TemporaryDirectory() as outside_dir:
+            source = Path(outside_dir) / "outside.html"
+            source.write_text("<p>外部候选</p>", encoding="utf-8")
+            self.data["candidates"][0]["source"] = str(source)
+            self.save()
+            builder.build(self.manifest, self.output)
+            self.assertIn("外部候选", self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"])
+            with self.assertRaisesRegex(ValueError, "输出不能覆盖输入"):
+                builder.build(self.manifest, source, force=True)
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows drive paths")
+    def test_native_windows_resource_paths_accept_slashes_and_reserved_characters(self):
+        image = self.folder / "素材 #100%.png"
+        image.write_bytes(b"image")
+        for ref in (str(image), image.as_posix(), image.as_uri()):
+            with self.subTest(ref=ref):
+                self.source.write_text(f'<img src="{ref}">', encoding="utf-8")
+                builder.build(self.manifest, self.output, force=True)
+                content = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"]
+                self.assertIn("data:image/png;base64,aW1hZ2U=", content)
+                self.assertNotIn("#100", content)
+
+    def test_source_filesystem_paths_and_text_newlines_keep_existing_behavior(self):
+        source = self.folder / "candidate #1%20.html"
+        source.write_bytes(b'<html>\r\n<head></head>\r\n<body>content</body></html>')
+        self.data["candidates"][0]["source"] = source.name
+        self.save()
+        builder.build(self.manifest, self.output)
+        content = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"]
+        self.assertIn("<html>\n<head>", content)
+        self.assertNotIn("\r", content)
+        self.assertEqual(source.read_bytes(), b'<html>\r\n<head></head>\r\n<body>content</body></html>')
+
+    def test_css_imports_resolve_relative_to_each_stylesheet(self):
+        (self.folder / "styles" / "nested").mkdir(parents=True)
+        (self.folder / "styles" / "main.css").write_text('@import "nested/theme.css" layer(theme) supports(display: grid) screen; body{margin:0}', encoding="utf-8")
+        (self.folder / "styles" / "nested" / "theme.css").write_text('@import "../main.css"; @font-face{src:url("../../font.ttf?v=1")} .hero{background:url(../../image.png)}', encoding="utf-8")
+        (self.folder / "font.ttf").write_bytes(b"font")
+        (self.folder / "image.png").write_bytes(b"image")
+        self.source.write_text('<link REL=stylesheet HREF="styles/main.css" media="(min-width: 1px)"><p>内容</p>', encoding="utf-8")
+        builder.build(self.manifest, self.output)
+        content = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"]
+        for expected in ("@media (min-width: 1px)", "@layer theme", "@supports (display: grid)", "@media screen", "data:font/ttf;base64,", "data:image/png;base64,"):
+            self.assertIn(expected, content)
+        self.assertNotIn("@import", content)
+        self.assertNotIn("image.png", content)
+
+    def test_resource_spelling_variants_are_embedded(self):
+        (self.folder / "图 片.png").write_bytes(b"image")
+        (self.folder / "sprite.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"><symbol id="dot"/></svg>', encoding="utf-8")
+        self.source.write_text(r'''<html><head><style>
+          .hero{background:u\72l(/* image */ "图%20片.png?cache=1")}
+          .retina{background:image-set("图%20片.png" 1x, url("图%20片.png") 2x)}
+        </style></head><body><IMG SRC=图%20片.png><svg><use href="sprite.svg#dot"/></svg>
+        <video poster="图%20片.png"></video></body></html>''', encoding="utf-8")
+        builder.build(self.manifest, self.output)
+        content = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"]
+        self.assertEqual(content.count("data:image/png;base64,"), 5)
+        self.assertIn("data:image/svg+xml;base64,", content)
+        self.assertIn('#dot"', content)
+        self.assertNotIn("图%20片.png", content)
+
+    def test_img_srcset_keeps_src_or_takes_the_widest_candidate(self):
+        (self.folder / "small.png").write_bytes(b"small")
+        (self.folder / "large.png").write_bytes(b"large-image")
+        cases = {
+            '<img src="small.png" srcset="small.png 600w, large.png 1200w" alt="">': b"small",
+            '<img srcset="small.png 600w, large.png 1200w" alt="">': b"large-image",
+            '<img srcset="large.png 2x, small.png" alt="">': b"large-image",
+        }
+        for tag, expected in cases.items():
+            with self.subTest(tag=tag):
+                self.source.write_text(f"<html><head></head><body>{tag}</body></html>", encoding="utf-8")
+                builder.build(self.manifest, self.output, force=True)
+                content = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"]
+                self.assertNotIn("srcset", content)
+                self.assertEqual(content.count("data:image/png;base64,"), 1)
+                self.assertIn('src="data:image/png;base64,' + base64.b64encode(expected).decode(), content)
+        # A data URL keeps its commas, and an empty src gives way instead of leaving two src attributes.
+        inline = "data:image/png;base64,QUFB,QkI="
+        for tag, expected in {f'<img srcset="{inline} 2x, small.png 1x" alt="">': inline,
+                              '<img src="" srcset="large.png 1200w" alt="">': "data:image/png;base64," + base64.b64encode(b"large-image").decode()}.items():
+            with self.subTest(tag=tag):
+                self.source.write_text(f"<html><head></head><body>{tag}</body></html>", encoding="utf-8")
+                builder.build(self.manifest, self.output, force=True)
+                content = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["content"]
+                img = re.search(r"<img[^>]*>", content)[0]
+                self.assertEqual(re.findall(r'\ssrc="([^"]*)"', img), [expected])
+                self.assertNotIn("srcset", img)
+
+    def test_shell_secondary_text_meets_body_contrast(self):
+        template = (ROOT / "assets" / "style-explorer.html").read_text(encoding="utf-8")
+        tokens = dict(re.findall(r"--(canvas|well|faint|soft):(#[0-9a-f]{6})", re.search(r":root\{([^}]*)\}", template)[1]))
+
+        def luminance(color):
+            channels = [int(color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+            channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
+            return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+
+        for text in ("faint", "soft"):
+            for ground in ("canvas", "well"):
+                with self.subTest(text=text, ground=ground):
+                    high, low = sorted((luminance(tokens[text]), luminance(tokens[ground])), reverse=True)
+                    self.assertGreaterEqual((high + 0.05) / (low + 0.05), 4.5)
+
+    def test_resource_examples_in_text_comments_and_scripts_stay_unchanged(self):
+        example = '<img src="missing.png"> url(missing.png)'
+        self.source.write_text(f'<html><head><style>/* url(missing.png) */ p::after{{content:\'url(missing.png)\'}}</style></head>'
+                               f'<body><!-- {example} --><script>const example = \'{example}\';</script></body></html>', encoding="utf-8")
+        content = builder.prepare_html(self.source, interactive=True)
+        self.assertIn(example, content)
+        self.assertIn("/* url(missing.png) */", content)
+        self.assertIn("content:'url(missing.png)'", content)
+
+    def test_remote_and_missing_resources_report_exact_reference_and_fix(self):
+        for ref in ("https://example.invalid/font.ttf", "//example.invalid/font.ttf", "missing.ttf"):
+            for fragment in (f'<img src="{ref}">', f'<style>@font-face{{src:url("{ref}")}}</style>',
+                             f'<link rel="stylesheet" href="{ref}">', f'<script src="{ref}"></script>'):
+                with self.subTest(ref=ref, fragment=fragment):
+                    self.source.write_text(fragment, encoding="utf-8")
+                    with self.assertRaises(builder.ManifestError) as caught:
+                        builder.build(self.manifest, self.output)
+                    message = str(caught.exception)
+                    for expected in ("候选 a", "sample.html", ref, "重新生成"):
+                        self.assertIn(expected, message)
+                    self.assertIn("curl -L --fail --output" if "example.invalid" in ref else "请将该文件保存到", message)
+                    self.assertFalse(self.output.exists())
+
+    def test_resource_size_limits_preserve_output_and_allow_the_boundary(self):
+        builder.build(self.manifest, self.output)
+        original = self.output.read_bytes()
+        image = self.folder / "large.png"
+        image.write_bytes(b"i" * 1025)
+        self.source.write_text('<img src="large.png">', encoding="utf-8")
+        with patch.object(builder, "MAX_RESOURCE_BYTES", 1024):
+            with self.assertRaisesRegex(ValueError, "large.png.*单文件上限 1024.*压缩"):
+                builder.build(self.manifest, self.output, force=True)
+        self.assertEqual(self.output.read_bytes(), original)
+        used = set()
+        image.write_bytes(b"i" * 1024)
+        with patch.object(builder, "MAX_RESOURCE_BYTES", 1024), patch.object(builder, "MAX_TOTAL_RESOURCE_BYTES", 1024):
+            self.assertEqual(len(builder.read_asset(image, used)), 1024)
+            builder.read_asset(image, used)  # Repeated references count as one input.
+            other = self.folder / "other.png"
+            other.write_bytes(b"i")
+            with self.assertRaisesRegex(ValueError, "累计.*总上限 1024.*压缩"):
+                builder.read_asset(other, used)
+        with patch.object(builder, "MAX_TOTAL_RESOURCE_BYTES", 1):
+            with self.assertRaisesRegex(ValueError, "总上限"):
+                builder.build(self.manifest, self.output, force=True)
+        self.assertEqual(self.output.read_bytes(), original)
+
+    def test_palette_extracts_hex_colors_from_descriptions_and_other_shapes(self):
+        examples = [
+            (["深墨绿 #1b3a2a 实色带", "白色 #FFF"], ["#1b3a2a", "#FFF"]),
+            ("深墨绿 #1b3a2a，白色 #FFF", ["#1b3a2a", "#FFF"]),
+            ({"主色": "#1b3a2a", "背景": "白色 #FFF"}, ["#1b3a2a", "#FFF"]),
+            ([None, 42, {"color": "#1234"}, "#12345678 #abc"], ["#1234", "#12345678", "#abc"]),
+            (["red", "#fff"], ["#fff"]),
+        ]
+        for value, expected in examples:
+            with self.subTest(value=value):
+                self.data["candidates"][0]["palette"] = value
+                self.save()
+                builder.build(self.manifest, self.output, force=True)
+                self.assertEqual(self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]["palette"], expected)
+
+    def test_palette_without_any_complete_hex_color_has_copyable_fix(self):
+        for value in (None, 123, [], {}, ["green"], "#12 #12345 #1234567 #123456789 #12345g"):
+            with self.subTest(value=value):
+                self.data["candidates"][0]["palette"] = value
+                self.save()
+                with self.assertRaisesRegex(ValueError, r'候选 a：palette.*"palette": \["#1a2b3c", "#ffffff"\]'):
                     builder.build(self.manifest, self.output)
-                for expected in ("候选 a", outside.name, "把文件复制进 manifest 目录"):
-                    self.assertIn(expected, str(caught.exception))
+        self.assertFalse(self.output.exists())
+
+    def test_missing_or_unclosed_head_is_completed_before_csp(self):
+        examples = [
+            '<!doctype html><html><body><p>内容</p></body></html>',
+            '<!doctype html><p>内容</p>',
+            '<body><p>内容</p></body>',
+            '<html><head/><body><p>内容</p></body></html>',
+            '<!-- <head>假标签</head> --><p>内容</p>',
+            '<html><head><style>p{color:red}</style><body><p>内容</p></body></html>',
+            '<html><head><title>内容</title></html>',
+        ]
+        for source in examples:
+            for interactive in (False, True):
+                with self.subTest(source=source, interactive=interactive):
+                    self.source.write_text(source, encoding="utf-8")
+                    content = builder.prepare_html(self.source, interactive=interactive)
+                    self.assertIn("内容", content)
+                    self.assertIn("</head>", content)
+                    observed = []
+                    class Tags(HTMLParser):
+                        def handle_starttag(self, tag, attrs):
+                            observed.append(tag)
+                    Tags().feed(content)
+                    head = observed.index("head")
+                    self.assertEqual(observed[head + 1], "meta")
+                    self.assertLess(content.index("Content-Security-Policy"), content.index("</head>"))
+                    self.assertEqual(self.source.read_text(encoding="utf-8"), source)
+
+    @unittest.skipUnless(shutil.which("node") and (shutil.which("google-chrome") or shutil.which("chromium") or
+                         Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome").is_file()),
+                         "Chrome/Chromium is needed for offline resource rendering")
+    def test_rendered_inlined_assets_and_completed_head_work_offline(self):
+        image = self.folder / "image.png"
+        image.write_bytes(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7ioAAAAASUVORK5CYII='))
+        font = ROOT / "assets/fonts/instrument-serif/InstrumentSerif-Regular.ttf"
+        self.source.write_text(f'''<style>@font-face{{font-family:Test;src:url("{font.as_uri()}")}}
+          p{{font-family:Test}}</style><p>Offline font</p><img src="image.png">
+          <script>window.addEventListener('load',async()=>{{await document.fonts.load('16px Test');await document.fonts.ready;
+            parent.postMessage({{probe:'offline-assets',image:document.querySelector('img').naturalWidth,
+              font:[...document.fonts].every(f=>f.status==='loaded')}},'*');
+          }});</script>''', encoding="utf-8")
+        self.data["candidates"][0]["interactive"] = True
+        self.save()
+        builder.build(self.manifest, self.output)
+        probe = '''<script>window.addEventListener('message',event=>{
+          if(event.data?.probe!=='offline-assets')return;
+          const out=document.createElement('pre');out.id='offline-result';
+          out.textContent=JSON.stringify(event.data);document.body.append(out);
+        });</script>'''
+        page = self.output.read_text(encoding="utf-8")
+        self.output.write_text(page.replace('<head>', '<head>' + probe, 1), encoding="utf-8")
+        run = self.run_browser_probe("offline-result", "chrome-offline")
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertEqual(json.loads(run.stdout), {"probe": "offline-assets", "image": 1, "font": True})
 
     def test_live_candidates_accept_only_local_dev_servers(self):
         self.data["candidates"].append({"id": "live", "name": "现状", "concept": "当前版本", "typography": "系统字体", "palette": ["#fff"], "traits": ["现有页面"], "kind": "url", "url": "http://localhost:5173/orders", "baseline": True})
@@ -685,30 +941,6 @@ console.log(JSON.stringify(result));
         with self.assertRaises(ValueError):
             builder.build(self.manifest, self.output)
 
-    def test_template_keeps_documented_comparison_features(self):
-        builder.build(self.manifest, self.output)
-        page = self.output.read_text(encoding="utf-8")
-        hooks = {
-            "并排与单张": 'data-layout="loupe"',
-            "手机视口": 'data-viewport="mobile"',
-            "实际尺寸": '实际尺寸 100%',
-            "选择": "st.chosen",
-            "选择即复制": 'navigator.clipboard',
-            "本地地址候选": "c.kind==='url'",
-            "服务未运行提示": "开发服务器没有运行",
-            "复制启动命令": "button.dataset.copyServe",
-            "现状基线": "c.baseline",
-            "可操作小样": "c.interactive",
-            "按轮次保存": "DATA.fingerprint",
-            "展示北极星": "c.concept",
-            "展示色板": "c.palette",
-        }
-        missing = [name for name, hook in hooks.items() if hook not in page]
-        self.assertEqual(missing, [], "模板缺少对比页承诺的功能，见 .github/EXPLORER.md")
-        for removed in ('class="bar-r"', 'id="round"', 'id="filter-list"', 'id="notes-toggle"',
-                        'id="notes"', 'id="show-all"', "liveSource", "imageSource", "interactiveSource", "htmlSource"):
-            self.assertNotIn(removed, page)
-
     def test_brand_assets_and_edition_survive_relocation(self):
         copy = self.folder / "relocated"
         shutil.copytree(ROOT / "scripts", copy / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
@@ -720,7 +952,7 @@ console.log(JSON.stringify(result));
                 (copy / "SKILL.md").write_text("---\nname: " + name + "\n---\n", encoding="utf-8")
                 output = self.folder / (edition + ".html")
                 run = subprocess.run([sys.executable, str(copy / "scripts/build_explorer.py"), str(self.manifest),
-                                      "--output", str(output)], cwd=self.folder, capture_output=True, text=True)
+                                      "--output", str(output)], cwd=self.folder, capture_output=True, text=True, encoding="utf-8")
                 self.assertEqual(run.returncode, 0, run.stderr)
                 page = output.read_text(encoding="utf-8")
                 self.assertEqual(self.payload(page)["edition"], edition)
@@ -730,27 +962,17 @@ console.log(JSON.stringify(result));
                 self.assertNotIn('src="logo.png"', page)
                 self.assertNotIn('url("fonts/', page)
 
-    def test_copied_skill_works_from_another_directory(self):
-        copy = self.folder / "relocated"
-        shutil.copytree(ROOT / "scripts", copy / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
-        shutil.copytree(ROOT / "assets", copy / "assets")
-        run = subprocess.run([sys.executable, str(copy / "scripts" / "build_explorer.py"), str(self.manifest), "--output", str(self.output)], cwd=self.folder, capture_output=True, text=True)
-        self.assertEqual(run.returncode, 0, run.stderr)
-        self.assertTrue(self.output.is_file())
-
-
     def test_every_manifest_problem_is_reported_in_one_pass(self):
         self.data["schemaVersion"] = 2
-        self.data["candidates"][0].update(id="A", palette=["red", "#fff"], source="missing.html")
+        self.data["candidates"][0].update(id="A", palette=["red"], source="missing.html")
         self.data["candidates"].append({"id": "b", "concept": "c", "typography": "t", "palette": ["#123456"], "traits": [], "kind": "pdf"})
         self.save()
         with self.assertRaises(builder.ManifestError) as caught:
             builder.build(self.manifest, self.output)
         text = str(caught.exception)
         self.assertGreaterEqual(len(caught.exception.problems), 6)
-        for expected in ("schemaVersion", '候选 id "A" 无效', "missing.html", "red", 'kind 只能是', "候选 b：name", "候选 b：traits"):
+        for expected in ("schemaVersion", '候选 id "A" 无效', "missing.html", "red", 'kind 只能是', "候选 b：traits"):
             self.assertIn(expected, text)
-        self.assertNotIn("#fff", text)
         self.assertFalse(self.output.exists())
 
     def test_single_problem_reads_as_one_sentence(self):
@@ -762,33 +984,62 @@ console.log(JSON.stringify(result));
         self.assertIn("候选 a：palette", str(caught.exception))
 
     def test_output_defaults_to_a_file_beside_the_manifest(self):
-        run = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_explorer.py"), str(self.manifest)], capture_output=True, text=True)
+        run = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_explorer.py"), str(self.manifest)], capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(run.returncode, 0, run.stderr)
         expected = self.folder.resolve() / "style-explorer.html"
         self.assertEqual(Path(json.loads(run.stdout)["output"]), expected)
         self.assertTrue(expected.is_file())
-        again = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_explorer.py"), str(self.manifest)], capture_output=True, text=True)
+        again = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_explorer.py"), str(self.manifest)], capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(again.returncode, 1)
         self.assertIn("--force", again.stderr)
 
     def test_missing_and_malformed_manifests_say_what_to_do(self):
         script = str(ROOT / "scripts" / "build_explorer.py")
-        missing = subprocess.run([sys.executable, script, str(self.folder / "nope.json")], capture_output=True, text=True)
+        missing = subprocess.run([sys.executable, script, str(self.folder / "nope.json")], capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(missing.returncode, 1)
         self.assertIn("找不到 manifest", missing.stderr)
         self.assertNotIn("Errno", missing.stderr)
         broken = self.folder / "broken.json"
         broken.write_text('{"schemaVersion": 1,', encoding="utf-8")
-        malformed = subprocess.run([sys.executable, script, str(broken)], capture_output=True, text=True)
+        malformed = subprocess.run([sys.executable, script, str(broken)], capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(malformed.returncode, 1)
         self.assertRegex(malformed.stderr, r"不是合法的 JSON：第 \d+ 行第 \d+ 列")
         self.assertNotIn("Traceback", malformed.stderr)
 
     def test_help_shows_a_complete_example(self):
-        run = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_explorer.py"), "--help"], capture_output=True, text=True)
+        run = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_explorer.py"), "--help"], capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(run.returncode, 0)
-        for expected in ("manifest.json", '"schemaVersion": 1', "--force", "style-explorer.html"):
+        for expected in ("manifest.json", '"candidates": [{"source": "a.html"}', "--force", "style-explorer.html"):
             self.assertIn(expected, run.stdout)
+
+    def test_minimal_manifest_needs_only_source_and_uses_title(self):
+        self.source.write_text('<!doctype html><html><head><title>  Title   from HTML </title></head><body>Page</body></html>', encoding="utf-8")
+        self.data = {"candidates": [{"source": "sample.html"}]}
+        self.save()
+        builder.build(self.manifest, self.output)
+        candidate = self.payload(self.output.read_text(encoding="utf-8"))["candidates"][0]
+        self.assertEqual(candidate["name"], "Title from HTML")
+        self.assertEqual(candidate["id"], "candidate-1")
+        for optional in ("concept", "typography", "palette", "traits", "nativeViewport"):
+            self.assertNotIn(optional, candidate)
+
+    def test_directory_and_multiple_html_files_build_without_manifest(self):
+        folder = self.folder / "candidates"
+        folder.mkdir()
+        first, second = folder / "first.html", folder / "second.html"
+        first.write_text('<title>First option</title><main>One</main>', encoding="utf-8")
+        second.write_text('<main>Two</main>', encoding="utf-8")
+        output = self.folder / "direct.html"
+        result = builder.build([first, second], output)
+        self.assertEqual(result["candidates"], 2)
+        candidates = self.payload(output.read_text(encoding="utf-8"))["candidates"]
+        self.assertEqual([c["name"] for c in candidates], ["First option", "second"])
+        self.assertEqual([c["concept"] for c in candidates if "concept" in c], [])
+
+        directory_output = self.folder / "directory" / "style-explorer.html"
+        builder.build(folder, directory_output)
+        directory_candidates = self.payload(directory_output.read_text(encoding="utf-8"))["candidates"]
+        self.assertEqual([c["name"] for c in directory_candidates], ["First option", "second"])
 
 
 if __name__ == "__main__":

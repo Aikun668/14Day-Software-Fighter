@@ -1,0 +1,16 @@
+diff --git a/backend/app/api/plans.py b/backend/app/api/plans.py
+index 895c617..e654aed 100644
+--- a/backend/app/api/plans.py
++++ b/backend/app/api/plans.py
+@@ -107,7 +107,10 @@ def create_revision(
+     old = db.query(MedicationPlan).filter(MedicationPlan.id == plan_id).first()
+     if old is None:
+         raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "计划不存在", "details": None})
+-    # 归属校验
++    # 归属校验（SEC-1）：患者角色与 get_patient_for_clinician 一致，一律 403；
++    # ADMIN 规则待老板裁定，本次未改动。
++    if user.role == "PATIENT":
++        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": "无权访问该资源", "details": None})
+     if user.role == "CLINICIAN":
+         patient = db.query(Patient).filter(Patient.id == old.patient_id).first()
+         if patient is None or patient.assigned_clinician_id != user.id:

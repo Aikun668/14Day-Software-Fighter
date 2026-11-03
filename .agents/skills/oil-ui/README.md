@@ -1,100 +1,104 @@
-中文 · [English](README.en.md)
+English · [中文](README.zh-CN.md)
 
 <p align="center">
-  <img src="./assets/readme/hero.webp" width="100%" alt="oil-ui：把 AI 的 UI 设计能力推到极限。插画里的人把黄色图钉按在三张风格不同的小样中间那张上">
+  <img src="./assets/readme/hero.en.webp" width="100%" alt="oil-ui: push AI UI design to its limits. A person pins a yellow pushpin to the middle of three previews in different styles">
 </p>
 
 <p align="center">
-  <a href="https://ui.oiloil.org"><img src="./assets/readme/showcase.webp" width="100%" alt="先看效果：画廊里的部分作品，包括学英语 App、音乐年度报告、硬件官网、组件库官网、项目管理工具、打车 App、语音助手、结账流程和胶片相机"></a>
+  <a href="https://ui.oiloil.org/en/?utm_source=github&utm_medium=referral&utm_campaign=readme-en"><img src="./assets/readme/showcase.en.webp" width="100%" alt="Gallery highlights: an English learning app, a music year in review, hardware and component library websites, a project management tool, a ride-hailing app, a voice assistant, a checkout flow, and a film camera"></a>
 </p>
 
-Oil UI 是给 AI Agent 用的界面设计 Skill：先拉开几种真正不同的设计方向放在一起让你挑，再照着真实画面打磨。网站、App、后台和组件都能做。想看更多效果，可以去 [ui.oiloil.org](https://ui.oiloil.org)。
+Oil UI is an interface design skill for AI agents. It recommends one direction and refines it against real screenshots, or explores several side by side when you ask to compare. It works for websites, apps, dashboards, and components. See more designs at [ui.oiloil.org](https://ui.oiloil.org/en/?utm_source=github&utm_medium=referral&utm_campaign=readme-en).
 
-## 它怎么设计
+## How it designs
 
-1. **先看清这是什么产品。** 动手之前，先说清楚它属于哪一类，再找出同类里风格最鲜明的两三家，看它们是怎么做的、为什么这么做，然后决定哪些沿用、哪些换掉。
-2. **把“高级”“简洁”翻成具体的决定。** 这类词人人都会说，却落不到画面上。它会先从题材、受众和品牌语气定下调性，比如热闹还是安静、精致还是粗粝、信息排得密还是疏，再把调性翻成看得见的选择：用什么字体、留多少白、颜色占多大面积。
-3. **每个方向都从一样具体的东西出发。** 可以是一种材质和它所在的环境、一个场景、一个角色，也可以借用另一个领域的整套表现方式。灵感从产品本身找，不从“简约”“大气”这类形容词出发。
-4. **先想清楚首屏是给谁看的。** 来看内容、挑东西或者干活的页面，首屏就应该是内容本身；要说服别人的页面，才需要先定首屏的版式，再写文案。
-5. **几个方向要真的不一样。** 版式、字体、配色和主视觉这四样里，任意两个方向最多只能有一样相同。小样做出来后并排放着，眯起眼睛看首屏的明暗分布，太像了就重新定版式，不靠换个颜色补救。
-6. **留一处让人记住的地方。** 不求整页都用力，只把一两处做到极致，比如点按时的反馈、付款成功的那一下、AI 干活的过程，或者一个 404 页面，其余地方保持安静。
-7. **好不好看由你来定。** 几份小样放进同一个对比页，由你挑一个，再说说具体喜欢和不喜欢哪里。它按你的意见收紧之后，再往下做。
-8. **以真实画面为准。** 做完会在电脑和手机尺寸下打开页面截图检查，也可以请一位没看过制作过程的评审来挑问题。最后做一轮减法：一页只留一个主角，删掉不影响理解的文字、重复的线和多余的框。
+1. **Understand what the product is.** Before drawing anything, it names the product category, finds two or three peers with the most distinctive styles, and looks at what they do and why. Then it decides what to keep and what to change.
+2. **Turn “premium” and “clean” into real decisions.** Everyone uses these words, but they don't tell you what to put on the screen. It first sets the tone from the subject, audience, and brand voice, such as lively or calm, polished or raw, dense or airy. Then it turns that tone into visible choices: which typefaces, how much white space, and how much of the page uses color.
+3. **Start each direction from something concrete.** That could be a material in its setting, a scene, a character, or the visual language of another field. Ideas come from the product itself, not from adjectives like “minimal” or “bold.”
+4. **Decide who the first screen is for.** On pages where people browse, shop, or get work done, the first screen should be the content itself. Only pages meant to persuade need a designed opening layout, settled before the copy is written.
+5. **Make explicit comparisons truly different.** When you ask for several directions, layout, typography, color, and key imagery may share at most one between any two. Once the previews exist, it puts them side by side and squints at the light and dark shapes of each first screen. If two look alike, it changes the layout instead of just swapping colors.
+6. **Leave one moment people remember.** Instead of pushing every part of the page, it makes one or two details exceptional, such as the response to a tap, a successful payment, AI at work, or a 404 page. Everything else stays quiet.
+7. **You decide what looks right.** It recommends one direction for your confirmation by default. When you ask to compare, the previews go on one comparison page; you pick one and say what you like and dislike, and it tightens the design around your feedback before going further.
+8. **Trust the real screen.** When a page is done, it opens it at desktop and mobile sizes and checks screenshots. You can also bring in a reviewer who hasn't seen the work in progress. Last comes a round of subtraction: one focal point per page, and no copy, lines, or boxes that don't help you understand it.
 
-想让界面更好用、改造老项目，或者做流光、点阵这类特效，可以看看 [Oil UI Pro](https://ui.oiloil.org/pro/)，区别见[下文](#开源版和-pro)。
+For more usable interfaces, existing project redesigns, or effects such as light trails and dot patterns, see [Oil UI Pro](https://ui.oiloil.org/en/pro/?utm_source=github&utm_medium=referral&utm_campaign=readme-en). The differences are listed [below](#open-source-and-pro).
 
-## 安装
+## Installation
 
-把这句话交给支持安装 Skill 的 Agent：
+Send this to an agent that can install skills:
 
 ```text
-请帮我安装这个 Skill：https://github.com/oil-oil/oil-ui
+Install this skill for me: run npx skills add oil-oil/oil-ui
 ```
 
-或者在终端运行：
+Or run this in your terminal:
 
 ```bash
 npx skills add oil-oil/oil-ui
 ```
 
-装好就能用，不需要额外配置。有新版本时，Agent 会在回复末尾提醒你，想更新直接让它更新就行。已经装了 Oil UI Pro 的话，就不用再装开源版，两个同时装会抢着接同一类请求。
+It's ready to use right after installation, with nothing to configure. When a new version is out, your agent mentions it at the end of a reply; ask it to update whenever you like. If you already have Oil UI Pro, you don't need the open-source version. Installing both makes them compete for the same requests.
 
-## 使用
+If you use DeepSeek Harness, install the native plugin [dsh-oil-ui](https://github.com/oil-oil/dsh-oil-ui) (`dsh plugin --profile web add github:oil-oil/dsh-oil-ui`; it includes the free edition and automatically detects a local Oil UI Pro installation).
 
-直接把任务告诉 Agent，例如：
+## Usage
 
-- “用 oil-ui 给这个课程预约产品探索几种设计方向，做成可以预览的页面。”
-- “做三种字体、配色和构图都不同的设计，放在对比页里让我选。”
-- “帮我润色这个页面，按项目现有的设计规范来。”
-- “只评审这个首页，告诉我哪里要改、怎么改，不要动文件。”
-- “按这张截图还原页面，参考图里没有的手机布局也补上。”
+Tell your agent what you need, for example:
 
-有品牌资料、截图或现成的项目，可以一起交给它。没有参考也能开始，只有在不清楚要交付什么的时候，它才会来问你。
+- “Use oil-ui to explore a few design directions for this course booking product and build pages I can preview.”
+- “Create three designs with different typography, colors, and compositions. Put them on a comparison page so I can choose.”
+- “Polish this page using the project’s existing design guidelines.”
+- “Review this homepage and explain what to change and how. Leave the files untouched.”
+- “Recreate this page from the screenshot and add a mobile layout too.”
 
-## 自带的风格对比页
+Share any brand assets, screenshots, or existing project you have. It can start without references and only asks you questions when the deliverable is unclear.
 
-<p align="center">
-  <img src="./assets/readme/proof-mona-lisa.webp" width="100%" alt="风格对比页：同一个《蒙娜丽莎》特展页面的三种设计方向，分别是三十厘米、号外 1911 和晕涂">
-</p>
+Intermediate candidates, screenshots, and media caches live in the project’s `.oil-ui` workspace. Final code and production assets are still written back to the project, and existing project conventions take precedence.
 
-想比较几份设计时，它会把它们并排放进同一个页面。放进去的可以是 HTML 文件、图片，也可以是正在运行的开发页面，现在的版本可以放在第一个当对照。你可以切换电脑和手机尺寸、点开看实际大小、用方向键翻看。看中哪一份就点“选择”，把复制出来的一句话发给 Agent，它会接着往下做。
-
-## 开源版和 Pro
+## Built-in style comparison page
 
 <p align="center">
-  <img src="./assets/readme/proof-van-gogh.webp" width="100%" alt="完整版的风格对比页：梵高特展页面的三种设计方向，致提奥、笔触和东窗">
+  <img src="./assets/readme/proof-mona-lisa.webp" width="100%" alt="Style comparison page: three directions for the same Mona Lisa exhibition page, titled Thirty Centimeters, Extra! 1911, and Sfumato">
 </p>
 
-开源版能把一个新页面从头做到好看。Pro 在这之上，帮你把界面做得好用、把老项目改好，并用更严格的评审和精修把质量往上推。
+When you want to compare designs, it puts them side by side on one page. They can be HTML files, images, or running development pages, and the current version can go first as a baseline. You can switch between desktop and mobile sizes, open each one at actual size, and browse with the arrow keys. Click “Select” on the one you like, paste the copied sentence into your agent, and it carries on from there.
 
-| | Oil UI 开源版 | Oil UI Pro |
+## Open source and Pro
+
+<p align="center">
+  <img src="./assets/readme/proof-van-gogh.webp" width="100%" alt="Full version style comparison page: three directions for a Van Gogh exhibition page, titled To Theo, Brushstrokes, and East Window">
+</p>
+
+The open-source version takes a new page from a blank start to a good-looking design. Pro builds on that: it makes interfaces easier to use, improves existing projects, and raises the quality bar with stricter review and polishing.
+
+| | Oil UI (open source) | Oil UI Pro |
 | --- | :---: | :---: |
-| 设计方向：认品类、定调性、拉开方向、风格对比页 | ✓ | ✓ |
-| 视觉：层级、字体、配色、留白、配图和动效 | ✓ | ✓ |
-| 让人记住的一刻和滚动叙事（视差、一镜到底） | ✓ | ✓ |
-| 截图还原 | ✓ | ✓ |
-| 小游戏的演出节奏、手感、生成素材和实时 3D | ✓ | ✓ |
-| 独立评审 | 打分并列出问题 | 以 9 分为目标反复评审修改；检查几个方向有没有撞车；按真实任务把页面用一遍 |
-| 精修：AI 默认审美自查、细节清单、怎么做减法 | | ✓ |
-| 好用：交互和状态、表单、弹窗与浮层、电脑和手机上的布局 | | ✓ |
-| 后台和工具：按产品挑工作区布局，让风格贯穿整页 | | ✓ |
-| 老项目：优化 UI、改流程、加新功能各有一套做法 | 帮你分清是哪一种 | ✓ |
-| 把单个组件打磨到极致 | | ✓ |
-| 19 套卡片原型和代码、空间折展容器 | | ✓ |
-| 流光、点阵、流动渐变这类特效 | | ✓ |
-| 小游戏的场景布局、视觉和状态检查 | | ✓ |
+| Design direction: product category, tone, distinct directions, comparison page | ✓ | ✓ |
+| Visuals: hierarchy, typography, color, spacing, imagery, and motion | ✓ | ✓ |
+| Memorable moments and scroll storytelling (parallax, continuous shots) | ✓ | ✓ |
+| Screenshot recreation | ✓ | ✓ |
+| Pacing, feel, generated assets, and real-time 3D for mini-games | ✓ | ✓ |
+| Independent review | Visual scoring and a lightweight UX walkthrough | Repeated review and revision aiming for 9/10; checks whether directions overlap; autonomous risk probes and same-path UX rechecks |
+| Polish: checks for AI design defaults, a detail checklist, and how to simplify | | ✓ |
+| Usability: interactions and states, forms, dialogs and popovers, desktop and mobile layouts | | ✓ |
+| Dashboards and tools: workspace layouts chosen for the product, with one style throughout | | ✓ |
+| Existing projects: separate approaches for a UI refresh, a flow fix, and a new feature | Tells you which one you need | ✓ |
+| Polish a single component to the extreme | | ✓ |
+| 19 card prototypes with code and spatial expansion containers | | ✓ |
+| Effects such as light trails, dot patterns, and flowing gradients | | ✓ |
+| Scene layouts, visuals, and state checks for mini-games | | ✓ |
 
-Oil UI Pro 69 元，一次买断，永久更新，在 [ui.oiloil.org/pro](https://ui.oiloil.org/pro/) 购买。
+Oil UI Pro costs $9.99: a one-time purchase with lifetime updates. Purchase it at [ui.oiloil.org/pro](https://ui.oiloil.org/en/pro/?utm_source=github&utm_medium=referral&utm_campaign=readme-en).
 
-## 版本检查
+## Version checks
 
-每次使用时，Skill 会检查一次有没有新版本，最多每 10 分钟联网一次。它只读取 ui.oiloil.org 公开的版本列表，不上传项目内容；默认只提示，不下载、不替换任何文件，只有你明确要求更新时才更新。检查结果缓存在 `~/.local/state/oil/`（设置了 `XDG_STATE_HOME` 时用它，Windows 在 `%LOCALAPPDATA%\oil\`）。需要 Python 3；不想检查时设置环境变量 `OIL_NO_UPDATE_CHECK=1`。
+Each time it is used, the Skill checks for a newer version, going online at most once every 10 minutes. It only reads the public version list at ui.oiloil.org and uploads nothing from your project. By default it only tells you about an update; it downloads and replaces nothing unless you explicitly ask it to update. Results are cached in `~/.local/state/oil/` (or `XDG_STATE_HOME` when set; `%LOCALAPPDATA%\oil\` on Windows). It needs Python 3. Set `OIL_NO_UPDATE_CHECK=1` to turn it off.
 
-## 搭配使用
+## Use with
 
-- [oil-motion](https://github.com/oil-oil/oil-motion)：用生成的视频或序列帧做随滚动、拖动变化的网页动画，比如产品拆解、镜头穿越。想要很强的首屏动画时用它。
-- [oil-tone](https://github.com/oil-oil/oil-tone)：把页面上的标题、说明和介绍改得自然、清楚、好读，中文和英文都能用。觉得文案像 AI 写的、读着不顺时用它。
+- [oil-motion](https://github.com/oil-oil/oil-motion): Turn generated videos or frame sequences into web animation controlled by scrolling or dragging, such as product teardowns or camera fly-throughs. Use it for a striking opening animation.
+- [oil-tone](https://github.com/oil-oil/oil-tone): Rewrites headings, descriptions and intro copy so they read naturally and clearly, in Chinese or English. Use it when the copy feels machine-written or awkward.
 
-## 许可
+## License
 
 [MIT](LICENSE)
