@@ -4,7 +4,6 @@ import { apiFetch } from '../../api/client'
 import {
   Card,
   HeroBar,
-  StatBand,
   TwoColumn,
 } from '../../components/clinic'
 
@@ -19,7 +18,23 @@ interface Plan {
 const cleanDemo = (value: string) => value.replace(/\s*[(（]DEMO[)）]/gi, '').trim()
 const day = (iso: string) => new Date(iso).toLocaleDateString('zh-CN')
 
+type PlanPhase = 'active' | 'pending' | 'closed'
+
+function planPhase(plan: Plan, now: number): PlanPhase {
+  const started = new Date(plan.starts_at).getTime() <= now
+  if (!started) return 'pending'
+  if (plan.ends_at === null) return 'active'
+  return 'closed'
+}
+
+const PHASE_LABEL: Record<PlanPhase, string> = {
+  active: '生效中',
+  pending: '待生效',
+  closed: '已关闭',
+}
+
 // M03 用药计划编辑（J028）
+// 干活页：选中患者后填写新计划，并对照历史版本。不是摘要仪表盘。
 export default function PlanEditPage() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [plans, setPlans] = useState<Plan[]>([])
@@ -63,7 +78,7 @@ export default function PlanEditPage() {
     setLoading(true)
     try {
       const daily_times = v.plan_type === 'REGULAR'
-        ? (v.daily_times_text || '08:00\n20:00').split('\n').filter(s => s.trim()).map((t, i) => ({ local_time: t.trim(), label: `时点${i + 1}` }))
+        ? (v.daily_times_text || '').split('\n').filter(s => s.trim()).map((t, i) => ({ local_time: t.trim(), label: `时点${i + 1}` }))
         : []
       await apiFetch(`/api/patients/${selectedPatient.id}/medication-plans`, {
         method: 'POST',
@@ -83,34 +98,34 @@ export default function PlanEditPage() {
     } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
   }
 
-  // 摘要：当前患者的计划概况。「当前版本」= 已生效且未结束的计划（未来开始的不算）
   // now 用 state 初始化器取一次即可，避免渲染期调用不纯函数
   const [now] = useState(() => Date.now())
+  // 「当前生效」= 已开始且未结束。未来才开始的不算。
   const currentPlan = useMemo(
     () => plans
       .filter((p) => p.ends_at === null && new Date(p.starts_at).getTime() <= now)
       .sort((a, b) => b.version - a.version)[0] ?? null,
     [plans, now],
   )
-  const summary = useMemo(() => {
-    const regular = plans.filter((p) => p.plan_type === 'REGULAR').length
-    const prn = plans.length - regular
-    return {
-      versions: plans.length,
-      regular,
-      prn,
-      times: currentPlan?.daily_times?.length ?? 0,
-    }
-  }, [plans, currentPlan])
+  const pendingPlan = useMemo(
+    () => plans
+      .filter((p) => planPhase(p, now) === 'pending')
+      .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())[0] ?? null,
+    [plans, now],
+  )
+  const headline = currentPlan ?? pendingPlan
 
   const planType = Form.useWatch('plan_type', form)
+  const patientName = selectedPatient?.display_name ?? ''
 
   return (
-    <div className="cc-page">
+    <div className="cc-page cc-plan-page">
       <HeroBar
         eyebrow={<>用药计划 · <span className={selectedPatient ? 'ok' : undefined}>{selectedPatient ? '已选患者' : '未选患者'}</span></>}
-        title="用药计划编辑"
-        sub="选择患者后调整固定时点与计划周期。"
+        title={selectedPatient ? `为${patientName}编辑方案` : '用药计划'}
+        sub={selectedPatient
+          ? '在这里写一版新计划，并对照历史版本。'
+          : '先选定一位患者，再新建计划或查看历史版本。'}
         actions={
           <Select
             style={{ minWidth: 240 }}
@@ -124,41 +139,43 @@ export default function PlanEditPage() {
         }
       />
 
-      <StatBand
-        label="计划摘要"
-        items={[
-          { key: 'versions', label: '历史版本', value: selectedPatient ? summary.versions : '—', meta: '含已关闭' },
-          { key: 'current', label: '当前版本', value: selectedPatient ? (currentPlan ? `v${currentPlan.version}` : '无') : '—', meta: currentPlan ? cleanDemo(currentPlan.drug_label) : '未创建计划' },
-          { key: 'type', label: '计划类型', value: selectedPatient ? (currentPlan ? (currentPlan.plan_type === 'REGULAR' ? '固定' : '按需') : '—') : '—', words: true, meta: currentPlan?.plan_type === 'REGULAR' ? '每日固定时点' : '不固定时点' },
-          { key: 'times', label: '每日时点', value: selectedPatient ? summary.times : '—', meta: '当前版本' },
-        ]}
-      />
+      {selectedPatient && headline ? (
+        <div className="cc-plan-now" aria-label={currentPlan ? '当前生效方案' : '待生效方案'}>
+          <span className="cc-plan-now-label">{currentPlan ? '当前生效' : '待生效'}</span>
+          <span className="cc-plan-now-drug">{cleanDemo(headline.drug_label)}</span>
+          <span className={`cc-chip ${headline.plan_type === 'REGULAR' ? 'blue' : ''}`}>
+            {headline.plan_type === 'REGULAR' ? '固定' : '按需'}
+          </span>
+          {headline.plan_type === 'REGULAR' && headline.daily_times?.map((t) => (
+            <span key={t.id} className="cc-chip">{t.local_time.slice(0, 5)}</span>
+          ))}
+          <span className="cc-plan-now-ver">v{headline.version}</span>
+        </div>
+      ) : null}
 
       {!selectedPatient ? (
-        <Card title="开始使用" hint="第 1 步">
-          <p className="cc-empty-line" style={{ padding: '24px 0', textAlign: 'center' }}>
-            在右上角选择一位患者，即可新建计划或查看历史版本。
+        <Card title="先选择患者">
+          <p className="cc-plan-empty">
+            在右上角选定一位患者，即可填写新计划，并对照历史版本。
           </p>
         </Card>
       ) : (
         <TwoColumn
+          natural
           aside={
-            <Card title="历史版本" hint={`${plans.length} 个`}>
+            <Card title="历史版本" hint={plans.length > 0 ? `${plans.length} 个` : '对照'}>
               {plans.length === 0 ? (
                 <p className="cc-empty-line">该患者还没有用药计划。</p>
               ) : (
                 <ul className="cc-record-list">
                   {plans.map((p) => {
-                    // 生效状态按时间轴判断：已开始未结束才「生效中」，未来开始算「待生效」
-                    const started = new Date(p.starts_at).getTime() <= now
-                    const active = p.ends_at === null && started
-                    const pending = !started
+                    const phase = planPhase(p, now)
                     return (
                     <li key={p.id}>
                       <div className="cc-record-main">
                         <div className="cc-plan-version">
                           <span className="cc-plan-drug">v{p.version} · {cleanDemo(p.drug_label)}</span>
-                          <span className={`cc-chip ${active ? 'blue' : ''}`}>{active ? '生效中' : pending ? '待生效' : '已关闭'}</span>
+                          <span className={`cc-chip ${phase === 'active' ? 'blue' : ''}`}>{PHASE_LABEL[phase]}</span>
                           <span className={`cc-chip ${p.plan_type === 'REGULAR' ? 'blue' : ''}`}>{p.plan_type === 'REGULAR' ? '固定' : '按需'}</span>
                         </div>
                         <span className="cc-plan-range">{day(p.starts_at)} ~ {p.ends_at ? day(p.ends_at) : '至今'}</span>
@@ -178,8 +195,8 @@ export default function PlanEditPage() {
             </Card>
           }
         >
-          <Card title={`新建计划 · ${selectedPatient.display_name}`} hint="创建后原计划自动关闭">
-            <Form form={form} layout="vertical" onFinish={onCreate} initialValues={{ plan_type: 'REGULAR' }}>
+          <Card title="新建计划">
+            <Form className="cc-plan-form" form={form} layout="vertical" onFinish={onCreate} initialValues={{ plan_type: 'REGULAR' }}>
               <Form.Item name="device_model_id" label="型号" rules={[{ required: true, message: '请选择型号' }]}>
                 <Select options={models.map(m => ({ value: m.id, label: m.model_name }))} placeholder="选择装置型号" />
               </Form.Item>
@@ -201,8 +218,12 @@ export default function PlanEditPage() {
                 </Form.Item>
               </div>
               {planType === 'REGULAR' && (
-                <Form.Item name="daily_times_text" label="每日时点（每行一个，HH:MM）">
-                  <Input.TextArea rows={3} placeholder={'08:00\n20:00'} />
+                <Form.Item
+                  name="daily_times_text"
+                  label="每日时点（每行一个，HH:MM）"
+                  rules={[{ required: true, whitespace: true, message: '请填写至少一个时点' }]}
+                >
+                  <Input.TextArea rows={3} />
                 </Form.Item>
               )}
               <Button type="primary" htmlType="submit" loading={loading}>创建计划</Button>

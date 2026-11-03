@@ -276,6 +276,15 @@
   grid-template-rows: 1fr;
 }
 
+/* 干活页：两栏顶对齐，高度各走各的。单卡不再吃掉 1fr 去凑另一栏的高度。 */
+.cc-split-natural {
+  align-items: start;
+}
+
+.cc-split-natural .cc-split-col:has(> .cc-card:only-child) {
+  grid-template-rows: auto;
+}
+
 .cc-card {
   padding: 22px 24px 24px;
 }
@@ -588,6 +597,60 @@
   line-height: 38px;
 }
 
+/* ── 用药计划编辑：干活页。Hero 收瘦，表单是主角，历史自然高度 ── */
+.cc-plan-page .cc-hero {
+  align-items: center;
+  padding-bottom: 20px;
+  margin-bottom: 0;
+}
+
+.cc-plan-page .cc-split {
+  grid-template-columns: minmax(0, 1.85fr) minmax(260px, 0.82fr);
+}
+
+.cc-plan-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 18px;
+}
+
+.cc-plan-now-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cc-plan-now-drug {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cc-plan-now-ver {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-plan-empty {
+  margin: 0;
+  padding: 12px 8px 16px;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.cc-plan-form .ant-form-item {
+  margin-bottom: 22px;
+}
+
+.cc-plan-form .ant-btn-primary {
+  margin-top: 4px;
+}
+
 /* ── 表单卡：日期双列，时点整行 ── */
 .cc-form-grid {
   display: grid;
@@ -733,6 +796,8 @@ button.cc-attn-row:hover {
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink-2);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
@@ -894,7 +959,8 @@ body:has(.cc-shell),
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .cc-split {
+  .cc-split,
+  .cc-plan-page .cc-split {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -941,6 +1007,15 @@ body:has(.cc-shell),
     flex-direction: column;
     align-items: flex-start;
     padding-bottom: 24px;
+  }
+
+  .cc-plan-page .cc-hero {
+    align-items: flex-start;
+    padding-bottom: 16px;
+  }
+
+  .cc-form-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .cc-title {
