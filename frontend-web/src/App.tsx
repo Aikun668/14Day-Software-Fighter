@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+﻿import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/auth/LoginPage'
 import ChangePasswordPage from './pages/auth/ChangePasswordPage'
 import WorkbenchPage from './pages/clinician/WorkbenchPage'
@@ -51,7 +51,7 @@ export default function App() {
           <Route path="/plans" element={<ComfortShell><PlanEditPage /></ComfortShell>} />
           <Route path="/stats" element={<ComfortShell><StatsPage /></ComfortShell>} />
           <Route path="/followups" element={<ComfortShell><FollowupPage /></ComfortShell>} />
-          <Route path="/admin" element={<Shell><AdminPage /></Shell>} />
+          <Route path="/admin" element={<ComfortShell><AdminPage /></ComfortShell>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

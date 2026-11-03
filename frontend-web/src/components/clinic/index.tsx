@@ -91,7 +91,8 @@ export function StatBand({ items, label }: StatBandProps) {
 /* ── 内容卡：白底圆卡，卡头左标题右提示 ── */
 
 interface CardProps {
-  title: ReactNode
+  /** 卡头标题；不放标题就不渲染卡头（如页签容器卡） */
+  title?: ReactNode
   /** 卡头右侧的辅助说明 */
   hint?: ReactNode
   /** 卡片 id，便于锚点跳转 */
@@ -102,10 +103,12 @@ interface CardProps {
 export function Card({ title, hint, id, children }: CardProps) {
   return (
     <section className="cc-card" id={id}>
-      <div className="cc-card-h">
-        <h2>{title}</h2>
-        {hint ? <span className="hint">{hint}</span> : null}
-      </div>
+      {title ? (
+        <div className="cc-card-h">
+          <h2>{title}</h2>
+          {hint ? <span className="hint">{hint}</span> : null}
+        </div>
+      ) : null}
       {children}
     </section>
   )

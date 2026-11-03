@@ -1,4 +1,4 @@
-# UI 优化日志 · 吸入治疗医护 Web
+﻿# UI 优化日志 · 吸入治疗医护 Web
 
 > 仓库：`Aikun668/14Day-Software-Fighter`  
 > 分支参考：`feat/ui-upgrade-2026-10`（本地 WIP 已推 `3bac6ab`）  
@@ -672,4 +672,37 @@
 | 改动 | 外壳锁成一屏（仍保留 `min-height: 100vh`）。主栏 `.cc-shell-content` 自己滚动，窗口不滚。侧栏高度等于视口减去顶栏，菜单过长时只滚菜单。账号和退出仍在 `.sider-foot`，停在视口栏底。卡片不拉高。登录页和管理端不走这套壳。 |
 | 证据 | 短页图4：`docs/evidence/clinic-comfort-humanize/04-sidebar-sticky-short.png`，画廊 `docs/evidence/clinic-comfort-full-ui/04-patient-detail.png`。视口 900，侧栏顶 64 底 900，用户区底边 900；主内容高 570、底边 670；两张内容卡仍各 263px。长页图6 滚前侧栏同样顶 64 底 900，主栏可滚高度 1550。滚到登记情况后（`contentScroll` 714）侧栏顶仍是 64、用户区底边仍是 900，窗口 `scrollY` 为 0：`06-sidebar-sticky-scrolled.png`，画廊 `06-stats-overview.png`。 |
 | 未改 / 风险 | 统计口径和登记展开没动。管理端仍是标准壳。窄屏侧栏收成图标时，用户名藏起，退出仍在栏底。 |
+### 2026-11-03 · 图11/12/13 管理端三页签按 Clinic Comfort 重做
+
+**骨架（不套医护模板）**
+
+管理端任务是「目录与台账」，各页签都是看表。落成：**瘦 Hero + 一张卡装五个页签，页签里就是表**——不套摘要卡、不套双栏。
+
+| 块 | 内容 |
+|---|---|
+| Hero | 眉题「管理端 · N 项内容」+ 标题「内容与账号管理」+ 一句边界说明（只做目录与台账，不涉及患者临床数据）。没有实心主按钮（动作在各页签里） |
+| 卡内页签 | 装置型号 / 指导版本 / 账号 / 知识内容 / 审计日志，一个卡容器 |
+| 页签头 | 灰字说明行（口径提示）+ 右侧该页签的实心主按钮（新建型号 / 新建指导草稿 / 新建账号 / 新建知识草稿） |
+| 表格 | 保留 antd Table（看表任务），但去底色、表头改轻灰小字、行分隔用 `--line-soft`，跟 cc 表格同一把尺 |
+
+**改动**
+
+- `AdminPage.tsx`：`PageHeader` + `page-section` + `toolbar` → `HeroBar` + `Card` + `cc-admin-tools`；五个页签结构不变（只动壳，不动业务逻辑与接口）。
+- `Card` 组件 `title` 改为可选（页签容器卡不需要卡头标题）。
+- 新增共享 CSS：`cc-admin-tools` / `cc-admin-note` / 管理端表格轻量化规则。
+- 路由 `/admin` 换 `ComfortShell`（无面包屑，顶栏显示品牌）。
+- 清掉 `Typography.Text` 引用（提示文案并入 `cc-admin-note`）。
+
+**验证**
+
+- `pnpm run build` 通过；`pnpm run lint` 11 warnings / 0 errors，与改前一致。
+- 结构断言：`ccPage:1 ccHero:1 ccCard:1 tabs:5`；旧类 `page-header` / `page-section` / `toolbar` 计数 0；表头背景透明（进卡）。
+- 三个页签截图数据齐全（型号 3 行 / 指导 4 行 / 账号 5 行，含启用/停用胶囊与审核→发布按钮链）。
+- 新建账号弹窗：浅遮罩 + 模糊（上一轮全站弹层样式自动生效）。
+- 窄屏 390px：782px，页签可横向滚。
+
+**说明**
+
+- 本次只动壳与样式，五个页签的列定义、操作逻辑、接口调用全部未改。
+- 图14 知识内容、图15 审计日志两个页签同卡自动生效（同一壳），单独过审留待后续。
 

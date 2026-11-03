@@ -697,6 +697,58 @@ button.cc-chip-btn {
   margin-top: 4px;
 }
 
+/* ── 管理端：目录/台账页。瘦 Hero + 一张卡装页签，页签里就是表 ── */
+.cc-admin-page .cc-hero {
+  padding-bottom: 20px;
+  margin-bottom: 4px;
+}
+
+.cc-admin-page .ant-tabs-nav {
+  margin-bottom: 20px;
+}
+
+.cc-admin-tools {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.cc-admin-note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  min-width: 0;
+  flex: 1;
+}
+
+/* 管理端表格进卡：表头轻、行分隔细，跟 cc 表格同一把尺 */
+.cc-admin-page .ant-table-wrapper .ant-table {
+  background: transparent;
+}
+
+.cc-admin-page .ant-table-wrapper .ant-table-thead > tr > th {
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--line);
+}
+
+.cc-admin-page .ant-table-wrapper .ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.cc-admin-page .ant-table-wrapper .ant-table-tbody > tr:last-child > td {
+  border-bottom: 0;
+}
+
+.cc-admin-page .ant-pagination {
+  margin-bottom: 0;
+}
+
 /* ── 展开/收起：窄屏长列表收住用 ── */
 .cc-expand-toggle {
   display: block;
