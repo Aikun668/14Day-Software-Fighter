@@ -573,6 +573,59 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── Hero 里放选择器（用药计划页的患者入口）：与按钮同高对齐 ── */
+.cc-hero-actions .ant-select {
+  min-width: 240px;
+}
+
+.cc-hero-actions .ant-select .ant-select-selector {
+  height: 40px;
+  border-radius: 14px;
+}
+
+.cc-hero-actions .ant-select .ant-select-selection-item,
+.cc-hero-actions .ant-select .ant-select-selection-placeholder {
+  line-height: 38px;
+}
+
+/* ── 表单卡：日期双列，时点整行 ── */
+.cc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.cc-form-grid .ant-form-item:nth-last-child(1):nth-child(odd) {
+  grid-column: span 2;
+}
+
+/* ── 历史版本行：复用 cc-record-list，附加类型芯片与当前标记 ── */
+.cc-plan-version {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cc-plan-version .cc-plan-drug {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cc-plan-version .cc-plan-range {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-plan-times {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
 /* ── 展开/收起：窄屏长列表收住用 ── */
 .cc-expand-toggle {
   display: block;
