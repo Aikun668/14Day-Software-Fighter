@@ -130,28 +130,36 @@ export default function WebLayout({ children }: { children: ReactNode }) {
       <Header
         className="patient-detail-header"
         style={{
-          height: 56,
-          lineHeight: '56px',
+          height: isPatientDetailPage ? 64 : 56,
+          lineHeight: isPatientDetailPage ? '64px' : '56px',
           background: 'var(--surface)',
           borderBottom: '1px solid var(--line)',
-          padding: '0 24px',
+          padding: isPatientDetailPage ? '0 32px' : '0 24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
-        <span className="patient-detail-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-          <BrandMark size={22} />
-          <Typography.Text className="patient-detail-brand-title" strong style={{ fontSize: 15, color: 'var(--ink)' }}>
-            吸入治疗指导与依从性辅助管理软件
-          </Typography.Text>
-        </span>
+        {isPatientDetailPage ? (
+          <button type="button" className="cc-crumb" onClick={() => navigate('/patients')}>
+            <span>患者</span>
+            <span aria-hidden="true">/</span>
+            <strong>详情</strong>
+          </button>
+        ) : (
+          <span className="patient-detail-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <BrandMark size={22} />
+            <Typography.Text className="patient-detail-brand-title" strong style={{ fontSize: 15, color: 'var(--ink)' }}>
+              吸入治疗指导与依从性辅助管理软件
+            </Typography.Text>
+          </span>
+        )}
 
         {/* 顶栏全局搜索（仅医护）：输入编号或姓名，选择后直达患者详情 */}
         {user?.role === 'CLINICIAN' && (
           <AutoComplete
             className="patient-detail-search"
-            style={{ width: 320 }}
+            style={{ width: isPatientDetailPage ? 200 : 320 }}
             value={keyword}
             options={searchOptions}
             onChange={setKeyword}
@@ -190,13 +198,22 @@ export default function WebLayout({ children }: { children: ReactNode }) {
         {/* 只有一个菜单项时（管理员）不占用侧栏宽度 */}
         {items.length > 1 && (
           <Sider
-            width={232}
+            width={isPatientDetailPage ? 220 : 232}
             collapsed={compactPatientDetail}
             collapsedWidth={64}
             theme="light"
-            style={{ borderRight: '1px solid var(--line)' }}
+            style={{ borderRight: '1px solid var(--line)', background: 'var(--surface)' }}
           >
             <div className="side-menu">
+              {isPatientDetailPage && !compactPatientDetail && (
+                <div className="cc-side-brand">
+                  <div className="cc-side-mark" aria-hidden="true">吸</div>
+                  <div>
+                    <strong>吸入治疗管理</strong>
+                    <span>医护工作台</span>
+                  </div>
+                </div>
+              )}
               <Menu
                 mode="inline"
                 inlineCollapsed={compactPatientDetail}
@@ -220,7 +237,7 @@ export default function WebLayout({ children }: { children: ReactNode }) {
             </div>
           </Sider>
         )}
-        <Content className="patient-detail-content" style={{ background: 'var(--bg)', padding: 28, flex: 1, minWidth: 0 }}>
+        <Content className="patient-detail-content" style={{ background: 'var(--bg)', padding: isPatientDetailPage ? '36px 40px 40px' : 28, flex: 1, minWidth: 0 }}>
           <div style={{ width: '100%' }}>{children}</div>
         </Content>
       </Layout>

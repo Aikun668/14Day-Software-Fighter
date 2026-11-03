@@ -204,7 +204,7 @@ export default function MedicationBackfillModal({ open, patientId, patientName, 
           {mode === 'slot' ? (
             <div>
               <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>
-                漏登记的时点（近 7 天至明天）
+                未发现登记的时点（近 7 日至明天）
               </label>
               {loading ? (
                 <p className="muted" style={{ margin: 0 }}>加载中…</p>

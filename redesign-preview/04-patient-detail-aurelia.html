@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>患者详情 · Clinic Comfort v2 — P-004 李先生</title>
+<style>
+  :root {
+    --bg: #F4F6F9;
+    --surface: #FFFFFF;
+    --surface-soft: #EEF2F7;
+    --line: #E5EAF1;
+    --ink: #1A1D26;
+    --ink-2: #4A5160;
+    --muted: #8B93A7;
+    --primary: #5B7CFF;
+    --primary-soft: #E8EEFF;
+    --primary-text: #3D56C7;
+    --ok: #1F9D7A;
+    --ok-soft: #E4F7F1;
+    --warn: #D97706;
+    --warn-soft: #FFF4E5;
+    --missed: #2A2F3A;
+    --chip-violet: #F0EBFF;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --shadow: 0 8px 24px rgba(26, 29, 38, 0.06);
+    --font: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+  body {
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--ink);
+    background: #DDE3EC;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 28px;
+  }
+  .frame {
+    max-width: 1280px;
+    margin: 0 auto;
+    background: var(--bg);
+    border-radius: 28px;
+    box-shadow: 0 24px 64px rgba(26, 29, 38, 0.12);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    align-items: stretch;
+  }
+  .nav {
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 100%;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 10px 28px;
+    font-weight: 600; font-size: 14px;
+  }
+  .brand-mark {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: var(--primary-soft); color: var(--primary);
+    display: grid; place-items: center;
+  }
+  .brand span { display: block; font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 12px; border-radius: var(--radius-md);
+    color: var(--ink-2);
+  }
+  .nav-item.active { background: var(--primary-soft); color: var(--primary-text); font-weight: 600; }
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 64px; background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px;
+  }
+  .crumbs { color: var(--muted); font-size: 13px; }
+  .crumbs strong { color: var(--ink); }
+  .top-right { display: flex; align-items: center; gap: 12px; }
+  .search {
+    width: 200px; height: 38px; border: 1px solid var(--line);
+    border-radius: 999px; padding: 0 14px; background: var(--bg); color: var(--muted);
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--primary-soft); color: var(--primary-text);
+    display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  }
+  .content { padding: 36px 40px 36px; }
+  .hero {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px;
+    min-height: 148px;
+    padding: 12px 4px 36px;
+    margin-bottom: 8px;
+  }
+  .eyebrow {
+    font-size: 12px; color: var(--muted);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin: 0 0 14px; font-weight: 500;
+  }
+  .eyebrow .ok { color: var(--ok); font-weight: 600; text-transform: none; letter-spacing: 0; }
+  h1 {
+    margin: 0 0 12px; font-size: 32px; font-weight: 600;
+    letter-spacing: -0.03em; line-height: 1.15;
+  }
+  .demo {
+    display: inline-flex; align-items: center; height: 22px; padding: 0 8px;
+    border-radius: 999px; background: var(--chip-violet); color: #6B5BD2;
+    font-size: 12px; font-weight: 600; margin-left: 10px; vertical-align: 4px;
+  }
+  .sub { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 36em; }
+  .hero-actions { display: flex; gap: 10px; flex-shrink: 0; padding-bottom: 4px; }
+  .btn {
+    height: 40px; padding: 0 18px; border-radius: var(--radius-md);
+    border: 1px solid transparent; font-weight: 600; font-size: 14px;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ink-2); }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow); padding: 20px 20px 18px;
+  }
+  .stat-label { color: var(--muted); font-size: 12px; font-weight: 500; margin: 0 0 12px; }
+  .stat-value { font-size: 28px; font-weight: 650; letter-spacing: -0.03em; margin: 0 0 8px; }
+  .stat-meta { font-size: 12px; color: var(--ink-2); margin: 0; }
+  .stat-meta.warn { color: var(--warn); }
+
+  .split {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px;
+  }
+  .card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow); padding: 22px 24px 24px;
+  }
+  .card-h {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .card-h h2 { margin: 0; font-size: 16px; font-weight: 600; }
+  .card-h .hint { font-size: 12px; color: var(--muted); }
+  .scale {
+    display: grid;
+    grid-template-columns: 56px repeat(7, 1fr);
+    gap: 10px 8px; align-items: center;
+  }
+  .scale-day { text-align: center; font-size: 12px; color: var(--muted); }
+  .scale-day strong { display: block; color: var(--ink); font-size: 13px; }
+  .scale-slot { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .cell { height: 40px; border-radius: 10px; }
+  .cell.ok {
+    background: var(--primary-soft);
+    box-shadow: inset 0 0 0 1.5px #C5D0FF;
+  }
+  .cell.miss {
+    background: #EEF1F6;
+    box-shadow: inset 0 0 0 1.5px #C8CEDA;
+  }
+  .cell.miss::after {
+    /* solid black blocks retired — soft slate wash only */
+  }
+  .legend {
+    display: flex; gap: 16px; margin-top: 16px; font-size: 12px; color: var(--muted);
+  }
+  .legend i {
+    display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+    margin-right: 6px; vertical-align: -1px;
+  }
+  .attn { display: flex; flex-direction: column; gap: 12px; }
+  .attn-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 14px; border-radius: 14px; background: var(--bg);
+  }
+  .attn-ico {
+    width: 38px; height: 38px; border-radius: 12px;
+    display: grid; place-items: center; font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .attn-ico.bind { background: var(--warn-soft); color: var(--warn); }
+  .attn-ico.cov { background: var(--primary-soft); color: var(--primary-text); }
+  .attn-body { min-width: 0; flex: 1; }
+  .attn-body strong { display: block; font-size: 13px; margin-bottom: 2px; }
+  .attn-body span { font-size: 12px; color: var(--muted); }
+  .chip {
+    height: 24px; padding: 0 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; display: inline-flex; align-items: center;
+  }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.blue { background: var(--primary-soft); color: var(--primary-text); }
+  .foot { text-align: center; color: #7A8499; font-size: 12px; margin-top: 18px; }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <aside class="nav">
+      <div class="brand">
+        <div class="brand-mark">吸</div>
+        <div>吸入治疗管理<span>医护工作台</span></div>
+      </div>
+      <div class="nav-item">工作台</div>
+      <div class="nav-item active">患者</div>
+      <div class="nav-item">用药计划</div>
+      <div class="nav-item">随访</div>
+      <div class="nav-item">统计</div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div class="crumbs">患者 / <strong>详情</strong></div>
+        <div class="top-right">
+          <input class="search" type="search" placeholder="搜索患者" readonly />
+          <div class="avatar">YW</div>
+        </div>
+      </header>
+      <div class="content">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">Tuesday · Nov 3 · <span class="ok">系统正常</span></p>
+            <h1>你好，李先生 <span class="demo">演示数据</span></h1>
+            <p class="sub">氟替卡松 / 沙美特罗 · 08:00 / 20:00。下面是近 7 日登记覆盖与待办。</p>
+          </div>
+          <div class="hero-actions">
+            <button type="button" class="btn btn-ghost">更多</button>
+            <button type="button" class="btn btn-primary">绑定账号</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <p class="stat-label">近 7 日覆盖</p>
+            <p class="stat-value">42.9%</p>
+            <p class="stat-meta warn">6 / 14 时点 · 非依从性</p>
+          </div>
+          <div class="stat">
+            <p class="stat-label">未发现登记</p>
+            <p class="stat-value">8</p>
+            <p class="stat-meta">近 7 日</p>
+          </div>
+          <div class="stat">
+            <p class="stat-label">账号</p>
+            <p class="stat-value" style="font-size:24px">未绑定</p>
+            <p class="stat-meta warn">需处理</p>
+          </div>
+          <div class="stat">
+            <p class="stat-label">待随访</p>
+            <p class="stat-value">1</p>
+            <p class="stat-meta">计划内</p>
+          </div>
+        </div>
+
+        <div class="split">
+          <section class="card">
+            <div class="card-h">
+              <h2>近 7 日时点</h2>
+              <span class="hint">覆盖 ≠ 依从性</span>
+            </div>
+            <div class="scale" aria-label="近七日早晚时点">
+              <div></div>
+              <div class="scale-day"><strong>28</strong>二</div>
+              <div class="scale-day"><strong>29</strong>三</div>
+              <div class="scale-day"><strong>30</strong>四</div>
+              <div class="scale-day"><strong>31</strong>五</div>
+              <div class="scale-day"><strong>1</strong>六</div>
+              <div class="scale-day"><strong>2</strong>日</div>
+              <div class="scale-day"><strong>3</strong>一</div>
+              <div class="scale-slot">08:00</div>
+              <div class="cell ok"></div>
+              <div class="cell miss"></div>
+              <div class="cell ok"></div>
+              <div class="cell miss"></div>
+              <div class="cell miss"></div>
+              <div class="cell ok"></div>
+              <div class="cell miss"></div>
+              <div class="scale-slot">20:00</div>
+              <div class="cell ok"></div>
+              <div class="cell miss"></div>
+              <div class="cell ok"></div>
+              <div class="cell miss"></div>
+              <div class="cell miss"></div>
+              <div class="cell ok"></div>
+              <div class="cell miss"></div>
+            </div>
+            <div class="legend">
+              <span><i style="background:#E8EEFF;box-shadow:inset 0 0 0 1px #C5D0FF"></i>已登记</span>
+              <span><i style="background:#EEF1F6;box-shadow:inset 0 0 0 1px #C8CEDA"></i>未发现登记</span>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">
+              <h2>需关注</h2>
+              <span class="hint">2 项</span>
+            </div>
+            <div class="attn">
+              <div class="attn-row">
+                <div class="attn-ico bind">绑</div>
+                <div class="attn-body">
+                  <strong>账号未绑定</strong>
+                  <span>绑定后才能同步 App 登记</span>
+                </div>
+                <span class="chip warn">待处理</span>
+              </div>
+              <div class="attn-row">
+                <div class="attn-ico cov">覆</div>
+                <div class="attn-body">
+                  <strong>近 7 日覆盖偏低</strong>
+                  <span>多个时点未发现登记</span>
+                </div>
+                <span class="chip blue">查看</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Clinic Comfort · 收页高 · 刻度改色板软蓝/浅灰</p>
+</body>
+</html>
