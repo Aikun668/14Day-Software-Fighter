@@ -1,0 +1,566 @@
+﻿/* Clinic Comfort 共享层（DESIGN.md）。
+   这是全站医护 Web 的视觉积木，不属于某一个页面：
+   Hero 留白 → 摘要卡带 → 双栏内容 → 收页高。
+   结构（几列、间距、等高）在这里定；每屏显示什么内容由各页面自己决定。 */
+
+/* ── 页面根：收页高，内容多高页面多高 ── */
+.cc-page {
+  width: 100%;
+  color: var(--ink);
+}
+
+/* ── Hero：故意留白，只放问候 + 一句说明 + 一个主操作 ── */
+.cc-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px 4px 36px;
+  margin-bottom: 8px;
+  animation: cc-rise 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cc-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.cc-eyebrow {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cc-eyebrow .ok {
+  color: var(--ok);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cc-title {
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.cc-demo {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  margin-left: 10px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--chip-violet);
+  color: #6B5BD2;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+  vertical-align: 4px;
+}
+
+.cc-sub {
+  max-width: 36em;
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.cc-hero-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+  padding-bottom: 4px;
+}
+
+.cc-hero-actions .ant-btn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 14px;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+/* ── 第一层：摘要卡带，最多四张 ── */
+.cc-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cc-stat,
+.cc-card {
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(26, 29, 38, 0.06);
+}
+
+.cc-stat {
+  padding: 20px 20px 18px;
+}
+
+.cc-stat-label,
+.cc-card-h .hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cc-stat-value {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-stat-value.words {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.cc-stat-meta {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.cc-stat-meta.warn {
+  color: var(--warn);
+}
+
+/* ── 第二层：仅双栏（左主右次），同排等高 ── */
+.cc-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.cc-card {
+  padding: 22px 24px 24px;
+}
+
+.cc-card-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.cc-card-h h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cc-card-h .hint {
+  margin: 0;
+}
+
+/* ── 刻度：产品签名件，软蓝已登记 / 浅灰未发现登记，同色温 ── */
+.cc-scale-wrap {
+  overflow-x: auto;
+}
+
+.cc-scale {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(36px, 1fr));
+  gap: 10px 8px;
+  align-items: center;
+  min-width: 520px;
+}
+
+.cc-scale-day {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.cc-scale-day strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cc-scale-slot {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-cell {
+  height: 40px;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.cc-cell.ok {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1.5px var(--primary-ring);
+}
+
+.cc-cell.miss {
+  background: var(--miss-fill);
+  box-shadow: inset 0 0 0 1.5px var(--miss-ring);
+}
+
+.cc-cell.pending {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+
+.cc-legend {
+  display: flex;
+  gap: 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cc-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+
+.cc-legend .ok {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--primary-ring);
+}
+
+.cc-legend .miss {
+  background: var(--miss-fill);
+  box-shadow: inset 0 0 0 1px var(--miss-ring);
+}
+
+.cc-empty-line {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ── 需关注：少而准，淡底行 + 芯片 ── */
+.cc-attn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cc-attn-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.cc-attn-row {
+  cursor: pointer;
+}
+
+button.cc-attn-row:hover {
+  background: var(--surface-soft);
+}
+
+.cc-attn-ico {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cc-attn-ico.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.cc-attn-ico.info {
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+
+.cc-attn-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.cc-attn-body strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+}
+
+.cc-attn-body span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cc-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cc-chip.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.cc-chip.blue {
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+
+/* ── 行列表：行间一条细线，不套卡片 ── */
+.cc-record-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cc-record-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.cc-record-list li:last-child {
+  border-bottom: 0;
+}
+
+.cc-record-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cc-record-main strong {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-record-main span,
+.cc-revoked {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ── 外壳（Clinic Comfort 布局变体）：收页高，不撑到视口底 ── */
+.cc-shell {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+}
+
+html:has(.cc-shell),
+body:has(.cc-shell),
+#root:has(.cc-shell) {
+  min-height: 0;
+  height: auto;
+}
+
+.cc-shell.ant-layout {
+  flex-grow: 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  background: var(--bg);
+}
+
+.cc-shell > .cc-shell-body.ant-layout {
+  flex-grow: 0;
+  width: 100%;
+  height: auto;
+}
+
+.cc-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cc-crumb strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.cc-side-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 18px;
+}
+
+.cc-side-brand strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cc-side-brand span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.cc-side-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cc-shell .ant-menu-item-group-title {
+  display: none;
+}
+
+.cc-shell .cc-shell-search.ant-select {
+  height: 38px;
+}
+
+.cc-shell .cc-shell-search .ant-select-content {
+  height: 38px;
+  border-radius: 999px;
+  background: var(--bg);
+  align-items: center;
+  padding-inline: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-hero {
+    animation: none;
+  }
+}
+
+/* ── 响应式：窄屏收成两栏 / 单栏，仍不硬拉高度 ── */
+@media (max-width: 1100px) {
+  .cc-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cc-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .cc-shell > .ant-layout-header {
+    gap: 12px;
+    padding: 0 12px !important;
+  }
+
+  .cc-shell .cc-shell-brand-title {
+    display: none;
+  }
+
+  .cc-shell .cc-shell-search.ant-select {
+    width: min(200px, calc(100vw - 140px)) !important;
+  }
+
+  .cc-shell .sider-foot {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 4px;
+  }
+
+  .cc-shell .sider-user {
+    display: none;
+  }
+
+  .cc-shell .sider-foot .ant-btn {
+    width: 56px;
+    padding-inline: 4px;
+  }
+
+  .cc-shell .cc-shell-content {
+    padding: 20px 16px 28px !important;
+  }
+
+  .cc-side-brand span,
+  .cc-side-brand strong {
+    display: none;
+  }
+
+  .cc-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: 24px;
+  }
+
+  .cc-title {
+    font-size: 28px;
+  }
+
+  .cc-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cc-scale {
+    min-width: 0;
+    grid-template-columns: 42px repeat(7, minmax(0, 1fr));
+    gap: 8px 4px;
+  }
+
+  .cc-cell {
+    height: 28px;
+  }
+
+  .cc-scale-day,
+  .cc-scale-slot {
+    font-size: 11px;
+  }
+}

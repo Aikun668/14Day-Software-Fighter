@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+﻿import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AutoComplete, Badge, Button, Avatar, Dropdown, Layout, Menu, Typography, type MenuProps } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
@@ -16,11 +16,25 @@ interface PatientHit {
 }
 
 // 医护 Web 布局（UI_DESIGN §5）：顶栏 56px + 左侧导航 232px + 内容区 28px 留白
-export default function WebLayout({ children }: { children: ReactNode }) {
+//
+// variant 决定外壳观感，不再靠 URL 判断：
+//   'standard' 传统布局（顶栏 56px、内容 padding 28px、页面撑到视口底）
+//   'comfort'  Clinic Comfort 变体（顶栏 64px、面包屑侧栏品牌、收页高）
+// 新页面要上 Clinic Comfort，显式传 variant="comfort" 即可，不再加路径判断。
+export default function WebLayout({
+  children,
+  variant = 'standard',
+  crumb,
+}: {
+  children: ReactNode
+  variant?: 'standard' | 'comfort'
+  /** comfort 变体顶栏左侧的返回面包屑，如 ['患者', '详情'] */
+  crumb?: { parent: string; parentTo: string; current: string }
+}) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuth()
-  const isPatientDetailPage = location.pathname.startsWith('/patients/')
+  const isComfort = variant === 'comfort'
   const [isCompactViewport, setIsCompactViewport] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches,
   )
@@ -36,7 +50,7 @@ export default function WebLayout({ children }: { children: ReactNode }) {
     return () => media.removeEventListener('change', syncViewport)
   }, [])
 
-  const compactPatientDetail = isPatientDetailPage && isCompactViewport
+  const compactComfort = isComfort && isCompactViewport
 
   // 侧栏待办数角标：仅医护拉取 OPEN 任务数（管理员无此菜单）
   useEffect(() => {
@@ -127,32 +141,32 @@ export default function WebLayout({ children }: { children: ReactNode }) {
 
   return (
     <Layout
-      className={isPatientDetailPage ? 'patient-detail-layout' : undefined}
-      style={{ minHeight: isPatientDetailPage ? 0 : '100vh', width: '100%', flexGrow: isPatientDetailPage ? 0 : undefined }}
+      className={isComfort ? 'cc-shell' : undefined}
+      style={{ minHeight: isComfort ? 0 : '100vh', width: '100%', flexGrow: isComfort ? 0 : undefined }}
     >
       <Header
-        className="patient-detail-header"
+        className="cc-shell-header"
         style={{
-          height: isPatientDetailPage ? 64 : 56,
-          lineHeight: isPatientDetailPage ? '64px' : '56px',
+          height: isComfort ? 64 : 56,
+          lineHeight: isComfort ? '64px' : '56px',
           background: 'var(--surface)',
           borderBottom: '1px solid var(--line)',
-          padding: isPatientDetailPage ? '0 32px' : '0 24px',
+          padding: isComfort ? '0 32px' : '0 24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
-        {isPatientDetailPage ? (
-          <button type="button" className="cc-crumb" onClick={() => navigate('/patients')}>
-            <span>患者</span>
+        {isComfort && crumb ? (
+          <button type="button" className="cc-crumb" onClick={() => navigate(crumb.parentTo)}>
+            <span>{crumb.parent}</span>
             <span aria-hidden="true">/</span>
-            <strong>详情</strong>
+            <strong>{crumb.current}</strong>
           </button>
         ) : (
-          <span className="patient-detail-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+          <span className="cc-shell-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             <BrandMark size={22} />
-            <Typography.Text className="patient-detail-brand-title" strong style={{ fontSize: 15, color: 'var(--ink)' }}>
+            <Typography.Text className="cc-shell-brand-title" strong style={{ fontSize: 15, color: 'var(--ink)' }}>
               吸入治疗指导与依从性辅助管理软件
             </Typography.Text>
           </span>
@@ -161,8 +175,8 @@ export default function WebLayout({ children }: { children: ReactNode }) {
         {/* 顶栏全局搜索（仅医护）：输入编号或姓名，选择后直达患者详情 */}
         {user?.role === 'CLINICIAN' && (
           <AutoComplete
-            className="patient-detail-search"
-            style={{ width: isPatientDetailPage ? 200 : 320 }}
+            className="cc-shell-search"
+            style={{ width: isComfort ? 200 : 320 }}
             value={keyword}
             options={searchOptions}
             onChange={setKeyword}
@@ -198,20 +212,20 @@ export default function WebLayout({ children }: { children: ReactNode }) {
       </Header>
 
       <Layout
-        className={isPatientDetailPage ? 'patient-detail-body' : undefined}
-        style={{ width: '100%', flexGrow: isPatientDetailPage ? 0 : undefined }}
+        className={isComfort ? 'cc-shell-body' : undefined}
+        style={{ width: '100%', flexGrow: isComfort ? 0 : undefined }}
       >
         {/* 只有一个菜单项时（管理员）不占用侧栏宽度 */}
         {items.length > 1 && (
           <Sider
-            width={isPatientDetailPage ? 220 : 232}
-            collapsed={compactPatientDetail}
+            width={isComfort ? 220 : 232}
+            collapsed={compactComfort}
             collapsedWidth={64}
             theme="light"
             style={{ borderRight: '1px solid var(--line)', background: 'var(--surface)' }}
           >
             <div className="side-menu">
-              {isPatientDetailPage && !compactPatientDetail && (
+              {isComfort && !compactComfort && (
                 <div className="cc-side-brand">
                   <div className="cc-side-mark" aria-hidden="true">吸</div>
                   <div>
@@ -222,7 +236,7 @@ export default function WebLayout({ children }: { children: ReactNode }) {
               )}
               <Menu
                 mode="inline"
-                inlineCollapsed={compactPatientDetail}
+                inlineCollapsed={compactComfort}
                 selectedKeys={[selectedKey]}
                 items={items}
                 onClick={({ key }) => navigate(key)}
@@ -244,10 +258,10 @@ export default function WebLayout({ children }: { children: ReactNode }) {
           </Sider>
         )}
         <Content
-          className="patient-detail-content"
+          className="cc-shell-content"
           style={{
             background: 'var(--bg)',
-            padding: isPatientDetailPage ? '36px 40px 40px' : 28,
+            padding: isComfort ? '36px 40px 40px' : 28,
             flex: 1,
             minWidth: 0,
           }}

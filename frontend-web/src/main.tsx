@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { App as AntdApp, ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import './index.css'
+import './styles/clinic-comfort.css'
 import App from './App.tsx'
 import { webTheme } from './styles/theme.ts'
 

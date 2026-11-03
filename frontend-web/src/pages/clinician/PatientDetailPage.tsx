@@ -4,6 +4,17 @@ import { Button, DatePicker, Drawer, Dropdown, Empty, Form, Input, Modal, Select
 import dayjs from 'dayjs'
 import { apiFetch } from '../../api/client'
 import MedicationBackfillModal from '../../components/MedicationBackfillModal'
+import {
+  AttentionPanel,
+  Card,
+  HeroBar,
+  StatBand,
+  TimeScale,
+  TwoColumn,
+  type AttentionItem,
+  type ScaleCellKind,
+  type ScaleSlot,
+} from '../../components/clinic'
 
 interface PatientDetail {
   id: string
@@ -320,17 +331,7 @@ export default function PatientDetailPage() {
         ? { key: 'follow', label: '去随访', onClick: () => navigate('/followups') }
         : null
 
-  type Attention = {
-    key: string
-    mark: string
-    tone: 'warn' | 'info'
-    title: string
-    detail: string
-    chip: string
-    chipTone: 'warn' | 'blue'
-    onClick?: () => void
-  }
-  const attention: Attention[] = []
+  const attention: AttentionItem[] = []
   if (unbound) {
     attention.push({
       key: 'bind',
@@ -401,140 +402,107 @@ export default function PatientDetailPage() {
     { key: 'records', label: '查看登记', onClick: () => setRecordsOpen(true) },
   ].filter((item) => item !== null)
 
+  // 刻度数据交给共享组件：行=时点，列=近 7 日
+  const scaleDays = days.map((day) => ({
+    key: day.format('YYYY-MM-DD'),
+    date: String(day.date()),
+    weekday: WEEK_ZH[day.day()],
+  }))
+  const scaleSlots = times.map((time): ScaleSlot => ({
+    key: time,
+    label: time,
+    cells: days.map((day) => {
+      const key = `${day.format('YYYY-MM-DD')}|${time}`
+      const slot = slotByCell.get(key)
+      const future = slot ? new Date(slot.scheduled_at).getTime() > asOf : false
+      const kind: ScaleCellKind = !slot ? 'none' : future ? 'pending' : slot.has_active_record ? 'ok' : 'miss'
+      const label = !slot
+        ? `${day.format('M月D日')} ${time} 无此时点`
+        : future
+          ? `${day.format('M月D日')} ${time} 未到时点`
+          : `${day.format('M月D日')} ${time} ${kind === 'ok' ? '已登记' : '未发现登记'}`
+      return { kind, label }
+    }),
+  }))
+
   return (
-    <div className="patient-detail-page">
-      <header className="cc-hero">
-        <div>
-          <p className="cc-eyebrow">
-            {WEEK_EN[now.day()]} · {MONTH_EN[now.month()]} {now.date()} · <span className={coverageStats ? 'ok' : undefined}>{coverageStats ? '系统正常' : '统计未更新'}</span>
-          </p>
-          <h1 className="cc-title">
+    <div className="cc-page">
+      <HeroBar
+        eyebrow={
+          <>
+            {WEEK_EN[now.day()]} · {MONTH_EN[now.month()]} {now.date()} ·{' '}
+            <span className={coverageStats ? 'ok' : undefined}>{coverageStats ? '系统正常' : '统计未更新'}</span>
+          </>
+        }
+        title={
+          <>
             你好，{patient.display_name}
             {isDemoData && <span className="cc-demo">演示数据</span>}
-          </h1>
-          <p className="cc-sub">{drugLine}</p>
-        </div>
-        <div className="cc-hero-actions">
-          <Dropdown menu={{ items: moreItems }} trigger={['click']}>
-            <Button>更多</Button>
-          </Dropdown>
-          {primary && (
-            <Button type="primary" onClick={primary.onClick}>{primary.label}</Button>
-          )}
-        </div>
-      </header>
+          </>
+        }
+        sub={drugLine}
+        actions={
+          <>
+            <Dropdown menu={{ items: moreItems }} trigger={['click']}>
+              <Button>更多</Button>
+            </Dropdown>
+            {primary && (
+              <Button type="primary" onClick={primary.onClick}>{primary.label}</Button>
+            )}
+          </>
+        }
+      />
 
-      <section className="cc-stats" aria-label="近 7 日摘要">
-        <article className="cc-stat">
-          <p className="cc-stat-label">近 7 日覆盖</p>
-          <p className="cc-stat-value">{formatRate(coverageStats)}</p>
-          <p className={missingCount ? 'cc-stat-meta warn' : 'cc-stat-meta'}>
-            {coverageStats
+      <StatBand
+        label="近 7 日摘要"
+        items={[
+          {
+            key: 'coverage',
+            label: '近 7 日覆盖',
+            value: formatRate(coverageStats),
+            warn: Boolean(missingCount),
+            meta: coverageStats
               ? coverageStats.N > 0
                 ? `${coverageStats.M} / ${coverageStats.N} 时点 · 非依从性`
                 : '近 7 日无到期时点'
-              : '统计暂不可用'}
-          </p>
-        </article>
-        <article className="cc-stat">
-          <p className="cc-stat-label">未发现登记</p>
-          <p className="cc-stat-value">{missingCount == null ? '—' : missingCount}</p>
-          <p className="cc-stat-meta">近 7 日</p>
-        </article>
-        <article className="cc-stat">
-          <p className="cc-stat-label">账号</p>
-          <p className="cc-stat-value words">{unbound ? '未绑定' : '已绑定'}</p>
-          <p className={unbound ? 'cc-stat-meta warn' : 'cc-stat-meta'}>{unbound ? '需处理' : '已关联'}</p>
-        </article>
-        <article className="cc-stat">
-          <p className="cc-stat-label">待随访</p>
-          <p className="cc-stat-value">{openTaskCount == null ? '—' : openTaskCount}</p>
-          <p className="cc-stat-meta">{openTaskCount ? '计划内' : '暂无'}</p>
-        </article>
-      </section>
+              : '统计暂不可用',
+          },
+          {
+            key: 'missing',
+            label: '未发现登记',
+            value: missingCount == null ? '—' : missingCount,
+            meta: '近 7 日',
+          },
+          {
+            key: 'account',
+            label: '账号',
+            value: unbound ? '未绑定' : '已绑定',
+            words: true,
+            warn: unbound,
+            meta: unbound ? '需处理' : '已关联',
+          },
+          {
+            key: 'followup',
+            label: '待随访',
+            value: openTaskCount == null ? '—' : openTaskCount,
+            meta: openTaskCount ? '计划内' : '暂无',
+          },
+        ]}
+      />
 
-      <div className="cc-split">
-        <section className="cc-card" id="coverage-scale" aria-labelledby="scale-title">
-          <div className="cc-card-h">
-            <h2 id="scale-title">近 7 日时点</h2>
-            <span className="hint">覆盖 ≠ 依从性</span>
-          </div>
+      <TwoColumn
+        aside={
+          <AttentionPanel items={shownAttention} count={shownAttention.length} />
+        }
+      >
+        <Card title="近 7 日时点" hint="覆盖 ≠ 依从性" id="coverage-scale">
           {times.length === 0 ? (
             <p className="cc-empty-line">近 7 日没有可显示的时点。</p>
           ) : (
-            <>
-              <div className="cc-scale-wrap">
-                <div className="cc-scale" aria-label="近七日时点登记覆盖">
-                  <div />
-                  {days.map((day) => (
-                    <div key={day.format('YYYY-MM-DD')} className="cc-scale-day">
-                      <strong>{day.date()}</strong>
-                      {WEEK_ZH[day.day()]}
-                    </div>
-                  ))}
-                  {times.flatMap((time) => {
-                    const labelCell = (
-                      <div key={`${time}-label`} className="cc-scale-slot">{time}</div>
-                    )
-                    const cells = days.map((day) => {
-                      const key = `${day.format('YYYY-MM-DD')}|${time}`
-                      const slot = slotByCell.get(key)
-                        const future = slot ? new Date(slot.scheduled_at).getTime() > asOf : false
-                        const kind = !slot ? 'none' : future ? 'pending' : slot.has_active_record ? 'ok' : 'miss'
-                      const label = !slot
-                        ? `${day.format('M月D日')} ${time} 无此时点`
-                        : future
-                          ? `${day.format('M月D日')} ${time} 未到时点`
-                          : `${day.format('M月D日')} ${time} ${kind === 'ok' ? '已登记' : '未发现登记'}`
-                      return (
-                        <div
-                          key={key}
-                          className={kind === 'none' ? 'cc-cell' : `cc-cell ${kind}`}
-                          title={label}
-                          aria-label={label}
-                        />
-                      )
-                    })
-                    return [labelCell, ...cells]
-                  })}
-                </div>
-              </div>
-              <ul className="cc-legend">
-                <li><i className="ok" aria-hidden="true" />已登记</li>
-                <li><i className="miss" aria-hidden="true" />未发现登记</li>
-              </ul>
-            </>
+            <TimeScale days={scaleDays} slots={scaleSlots} ariaLabel="近七日时点登记覆盖" />
           )}
-        </section>
-
-        <section className="cc-card" aria-labelledby="attn-title">
-          <div className="cc-card-h">
-            <h2 id="attn-title">需关注</h2>
-            <span className="hint">{shownAttention.length} 项</span>
-          </div>
-          <div className="cc-attn">
-            {shownAttention.map((item) => {
-              const body = (
-                <>
-                  <div className={`cc-attn-ico ${item.tone}`} aria-hidden="true">{item.mark}</div>
-                  <div className="cc-attn-body">
-                    <strong>{item.title}</strong>
-                    <span>{item.detail}</span>
-                  </div>
-                  <span className={`cc-chip ${item.chipTone}`}>{item.chip}</span>
-                </>
-              )
-              return item.onClick ? (
-                <button key={item.key} type="button" className="cc-attn-row" onClick={item.onClick}>
-                  {body}
-                </button>
-              ) : (
-                <div key={item.key} className="cc-attn-row">{body}</div>
-              )
-            })}
-          </div>
-        </section>
-      </div>
+        </Card>
+      </TwoColumn>
 
       <MedicationBackfillModal
         open={backfillOpen}

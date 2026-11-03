@@ -21,6 +21,22 @@ function Shell({ children }: { children: React.ReactNode }) {
   )
 }
 
+// Clinic Comfort 变体的外壳：收页高 + 侧栏品牌 + 面包屑。
+// 新页面要上 Clinic Comfort，就用它，而不是往 WebLayout 里加路径判断。
+function ComfortShell({
+  children,
+  crumb,
+}: {
+  children: React.ReactNode
+  crumb?: { parent: string; parentTo: string; current: string }
+}) {
+  return (
+    <RequireAuth>
+      <WebLayout variant="comfort" crumb={crumb}>{children}</WebLayout>
+    </RequireAuth>
+  )
+}
+
 // J013 路由骨架 + 鉴权守卫
 export default function App() {
   return (
@@ -31,7 +47,7 @@ export default function App() {
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/workbench" element={<Shell><WorkbenchPage /></Shell>} />
           <Route path="/patients" element={<Shell><PatientListPage /></Shell>} />
-          <Route path="/patients/:id" element={<Shell><PatientDetailPage /></Shell>} />
+          <Route path="/patients/:id" element={<ComfortShell crumb={{ parent: '患者', parentTo: '/patients', current: '详情' }}><PatientDetailPage /></ComfortShell>} />
           <Route path="/plans" element={<Shell><PlanEditPage /></Shell>} />
           <Route path="/stats" element={<Shell><StatsPage /></Shell>} />
           <Route path="/followups" element={<Shell><FollowupPage /></Shell>} />
