@@ -235,6 +235,22 @@
   align-items: stretch;
 }
 
+/* 每栏一列：一栏里可以放多张卡，卡与卡之间留 16px。
+   列高由外层 grid 的 align-items: stretch 决定（两栏等高）。
+   - 只有一张卡时：给它 1fr 行，让它撑满整列 → 与图4「两卡等高」一致。
+   - 多张卡时：卡按内容高度排布。 */
+.cc-split-col {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-content: stretch;
+  gap: 16px;
+  min-width: 0;
+}
+
+.cc-split-col:has(> .cc-card:only-child) {
+  grid-template-rows: 1fr;
+}
+
 .cc-card {
   padding: 22px 24px 24px;
 }
@@ -337,6 +353,114 @@
 .cc-legend .miss {
   background: var(--miss-fill);
   box-shadow: inset 0 0 0 1px var(--miss-ring);
+}
+
+.cc-legend .pending {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* 单行团队刻度：列=日期，没有左侧时点列，所以列模板与 .cc-scale 不同。
+   两行网格：第一行日期表头，第二行格子，各 7 列。 */
+.cc-team-scale {
+  grid-template-columns: repeat(7, minmax(36px, 1fr));
+  grid-template-rows: auto auto;
+  gap: 10px 8px;
+  min-width: 0;
+}
+
+/* ── 队列行：白卡里的行动行 ── */
+.cc-queue-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.cc-queue-row:last-child {
+  border-bottom: 0;
+}
+
+/* 名字这一块是可点的「进详情」入口。行本身不是 button：
+   行内还有动作按钮，button 里套 button 是无障碍问题。 */
+.cc-row-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cc-row-link:hover .cc-row-name {
+  color: var(--primary-text);
+}
+
+.cc-row-link:focus-visible {
+  outline: 2px solid var(--primary-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.cc-row-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.cc-row-dot.tone-warn {
+  background: var(--warn);
+}
+
+.cc-row-dot.tone-ok {
+  background: var(--ok);
+}
+
+.cc-row-name {
+  min-width: 0;
+  flex: 1;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  /* 名字是主信息：宁可换行也不要被压成一列字 */
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.cc-row-meta {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.cc-row-extra {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── 卡内列表容器：无额外边框，行分隔由 cc-queue-row 自己带 ── */
+.cc-task-list,
+.cc-followup-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cc-task-list > li + li,
+.cc-followup-list > li + li {
+  border-top: 1px solid var(--line-soft);
 }
 
 .cc-empty-line {
@@ -641,6 +765,11 @@ body:has(.cc-shell),
     gap: 8px 4px;
   }
 
+  .cc-team-scale {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px 4px;
+  }
+
   .cc-cell {
     height: 28px;
   }
@@ -648,5 +777,23 @@ body:has(.cc-shell),
   .cc-scale-day,
   .cc-scale-slot {
     font-size: 11px;
+  }
+
+  /* 队列行：窄屏改为两行——名字一行，动作一行，避免名字被挤成一列字 */
+  .cc-queue-row {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .cc-row-link {
+    flex: 1 1 100%;
+  }
+
+  .cc-row-name {
+    overflow-wrap: anywhere;
+  }
+
+  .cc-row-extra {
+    margin-left: 20px;
   }
 }

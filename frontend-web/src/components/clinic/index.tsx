@@ -1,6 +1,7 @@
 // Clinic Comfort 共享层：全站医护 Web 的视觉积木（DESIGN.md）。
 // 这里只定「结构」——几列、间距、等高；「内容」由各页面自己决定。
 // 用法：工作台、患者详情、统计、随访都可以直接用同一套积木，不会各写各的。
+import { Button } from 'antd'
 import type { ReactNode } from 'react'
 
 /* ── Hero：留白问候区。故意只放一句说明 + 一个主操作 ── */
@@ -107,8 +108,9 @@ interface TwoColumnProps {
 export function TwoColumn({ children, aside }: TwoColumnProps) {
   return (
     <div className="cc-split">
-      {children}
-      {aside}
+      {/* 每栏各自包一层：一栏里可以放多张卡，卡与卡之间自动留 16px */}
+      <div className="cc-split-col">{children}</div>
+      <div className="cc-split-col">{aside}</div>
     </div>
   )
 }
@@ -231,3 +233,127 @@ function ScaleRow({ slot }: { slot: ScaleSlot }) {
     </>
   )
 }
+
+/* ── 队列行：白卡里的行动行，点行进详情，行尾内联动作 ── */
+
+export interface QueueRowAction {
+  key: string
+  label: string
+  onClick: () => void
+}
+
+interface QueueRowProps {
+  /** 左侧状态点：warn = 待处理，ok = 已完成 */
+  tone?: 'warn' | 'ok'
+  /** 主标题（患者名等） */
+  name: string
+  /** 标题后的次要信息（编号等） */
+  meta?: ReactNode
+  /** 行中信息（时间等） */
+  extra?: ReactNode
+  /** 行尾动作 */
+  actions?: QueueRowAction[]
+  /** 整行点击（进详情） */
+  onClick?: () => void
+}
+
+export function QueueRow({ tone = 'warn', name, meta, extra, actions, onClick }: QueueRowProps) {
+  const inner = (
+    <>
+      <span className={`cc-row-dot tone-${tone}`} aria-hidden />
+      <span className="cc-row-name">
+        {name}
+        {meta ? <span className="cc-row-meta">{meta}</span> : null}
+      </span>
+      {extra ? <span className="cc-row-extra">{extra}</span> : null}
+      {actions?.map((action) => (
+        <Button
+          key={action.key}
+          size="small"
+          className="cc-queue-action"
+          onClick={(e) => {
+            e.stopPropagation()
+            action.onClick()
+          }}
+        >
+          {action.label}
+        </Button>
+      ))}
+    </>
+  )
+  // 行本身不是 button（行内还有动作按钮，button 里套 button 是无障碍问题）。
+  // 只有「名字」这一块可点进详情，用 button 元素保证键盘可达与语义正确。
+  if (!onClick) return <div className="cc-queue-row">{inner}</div>
+  return (
+    <div className="cc-queue-row">
+      <button type="button" className="cc-row-link" onClick={onClick}>
+        <span className={`cc-row-dot tone-${tone}`} aria-hidden />
+        <span className="cc-row-name">
+          {name}
+          {meta ? <span className="cc-row-meta">{meta}</span> : null}
+        </span>
+      </button>
+      {extra ? <span className="cc-row-extra">{extra}</span> : null}
+      {actions?.map((action) => (
+        <Button
+          key={action.key}
+          size="small"
+          className="cc-queue-action"
+          onClick={() => action.onClick()}
+        >
+          {action.label}
+        </Button>
+      ))}
+    </div>
+  )
+}
+
+/* ── 单行团队刻度：一行格子，列=日期（工作台「近 7 日团队覆盖」） ── */
+
+interface TeamScaleProps {
+  days: ScaleDay[]
+  /** 与 days 一一对应：已登记数 / 已到期数 */
+  cells: { registered: number; due: number }[]
+}
+
+export function TeamScale({ days, cells }: TeamScaleProps) {
+  return (
+    <>
+      <div className="cc-scale-wrap">
+        {/* 两行网格：第一行日期表头，第二行格子。没有左侧时点列，所以不需要占位格 */}
+        <div className="cc-scale cc-team-scale" aria-label="近七日团队登记覆盖">
+          {days.map((day) => (
+            <div key={`h-${day.key}`} className="cc-scale-day">
+              <strong>{day.date}</strong>
+              {day.weekday}
+            </div>
+          ))}
+          {cells.map((cell, index) => {
+            const day = days[index]
+            const rate = cell && cell.due > 0 ? Math.round((cell.registered / cell.due) * 1000) / 10 : null
+            const kind: ScaleCellKind = !cell || cell.due === 0
+              ? 'none'
+              : cell.registered >= cell.due ? 'ok' : cell.registered > 0 ? 'pending' : 'miss'
+            const label = !cell || cell.due === 0
+              ? `${day?.date ?? ''} 无到期时点`
+              : `${day?.date ?? ''} 已登记 ${cell.registered} / 已到期 ${cell.due}${rate === null ? '' : `（${rate}%）`}`
+            return (
+              <div
+                key={day?.key ?? index}
+                className={kind === 'none' ? 'cc-cell' : `cc-cell ${kind}`}
+                title={label}
+                aria-label={label}
+              />
+            )
+          })}
+        </div>
+      </div>
+      <ul className="cc-legend">
+        <li><i className="ok" aria-hidden="true" />全部登记</li>
+        <li><i className="pending" aria-hidden="true" />部分登记</li>
+        <li><i className="miss" aria-hidden="true" />未发现登记</li>
+      </ul>
+    </>
+  )
+}
+

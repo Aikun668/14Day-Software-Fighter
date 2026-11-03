@@ -226,3 +226,52 @@
 
 **下一步**：图2 工作台。用 `ComfortShell` + `HeroBar`/`StatBand`/`TwoColumn`，不要新写一套 CSS。
 
+### 2026-11-03 · 图2 工作台按 Clinic Comfort 重做
+
+**改了什么**
+
+工作台原来是「去卡片化布局」（内容直接放底色上，靠留白与组标题分区），跟图4 的「白底圆卡」是两套思路。这次按 Clinic Comfort 收成两层。
+
+**结构落法**
+
+| 层 | 内容 |
+|---|---|
+| Hero | 日期眉题 + 「工作台」标题 + 一句交班说明 + 右侧「更多」+ 一个实心主按钮「查看统计」 |
+| 第一层 | 四张摘要卡：今日登记 / 近 7 日覆盖 / 负责患者 / 待核查 |
+| 第二层 双栏 | 左：近 7 日团队登记（刻度）+ 待核查任务；右：需关注 + 近期随访 |
+
+**共享层这轮补的东西**
+
+- `TeamScale` —— 单行团队刻度（列=日期，无左侧时点列），复用 `cc-cell` 的四态配色
+- `QueueRow` —— 卡内行动行（状态点 + 名字 + 时间 + 行尾内联动作）
+- `TwoColumn` 改为每栏包一层 `.cc-split-col`：一栏可以放多张卡；只有一张卡时撑满整列（保持图4「两卡等高」），多张时按内容排布
+
+**踩到的坑（值得记）**
+
+1. **行内动作按钮连带触发了整行跳转。** 原因是行 div 用了 `role="button"`，其可访问名把行尾的「处理任务」也包了进去，行尾按钮变成 button 套 button——既是无障碍问题，也让行点击判定失效。
+   改法：行本身不再当按钮，只有「名字」那一块是真正的 `<button>`（`.cc-row-link`），行尾动作按钮各管各的。
+2. **`TwoColumn` 一栏放多张卡时布局塌了。** 原来 `{children}` 直接当 grid 子项，多张卡会被摊平成 4 个 grid 子项，把 2 列网格冲成 4 项。改法：每栏包一层 `.cc-split-col`。
+3. **`.cc-split-col` 用 flex 时，图4 的两卡等高丢了**（263 → 246）。改用 grid + `:has(> .cc-card:only-child)` 给单卡一行 `1fr`，等高恢复。
+4. **团队刻度日期头掉行。** `.cc-team-scale` 继承了 `.cc-scale` 的 `56px` 时点列模板，8 个子项塞进 7 列 → 换行。改法：团队刻度单独定 7 列模板，表头与格子各占一行，不留占位格。
+5. **窄屏名字被压成一列字。** 行内固定宽度的动作按钮把名字挤到 0 宽。改法：窄屏行改为两行（名字一行、动作一行），并给 `.cc-row-name` 设 `word-break: keep-all`。
+
+**验证**
+
+- `pnpm run build` 通过；`pnpm run lint` 11 warnings / 0 errors，与改前一致。
+- 端到端截图 `docs/evidence/clinic-comfort-shared-layer/workbench-0*.png`：
+  - 结构断言 `ccPage:1 ccHero:1 ccStats:1 ccStat:4 ccSplit:1 splitCol:2 ccCard:4 teamScale:1 teamCell:7 ccAttn:1 queueRow:14`；旧类 `status-strip` / `page-section` 计数 0
+  - 交互回归（逐条点过）：点「处理任务」→ 弹「处理任务 · 杨先生」且**不跳转**；点「补登用药」→ 弹「补登用药 · 杨先生」且不跳转；点患者名 → 进患者详情
+  - **患者详情回归**：改 `TwoColumn` 结构后仍是 `cardHeights [263, 263]`、`tops [407, 407]`、整页 710px，与 PR #1 基线完全一致
+  - 窄屏 390px：名字单行不折成竖排、双栏折成单列、团队刻度 7 列不溢出
+
+**产物**
+
+| 产物 | 位置 |
+|------|------|
+| 工作台页面 | `frontend-web/src/pages/clinician/WorkbenchPage.tsx` |
+| 新增共享组件 | `frontend-web/src/components/clinic/index.tsx`（`TeamScale` / `QueueRow`） |
+| 共享样式 | `frontend-web/src/styles/clinic-comfort.css` |
+| 截图脚本 | `docs/evidence/clinic-comfort-shared-layer/capture_workbench.py` |
+
+**下一步**：图3 患者管理列表。按同一范式：Hero + 摘要卡 + 卡内列表（患者列表用 `QueueRow` 形态）。
+
