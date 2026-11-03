@@ -3,21 +3,21 @@ import type { ThemeConfig } from 'antd'
 
 export const webTheme: ThemeConfig = {
   token: {
-    colorPrimary: '#573BF4',
-    colorPrimaryHover: '#4A2FE0',
-    colorLink: '#4D3BA7',
-    colorText: '#0F0D27',
-    colorTextSecondary: '#3D3D56',
-    colorTextTertiary: '#6B6E7F',
-    // 占位符用 5.05:1 的辅助灰（antd 默认更浅，白底上不足 4.5:1）
-    colorTextPlaceholder: '#6B6E7F',
-    colorBgBase: '#F8F9FC',
+    colorPrimary: '#5B7CFF',
+    colorPrimaryHover: '#4768F5',
+    colorLink: '#3D56C7',
+    colorText: '#1A1D26',
+    colorTextSecondary: '#4A5160',
+    colorTextTertiary: '#8B93A7',
+    // 占位符对齐 Clinic Comfort 的 muted，避免再回到靛紫灰
+    colorTextPlaceholder: '#8B93A7',
+    colorBgBase: '#F4F6F9',
     colorBgContainer: '#FFFFFF',
-    colorBorder: '#E6E9F1',
-    colorBorderSecondary: '#F0F2F7',
-    borderRadius: 8,
-    // 卡片 10px，控件 8px（UI_DESIGN §2）
-    borderRadiusLG: 10,
+    colorBorder: '#E5EAF1',
+    colorBorderSecondary: '#EEF2F7',
+    borderRadius: 14,
+    // 内容卡 20px，控件 14px（DESIGN.md Clinic Comfort）
+    borderRadiusLG: 20,
     // Web 控件高 40px（UI_DESIGN §4）
     controlHeight: 40,
     fontSize: 14,
@@ -25,12 +25,12 @@ export const webTheme: ThemeConfig = {
     fontSizeSM: 13,
     // 派生色显式写死：antd 默认从页面底色推导，会让弹层变灰、布局底色偏暗
     colorBgElevated: '#FFFFFF',
-    colorBgLayout: '#F8F9FC',
-    // 只用极浅阴影（UI_DESIGN §2）；下拉与弹层保留一层轻投影以分出层次
-    boxShadowTertiary: '0 1px 2px rgba(15, 13, 39, 0.04)',
-    boxShadowSecondary: '0 4px 16px rgba(15, 13, 39, 0.08)',
+    colorBgLayout: '#F4F6F9',
+    // 卡片轻阴影；下拉与弹层再抬一层
+    boxShadowTertiary: '0 1px 2px rgba(26, 29, 38, 0.04)',
+    boxShadowSecondary: '0 8px 24px rgba(26, 29, 38, 0.06)',
     fontFamily:
-      'PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, -apple-system, sans-serif',
+      'Inter, PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, -apple-system, sans-serif',
   },
   components: {
     Button: {
@@ -45,33 +45,33 @@ export const webTheme: ThemeConfig = {
     Menu: {
       itemHeight: 40,
       itemMarginInline: 8,
-      itemBorderRadius: 8,
-      itemColor: '#3D3D56',
-      itemHoverColor: '#0F0D27',
-      itemHoverBg: '#F3F4F9',
-      itemSelectedColor: '#4D3BA7',
-      itemSelectedBg: '#EFECFE',
+      itemBorderRadius: 14,
+      itemColor: '#4A5160',
+      itemHoverColor: '#1A1D26',
+      itemHoverBg: '#F4F6F9',
+      itemSelectedColor: '#3D56C7',
+      itemSelectedBg: '#E8EEFF',
     },
     Table: {
       headerBg: '#FFFFFF',
-      headerColor: '#6B6E7F',
+      headerColor: '#8B93A7',
       headerSplitColor: 'transparent',
-      borderColor: '#F0F2F7',
-      rowHoverBg: '#F8F5FF',
+      borderColor: '#EEF2F7',
+      rowHoverBg: '#F4F6F9',
       cellPaddingBlock: 12,
       cellPaddingInline: 16,
     },
     Tabs: {
-      itemColor: '#6B6E7F',
-      itemHoverColor: '#3D3D56',
-      itemSelectedColor: '#573BF4',
-      inkBarColor: '#573BF4',
+      itemColor: '#8B93A7',
+      itemHoverColor: '#4A5160',
+      itemSelectedColor: '#5B7CFF',
+      inkBarColor: '#5B7CFF',
       horizontalItemGutter: 28,
       horizontalItemPadding: '12px 0',
     },
     Tag: {
-      defaultBg: '#F3F4F8',
-      defaultColor: '#3D3D56',
+      defaultBg: '#EEF2F7',
+      defaultColor: '#4A5160',
     },
   },
 }
