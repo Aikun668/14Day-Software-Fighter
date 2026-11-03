@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Form, Input, message } from 'antd'
-import BrandMark from '../../components/BrandMark'
 import { apiFetch } from '../../api/client'
 import { useAuth } from '../../features/auth/AuthContext'
 
@@ -36,19 +35,19 @@ export default function ChangePasswordPage() {
     <div className="auth-page">
       <Card className="auth-card">
         <div className="auth-brand">
-          <BrandMark size={36} />
+          <div className="auth-mark" aria-hidden="true">吸</div>
           <h1 className="auth-title">首次登录需修改密码</h1>
           <p className="auth-sub">修改后需使用新密码重新登录</p>
         </div>
         <Form onFinish={onFinish} layout="vertical">
           <Form.Item name="old_password" label="原密码" rules={[{ required: true, message: '请输入原密码' }]}>
-            <Input.Password />
+            <Input.Password placeholder="请输入原密码" />
           </Form.Item>
           <Form.Item name="new_password" label="新密码" rules={[{ required: true, min: 8, message: '至少 8 位' }]}>
-            <Input.Password />
+            <Input.Password placeholder="至少 8 位" />
           </Form.Item>
           <Form.Item name="confirm" label="确认新密码" rules={[{ required: true, message: '请再次输入新密码' }]}>
-            <Input.Password />
+            <Input.Password placeholder="请再次输入新密码" />
           </Form.Item>
           <Button type="primary" htmlType="submit" block loading={loading}>
             修改并重新登录

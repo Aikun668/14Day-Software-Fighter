@@ -1,7 +1,93 @@
-﻿/* Clinic Comfort 共享层（DESIGN.md）。
+/* Clinic Comfort 共享层（DESIGN.md）。
    这是全站医护 Web 的视觉积木，不属于某一个页面：
    Hero 留白 → 摘要卡带 → 双栏内容 → 收页高。
    结构（几列、间距、等高）在这里定；每屏显示什么内容由各页面自己决定。 */
+
+/* ── 认证页（登录 / 改密）：Clinic Comfort 的「一层内容」形态 ──
+   登录页只有一件事，没有第二层内容带，所以不套 Hero/双栏；
+   落的是同一套视觉语汇：浅底大留白、20px 圆角白卡、轻阴影、诊所蓝、收页高。 */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+/* 卡片高度跟内容走，不硬撑满视口 */
+.auth-card {
+  width: 400px;
+  max-width: 100%;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(26, 29, 38, 0.06);
+}
+
+.auth-card .ant-card-body {
+  padding: 36px 32px 32px;
+}
+
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+/* 品牌标：软底方块，与侧栏 cc-side-mark 同一母题 */
+.auth-brand .auth-mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.auth-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.auth-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 表单：标签轻、控件圆角 14px、主按钮通栏 40px */
+.auth-card .ant-form-item-label > label {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.auth-card .ant-input {
+  border-radius: 14px;
+}
+
+.auth-card .ant-input-affix-wrapper {
+  border-radius: 14px;
+}
+
+.auth-card .ant-btn-primary {
+  height: 44px;
+  border-radius: 14px;
+  font-weight: 600;
+}
 
 /* ── 页面根：收页高，内容多高页面多高 ── */
 .cc-page {

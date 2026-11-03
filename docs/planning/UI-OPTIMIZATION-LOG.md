@@ -186,3 +186,43 @@
 
 **下一步**：可以铺图7 工作台了——用 `ComfortShell` + `HeroBar`/`StatBand`/`TwoColumn`，不要新写一套 CSS。
 
+### 2026-11-03 · 图1 登录页按 Clinic Comfort 重做
+
+**为什么做**
+
+共享层抽完后开始逐屏铺。图1 登录页是全站第一屏，也是唯一还没上 Clinic Comfort 的屏。原状态：antd 默认卡（无阴影、8px 圆角）、紫主按钮、品牌标是实心色块，跟图4 的 Clinic Comfort 不是一套。
+
+**范式怎么落到登录页**
+
+登录页只有一件事，**没有第二层内容带**，所以不套 `HeroBar` / `TwoColumn`。落的是同一套视觉语汇：
+
+| 范式要素 | 登录页落法 |
+|---|---|
+| 浅底大留白 | 整屏 `--bg #F4F6F9`，卡片浮在上方 |
+| 白底圆卡 + 轻阴影 | 20px 圆角、`0 8px 24px rgba(26,29,38,0.06)`（原 antd 默认卡无阴影） |
+| 诊所蓝主色 | 主按钮 `#5B7CFF`（原为紫 `#573BF4`，随 PR #1 已换） |
+| 收页高 | 卡片 452px 高跟内容走，不撑满视口 |
+| 控件圆角 14px | 输入框、按钮统一 14px（主按钮高 44px） |
+| 刻度母题 | 品牌标改软底方块 `吸`（`--primary-soft` 底 + 16px 圆角），与侧栏 `cc-side-mark` 同一母题 |
+| 一层内容 | 登录只有一件事，不堆第二层 |
+
+**改动**
+
+- `styles/clinic-comfort.css` 新增认证页规则（`.auth-page` / `.auth-card` / `.auth-brand` / `.auth-mark`）；`index.css` 里的旧规则删除，登录页也归到共享层。
+- `LoginPage.tsx`、`ChangePasswordPage.tsx`：品牌标从 `BrandMark`（实心方块）换成软底 `吸` 方块；输入框补 placeholder。
+
+**验证**
+
+- `pnpm run build` 通过；`pnpm run lint` 11 warnings / 0 errors，与改前一致。
+- 端到端截图 `docs/evidence/clinic-comfort-shared-layer/login-0*.png`；计算样式实测：
+  - 卡片 `borderRadius 20px`、`boxShadow rgba(26,29,38,0.06) 0px 8px 24px`、宽 400px 高 452px
+  - 品牌标底色 `rgb(232,238,255)`（`--primary-soft`）、圆角 16px
+  - 主按钮 `rgb(91,124,255)`（`--primary`）、圆角 14px、高 44px
+  - 输入框圆角 14px
+- 功能回归：错误密码弹「账号或密码错误」且输入内容保留；正确密码 `clinician_a / 123` 正常跳转工作台。
+- 窄屏 390px：卡片自适应，无横向溢出。
+
+**说明**：`BrandMark` 组件保留——标准变体（非 comfort）的顶栏还在用它，不在本轮范围。
+
+**下一步**：图2 工作台。用 `ComfortShell` + `HeroBar`/`StatBand`/`TwoColumn`，不要新写一套 CSS。
+
