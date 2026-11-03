@@ -74,7 +74,7 @@ export default function TaskCloseModal({ open, task, onClose, onSuccess }: Props
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <p className="muted" style={{ margin: 0 }}>
-          连续 3 个已到期时点未发现登记。关闭前请记录本次处理内容，便于追溯。
+          该患者的待核查任务已到期。关闭前请记录本次处理内容，便于追溯。
         </p>
         <div>
           <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>处理说明（必填）</label>
