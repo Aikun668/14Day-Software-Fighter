@@ -249,6 +249,99 @@ function ScaleRow({ slot }: { slot: ScaleSlot }) {
   )
 }
 
+/* ── 行尾动作：所有行动行共用 ── */
+
+export interface QueueRowAction {
+  key: string
+  label: string
+  onClick: () => void
+}
+
+/* ── 筛选条：卡内一行的搜索 + 筛选 + 右侧操作 ── */
+
+interface FilterBarProps {
+  /** 左侧搜索框 */
+  search?: ReactNode
+  /** 中间的筛选项 */
+  filters?: ReactNode
+  /** 右侧操作 */
+  actions?: ReactNode
+}
+
+export function FilterBar({ search, filters, actions }: FilterBarProps) {
+  return (
+    <div className="cc-filter-bar">
+      {search ? <div className="cc-filter-search">{search}</div> : null}
+      {filters ? <div className="cc-filter-items">{filters}</div> : null}
+      {actions ? <div className="cc-filter-actions">{actions}</div> : null}
+    </div>
+  )
+}
+
+/* ── 患者行：列表里的一行病人，含编号、诊断标签与账号状态 ── */
+
+export interface PatientRowItem {
+  key: string
+  /** 姓名/别名 */
+  name: string
+  /** 编号 */
+  code: string
+  /** 诊断标签 */
+  diagnosis?: string | null
+  /** 账号绑定状态 */
+  account?: { bound: boolean; label: string }
+  /** 行尾动作 */
+  actions?: QueueRowAction[]
+  /** 进详情 */
+  onClick?: () => void
+}
+
+export function PatientRow({ item }: { item: PatientRowItem }) {
+  const narrow = useIsNarrow()
+  const condense = narrow && (item.actions?.length ?? 0) > 1
+  const actionButtons = condense ? null : item.actions?.map((action) => (
+    <Button
+      key={action.key}
+      size="small"
+      className="cc-queue-action"
+      onClick={(e) => { e.stopPropagation(); action.onClick() }}
+    >
+      {action.label}
+    </Button>
+  ))
+  const moreMenu = condense ? (
+    <Dropdown
+      trigger={['click']}
+      menu={{ items: item.actions!.map((a) => ({ key: a.key, label: a.label, onClick: a.onClick })) }}
+    >
+      <Button size="small" className="cc-queue-action cc-queue-more" aria-label="更多操作">⋯</Button>
+    </Dropdown>
+  ) : null
+
+  const nameBlock = (
+    <>
+      <span className="cc-row-name">{item.name}</span>
+      <span className="cc-row-meta">{item.code}</span>
+    </>
+  )
+
+  return (
+    <div className="cc-queue-row cc-patient-row">
+      {item.onClick ? (
+        <button type="button" className="cc-row-link" onClick={item.onClick}>{nameBlock}</button>
+      ) : (
+        <span className="cc-row-link cc-row-link-static">{nameBlock}</span>
+      )}
+      {item.diagnosis ? <span className="cc-patient-diag">{item.diagnosis}</span> : null}
+      {item.account ? (
+        <span className={`cc-chip ${item.account.bound ? 'blue' : 'warn'}`}>{item.account.label}</span>
+      ) : null}
+      {actionButtons}
+      {moreMenu}
+    </div>
+  )
+}
+
 /* ── 可折叠列表：窄屏收住长列表，点「展开全部」再放开 ──
    桌面端默认全展开（空间够），窄屏默认只露前几条。 */
 
@@ -285,12 +378,6 @@ export function CollapsibleList({ items, collapseAt = 3, expandLabel }: Collapsi
 }
 
 /* ── 队列行：白卡里的行动行，点行进详情，行尾内联动作 ── */
-
-export interface QueueRowAction {
-  key: string
-  label: string
-  onClick: () => void
-}
 
 interface QueueRowProps {
   /** 左侧状态点：warn = 待处理，ok = 已完成 */

@@ -488,6 +488,91 @@
   border-top: 1px solid var(--line-soft);
 }
 
+/* ── 筛选条：卡内一行，左搜索中筛选右操作 ── */
+.cc-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.cc-filter-search {
+  flex: 0 0 auto;
+}
+
+.cc-filter-search .ant-input-search,
+.cc-filter-search .ant-input-affix-wrapper {
+  width: 260px;
+  border-radius: 14px;
+}
+
+.cc-filter-items {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.cc-filter-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── 患者行：编号 + 诊断标签 + 账号状态 ── */
+.cc-patient-row {
+  gap: 12px;
+}
+
+.cc-patient-row .cc-row-link {
+  flex: 0 1 auto;
+  min-width: 160px;
+}
+
+.cc-row-link-static {
+  cursor: default;
+}
+
+.cc-patient-diag {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-patient-row .cc-chip {
+  flex-shrink: 0;
+}
+
+/* ── 患者列表容器 ── */
+.cc-patient-list {
+  margin: 0;
+  padding: 0;
+}
+
+/* ── 分页：轻量，不用 antd 大分页器 ── */
+.cc-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.cc-pager-text {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── 展开/收起：窄屏长列表收住用 ── */
 .cc-expand-toggle {
   display: block;
@@ -848,5 +933,36 @@ body:has(.cc-shell),
 
   .cc-row-meta {
     margin-left: 6px;
+  }
+
+  /* 窄屏患者行：名字一行，诊断标签换行显示，状态与动作靠右 */
+  .cc-patient-row {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .cc-patient-row .cc-row-link {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .cc-patient-diag {
+    flex: 1 1 100%;
+    order: 3;
+    padding-left: 20px;
+    white-space: normal;
+  }
+
+  .cc-filter-search .ant-input-search,
+  .cc-filter-search .ant-input-affix-wrapper {
+    width: 100%;
+  }
+
+  .cc-filter-search {
+    flex: 1 1 100%;
+  }
+
+  .cc-filter-actions {
+    margin-left: 0;
   }
 }

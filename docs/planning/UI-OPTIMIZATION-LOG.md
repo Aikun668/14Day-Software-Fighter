@@ -302,3 +302,32 @@
 - `pnpm run build` 通过；`pnpm run lint` 11 warnings / 0 errors，与改前一致。
 - 患者详情回归仍 `cardHeights [263,263]`、`tops [407,407]`、整页 710px。
 
+### 2026-11-03 · 图3 患者管理按 Clinic Comfort 重做
+
+**改了什么**
+
+患者管理原来是 antd Table + 顶栏工具条。按范式收成两层：
+
+| 层 | 内容 |
+|---|---|
+| Hero | 眉题 + 「患者管理」+ 一句说明 + 实心主按钮「新建患者」 |
+| 第一层 | 四张摘要卡：负责患者 / 已绑定账号 / 未绑定账号 / 诊断标签数 |
+| 第二层 单栏 | 「患者列表」卡：筛选条 + 患者行 + 轻量分页 |
+
+- 新增共享组件 `FilterBar`（搜索 + 筛选 + 右侧操作一行）和 `PatientRow`（名字编号 / 诊断标签 / 账号状态芯片 / 行尾动作，窄屏动作收「⋯」）。
+- 诊断标签里的 `(DEMO)` 标记在展示层清掉（种子数据标记，不该出现在业务文案）。
+- 分页从 antd 大分页器换成轻量「上一页 / 1 / 下一页」。
+- 筛选选项的 `{text, value}` 写法是 antd Table 的，antd Select 要用 `{label, value}` —— 截图时发现下拉显示原始值，已修。
+
+**验证**
+
+- `pnpm run build` 通过；`pnpm run lint` 11 warnings / 0 errors，与改前一致。
+- 端到端截图 `docs/evidence/clinic-comfort-shared-layer/patients-0*.png`：
+  - 结构断言：`ccStat:4`、`patientRow:10`、`ccChip:10`；旧类 `ant-table` / `page-toolbar` / `page-header` 计数 0
+  - 筛选：选「未绑定」→ 8 行（10 - 2 已绑定，与数据一致）→ 清除 → 10 行
+  - 搜索 `P-004` → 1 行「李先生」
+  - 点患者名 → 正确进入 `/patients/:id` 详情
+  - 新建患者弹窗正常打开
+  - 窄屏 390px：摘要卡两列、筛选堆叠、每行收成「名字+编号+状态+⋯」，整页 1689px
+- 患者详情回归仍 `cardHeights [263,263]`、`tops [407,407]`、710px。
+

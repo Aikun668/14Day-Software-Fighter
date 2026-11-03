@@ -46,7 +46,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/workbench" element={<ComfortShell><WorkbenchPage /></ComfortShell>} />
-          <Route path="/patients" element={<Shell><PatientListPage /></Shell>} />
+          <Route path="/patients" element={<ComfortShell><PatientListPage /></ComfortShell>} />
           <Route path="/patients/:id" element={<ComfortShell crumb={{ parent: '患者', parentTo: '/patients', current: '详情' }}><PatientDetailPage /></ComfortShell>} />
           <Route path="/plans" element={<Shell><PlanEditPage /></Shell>} />
           <Route path="/stats" element={<Shell><StatsPage /></Shell>} />

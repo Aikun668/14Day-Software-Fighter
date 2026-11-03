@@ -1,8 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Form, Input, message, Modal, Select, Space, Table, Tag } from 'antd'
+import { Button, Form, Input, message, Modal, Select } from 'antd'
 import { apiFetch } from '../../api/client'
-import PageHeader from '../../components/PageHeader'
+import {
+  Card,
+  FilterBar,
+  HeroBar,
+  PatientRow,
+  StatBand,
+  type PatientRowItem,
+} from '../../components/clinic'
 
 interface Patient {
   id: string
@@ -21,6 +28,12 @@ interface PageResp {
 interface DeviceModel { id: string; model_name: string }
 interface Guide { id: string; title: string; steps: { id: string; step_no: number; text: string }[] }
 
+const PAGE_SIZE = 20
+
+// 去掉演示数据标记：档案标签里的 (DEMO) 是给种子脚本用的，不该出现在业务文案里
+const cleanDemo = (value: string | null) =>
+  value ? value.replace(/\s*[(（]DEMO[)）]/gi, '').trim() : null
+
 // M02 患者列表/详情（J016）+ 现场评估（J024）
 export default function PatientListPage() {
   const navigate = useNavigate()
@@ -28,10 +41,10 @@ export default function PatientListPage() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  // 表头筛选：诊断标签 / 账号绑定状态（均在服务端过滤，不是只筛当前页）
+  // 筛选：诊断标签 / 账号绑定状态（均在服务端过滤，不是只筛当前页）
   const [diagnosisFilter, setDiagnosisFilter] = useState<string[]>([])
   const [accountFilter, setAccountFilter] = useState<string[]>([])
-  const [diagnosisOptions, setDiagnosisOptions] = useState<{ text: string; value: string }[]>([])
+  const [diagnosisOptions, setDiagnosisOptions] = useState<{ label: string; value: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [form] = Form.useForm()
@@ -50,7 +63,7 @@ export default function PatientListPage() {
   ) => {
     setLoading(true)
     try {
-      const q = new URLSearchParams({ page: String(p), page_size: '20' })
+      const q = new URLSearchParams({ page: String(p), page_size: String(PAGE_SIZE) })
       if (s) q.set('search', s)
       // 筛选全部在服务端：多选诊断标签重复传参，按「任一」匹配
       diag.forEach((label) => q.append('diagnosis_label', label))
@@ -71,7 +84,7 @@ export default function PatientListPage() {
   // 筛选项：全量诊断标签（服务端去重，不受当前页影响）
   useEffect(() => {
     apiFetch<{ diagnosis_labels: string[] }>('/api/patients/filter-options')
-      .then((r) => setDiagnosisOptions(r.diagnosis_labels.map((v) => ({ text: v, value: v }))))
+      .then((r) => setDiagnosisOptions(r.diagnosis_labels.map((v) => ({ label: v, value: v }))))
       .catch(() => setDiagnosisOptions([]))
   }, [])
 
@@ -130,76 +143,160 @@ export default function PatientListPage() {
     } catch (e) { message.error((e as Error).message) }
   }
 
-  // 表头筛选走服务端：列上的 filters 只负责展示选项与受控状态，onFilter=false
-  // 交给 antd 不要本地过滤（否则与分页数据打架，看起来像「筛完只剩几条」）
-  const columns = [
-    { title: '患者编号', dataIndex: 'patient_code', width: 120, render: (v: string) => <span className="tabular">{v}</span> },
-    { title: '姓名/别名', dataIndex: 'display_name', render: (v: string) => <span className="strong">{v}</span> },
-    {
-      title: '诊断标签', dataIndex: 'diagnosis_label',
-      filters: diagnosisOptions,
-      filterMultiple: true,
-      filteredValue: diagnosisFilter.length > 0 ? diagnosisFilter : null,
-      onFilter: () => true,
-      render: (v: string | null) => v || '—',
+  // 摘要卡：当前页与筛选后的一致口径（服务端 total 才是权威，这里用当前列表算绑定数）
+  const summary = useMemo(() => {
+    const bound = data.filter((p) => p.account_user_id).length
+    const unbound = data.length - bound
+    const labels = new Set(data.map((p) => cleanDemo(p.diagnosis_label)).filter(Boolean))
+    return { bound, unbound, labels: labels.size }
+  }, [data])
+
+  const rows: PatientRowItem[] = data.map((p) => ({
+    key: p.id,
+    name: p.display_name,
+    code: p.patient_code,
+    diagnosis: cleanDemo(p.diagnosis_label),
+    account: {
+      bound: Boolean(p.account_user_id),
+      label: p.account_user_id ? '已绑定' : '未绑定',
     },
-    {
-      title: '账号', dataIndex: 'account_user_id', width: 120,
-      filters: [
-        { text: '已绑定', value: 'bound' },
-        { text: '未绑定', value: 'unbound' },
-      ],
-      filteredValue: accountFilter.length > 0 ? accountFilter : null,
-      onFilter: () => true,
-      render: (v: string | null) => v ? <Tag className="tag-brand">已绑定</Tag> : <Tag>未绑定</Tag>,
-    },
-    { title: '操作', key: 'action', width: 180, render: (_: unknown, r: Patient) => (
-      <Space size={16}>
-        <Button type="link" size="small" onClick={() => navigate(`/patients/${r.id}`)}>查看详情</Button>
-        <Button type="text" size="small" style={{ color: 'var(--ink-2)' }} onClick={() => openEval(r)}>现场评估</Button>
-      </Space>
-    ) },
-  ]
+    onClick: () => navigate(`/patients/${p.id}`),
+    actions: [
+      {
+        key: 'detail',
+        label: '查看详情',
+        onClick: () => navigate(`/patients/${p.id}`),
+      },
+      {
+        key: 'eval',
+        label: '现场评估',
+        onClick: () => { void openEval(p) },
+      },
+    ],
+  }))
+
+  const hasFilter = diagnosisFilter.length > 0 || accountFilter.length > 0 || search.length > 0
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
-    <div>
-      <PageHeader title="患者管理" subtitle="负责患者的档案、账号与装置绑定情况" />
-      <div className="page-toolbar">
-        <div className="page-toolbar-left">
-          <Input.Search
-            placeholder="搜索编号或姓名"
-            aria-label="搜索编号或姓名"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onSearch={(v) => { setPage(1); fetchList(1, v) }}
-            style={{ width: 280 }}
-          />
-        </div>
-        <div className="page-toolbar-right">
+    <div className="cc-page">
+      <HeroBar
+        eyebrow={<>患者管理 · <span className={total > 0 ? 'ok' : undefined}>{total > 0 ? '系统正常' : '暂无患者'}</span></>}
+        title="患者管理"
+        sub="下面是负责患者的档案、账号与诊断标签。"
+        actions={
           <Button type="primary" onClick={() => setModalOpen(true)}>新建患者</Button>
-        </div>
-      </div>
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={data}
-        loading={loading}
-        onChange={(_pagination, filters) => {
-          // 表头筛选变化 → 回第一页并请求服务端（不是只筛当前页）
-          const diag = (filters.diagnosis_label as string[] | null) ?? []
-          const acct = (filters.account_user_id as string[] | null) ?? []
-          setDiagnosisFilter(diag)
-          setAccountFilter(acct)
-          setPage(1)
-          fetchList(1, search, diag, acct)
-        }}
-        pagination={{
-          current: page,
-          total,
-          pageSize: 20,
-          onChange: (p) => setPage(p),
-        }}
+        }
       />
+
+      <StatBand
+        label="患者摘要"
+        items={[
+          { key: 'total', label: '负责患者', value: total, meta: '当前筛选结果' },
+          { key: 'bound', label: '已绑定账号', value: summary.bound, meta: '可同步 App 登记' },
+          { key: 'unbound', label: '未绑定账号', value: summary.unbound, warn: summary.unbound > 0, meta: summary.unbound > 0 ? '需处理' : '已处理' },
+          { key: 'labels', label: '诊断标签', value: summary.labels, meta: '本页涉及的标签数' },
+        ]}
+      />
+
+      <Card title="患者列表" hint={`共 ${total} 位`}>
+        <FilterBar
+          search={
+            <Input.Search
+              placeholder="搜索编号或姓名"
+              aria-label="搜索编号或姓名"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onSearch={(v) => { setPage(1); fetchList(1, v) }}
+              allowClear
+            />
+          }
+          filters={
+            <>
+              <Select
+                mode="multiple"
+                allowClear
+                placeholder="诊断标签"
+                aria-label="按诊断标签筛选"
+                style={{ minWidth: 180 }}
+                maxTagCount="responsive"
+                value={diagnosisFilter}
+                onChange={(v) => {
+                  setDiagnosisFilter(v)
+                  setPage(1)
+                  fetchList(1, search, v, accountFilter)
+                }}
+                options={diagnosisOptions}
+              />
+              <Select
+                mode="multiple"
+                allowClear
+                placeholder="账号状态"
+                aria-label="按账号绑定状态筛选"
+                style={{ minWidth: 140 }}
+                maxTagCount="responsive"
+                value={accountFilter}
+                onChange={(v) => {
+                  setAccountFilter(v)
+                  setPage(1)
+                  fetchList(1, search, diagnosisFilter, v)
+                }}
+                options={[
+                  { label: '已绑定', value: 'bound' },
+                  { label: '未绑定', value: 'unbound' },
+                ]}
+              />
+              {hasFilter && (
+                <Button
+                  type="link"
+                  size="small"
+                  onClick={() => {
+                    setSearch('')
+                    setDiagnosisFilter([])
+                    setAccountFilter([])
+                    setPage(1)
+                    fetchList(1, '', [], [])
+                  }}
+                >
+                  清除筛选
+                </Button>
+              )}
+            </>
+          }
+        />
+
+        {loading ? (
+          <p className="cc-empty-line">加载中…</p>
+        ) : rows.length === 0 ? (
+          <div className="cc-empty-line" style={{ padding: '32px 0', textAlign: 'center' }}>
+            {hasFilter ? '当前筛选条件下没有患者。' : '还没有患者。点右上角「新建患者」建档。'}
+          </div>
+        ) : (
+          <div className="cc-patient-list">
+            {rows.map((item) => <PatientRow key={item.key} item={item} />)}
+          </div>
+        )}
+
+        {pageCount > 1 && (
+          <div className="cc-pager">
+            <Button
+              size="small"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              上一页
+            </Button>
+            <span className="cc-pager-text">{page} / {pageCount}</span>
+            <Button
+              size="small"
+              disabled={page >= pageCount}
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+            >
+              下一页
+            </Button>
+          </div>
+        )}
+      </Card>
 
       <Modal title="新建患者" open={modalOpen} onCancel={() => setModalOpen(false)} onOk={() => form.submit()} confirmLoading={submitting} destroyOnHidden>
         <Form form={form} layout="vertical" onFinish={onCreate}>
