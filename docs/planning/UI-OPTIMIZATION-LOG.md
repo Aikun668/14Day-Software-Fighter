@@ -471,6 +471,8 @@
 | 页面 | `frontend-web/src/pages/clinician/FollowupPage.tsx` |
 | 桌面截图 | `docs/evidence/clinic-comfort-rollout-2/followups-01-queue-desktop.png`、`followups-02-composer-desktop.png`、`followups-03-from-task-desktop.png` |
 
+随访记录改成卡内一行三列（时间、患者、反馈 · 措施 · 后续），不再把段落贴在左缘。待核查和记录默认各最多 5 条（`VISIBLE_STEP`），超出显示「展开更多（还剩 x）」，再点下一批，可收起。桌面：`followups-04-collapsed-desktop.png`（5 条 + 还剩 1）、`followups-05-expanded-desktop.png`（6 条 + 收起）。待核查这次只有 4 条，不到上限，所以没有展开按钮。
+
 ### 2026-11-03 · 工作台收成交班操作台
 
 **为什么改**

@@ -1247,16 +1247,18 @@ button.cc-attn-row:hover {
 }
 
 .cc-follow-timeline {
-  margin: 0;
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
 }
 
+/* 一行三列铺满卡片：时间、患者、反馈·措施·后续。不把段落堆在左缘。 */
 .cc-follow-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 0;
+  display: grid;
+  grid-template-columns: 108px minmax(132px, 176px) minmax(0, 1fr);
+  column-gap: 24px;
+  align-items: baseline;
+  padding: 16px 12px;
   border-bottom: 1px solid var(--line-soft);
 }
 
@@ -1264,28 +1266,68 @@ button.cc-attn-row:hover {
   border-bottom: 0;
 }
 
-.cc-follow-when {
+.cc-follow-time {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cc-follow-who {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 12px;
-}
-
-.cc-follow-when strong {
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink);
   font-size: 14px;
-  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
-.cc-follow-when span {
+.cc-follow-who span {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 400;
 }
 
-.cc-follow-item p {
+.cc-follow-summary {
   margin: 0;
   color: var(--ink-2);
   font-size: 14px;
-  line-height: 1.55;
+  line-height: 1.6;
+}
+
+.cc-follow-summary.is-empty {
+  color: var(--muted);
+}
+
+.cc-follow-k {
+  margin-right: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cc-follow-dot {
+  color: var(--muted);
+}
+
+.cc-batch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.cc-batch-actions .cc-expand-toggle {
+  flex: 1 1 180px;
+  margin-top: 0;
+}
+
+.cc-batch-collapse {
+  background: transparent;
+  color: var(--ink-2);
 }
 
 /* ── 外壳（Clinic Comfort 布局变体）：收页高，不撑到视口底 ── */
@@ -1453,6 +1495,12 @@ body:has(.cc-shell),
   .cc-patients-page .cc-hero {
     align-items: flex-start;
     padding-bottom: 16px;
+  }
+
+  .cc-follow-item {
+    grid-template-columns: 1fr;
+    row-gap: 4px;
+    padding: 14px 4px;
   }
 
   .cc-stats-tools .ant-picker,

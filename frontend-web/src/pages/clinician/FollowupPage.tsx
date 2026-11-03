@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Button, Checkbox, DatePicker, Form, Input, message, Select } from 'antd'
 import dayjs from 'dayjs'
 import { apiFetch } from '../../api/client'
 import TaskCloseModal from '../../components/TaskCloseModal'
-import { Card, CollapsibleList, FilterBar, HeroBar, QueueRow } from '../../components/clinic'
+import { Card, FilterBar, HeroBar, QueueRow } from '../../components/clinic'
 
 interface Patient { id: string; patient_code: string; display_name: string }
 interface Task { id: string; patient_id: string; status: string; created_at: string }
@@ -18,6 +18,72 @@ interface Followup {
 
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+
+/** 待核查和随访记录默认先露这么多，再按批展开。100 条也不能一次铺满。 */
+const VISIBLE_STEP = 5
+
+function BatchList({
+  items,
+  resetKey,
+  listClass,
+}: {
+  items: ReactNode[]
+  resetKey: string
+  listClass: string
+}) {
+  const [count, setCount] = useState(VISIBLE_STEP)
+  useEffect(() => { setCount(VISIBLE_STEP) }, [resetKey])
+  const shown = items.slice(0, count)
+  const remain = items.length - shown.length
+  const opened = count > VISIBLE_STEP && items.length > VISIBLE_STEP
+  return (
+    <>
+      <ul className={listClass}>{shown}</ul>
+      {(remain > 0 || opened) && (
+        <div className="cc-batch-actions">
+          {remain > 0 && (
+            <button
+              type="button"
+              className="cc-expand-toggle"
+              onClick={() => setCount((n) => Math.min(items.length, n + VISIBLE_STEP))}
+            >
+              展开更多（还剩 {remain}）
+            </button>
+          )}
+          {opened && (
+            <button
+              type="button"
+              className="cc-expand-toggle cc-batch-collapse"
+              onClick={() => setCount(VISIBLE_STEP)}
+            >
+              收起
+            </button>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
+function RecordSummary({ item }: { item: Followup }) {
+  const bits = [
+    item.feedback ? { k: '反馈', v: item.feedback } : null,
+    item.action_taken ? { k: '措施', v: item.action_taken } : null,
+    item.next_plan ? { k: '后续', v: item.next_plan } : null,
+  ].filter((bit): bit is { k: string; v: string } => bit !== null)
+  if (bits.length === 0) return <p className="cc-follow-summary is-empty">没有写下内容</p>
+  return (
+    <p className="cc-follow-summary">
+      {bits.map((bit, index) => (
+        <span key={bit.k}>
+          {index > 0 ? <span className="cc-follow-dot" aria-hidden="true"> · </span> : null}
+          <span className="cc-follow-k">{bit.k}</span>
+          {bit.v}
+        </span>
+      ))}
+    </p>
+  )
+}
 
 // M05 随访中心（J038）
 // 干活页：跟进待核查队列，并翻随访记录。不是四张摘要卡。
@@ -196,8 +262,10 @@ export default function FollowupPage() {
           {tasks.length === 0 ? (
             <p className="cc-empty-line">暂无待核查任务。</p>
           ) : (
-            <ul className="cc-task-list">
-              {tasks.map((t) => {
+            <BatchList
+              resetKey="tasks"
+              listClass="cc-task-list"
+              items={tasks.map((t) => {
                 const p = patientById(t.patient_id)
                 const name = p?.display_name || '患者'
                 return (
@@ -223,13 +291,13 @@ export default function FollowupPage() {
                   </li>
                 )
               })}
-            </ul>
+            />
           )}
         </Card>
 
         <Card
           title="随访记录"
-          hint={historyName ? historyName.display_name : `最近 ${shown.length} 条`}
+          hint={historyName ? historyName.display_name : `共 ${shown.length} 条`}
         >
           <FilterBar
             filters={
@@ -256,25 +324,25 @@ export default function FollowupPage() {
               {historyPatient ? '这位患者还没有随访记录。' : '还没有随访记录。'}
             </p>
           ) : (
-            <ul className="cc-follow-timeline">
-              <CollapsibleList
-                collapseAt={4}
-                items={shown.map((f) => {
-                  const p = patientById(f.patient_id)
-                  return (
-                    <li key={f.id} className="cc-follow-item">
-                      <div className="cc-follow-when">
-                        <strong>{new Date(f.followed_at).toLocaleString('zh-CN')}</strong>
-                        <span>{p?.display_name || '患者'}{p ? ` · ${p.patient_code}` : ''}</span>
-                      </div>
-                      {f.feedback ? <p>反馈：{f.feedback}</p> : null}
-                      {f.action_taken ? <p>措施：{f.action_taken}</p> : null}
-                      {f.next_plan ? <p>后续：{f.next_plan}</p> : null}
-                    </li>
-                  )
-                })}
-              />
-            </ul>
+            <BatchList
+              resetKey={historyPatient ?? 'team'}
+              listClass="cc-follow-timeline"
+              items={shown.map((f) => {
+                const p = patientById(f.patient_id)
+                return (
+                  <li key={f.id} className="cc-follow-item">
+                    <time className="cc-follow-time" dateTime={f.followed_at}>
+                      {fmt(f.followed_at)}
+                    </time>
+                    <span className="cc-follow-who">
+                      {p?.display_name || '患者'}
+                      {p ? <span>{p.patient_code}</span> : null}
+                    </span>
+                    <RecordSummary item={f} />
+                  </li>
+                )
+              })}
+            />
           )}
         </Card>
       </div>

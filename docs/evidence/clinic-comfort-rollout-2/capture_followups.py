@@ -5,6 +5,7 @@
 """
 import json
 import pathlib
+import re
 
 from playwright.sync_api import sync_playwright
 
@@ -64,7 +65,18 @@ def main() -> None:
         page.wait_for_selector(".cc-follow-page .cc-task-list, .cc-follow-page .cc-empty-line", timeout=15000)
         page.wait_for_timeout(600)
         page.screenshot(path=str(OUT / "followups-01-queue-desktop.png"), full_page=True)
+        page.screenshot(path=str(OUT / "followups-04-collapsed-desktop.png"), full_page=True)
         print("QUEUE", json.dumps(snapshot(page), ensure_ascii=False))
+
+        expand = page.get_by_role("button", name=re.compile("展开更多"))
+        print("EXPAND_COUNT", expand.count())
+        if expand.count():
+            expand.first.click()
+            page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / "followups-05-expanded-desktop.png"), full_page=True)
+            print("EXPANDED", json.dumps(snapshot(page), ensure_ascii=False))
+            page.get_by_role("button", name="收起").click()
+            page.wait_for_timeout(200)
 
         page.get_by_role("button", name="新建随访").click()
         page.wait_for_selector("#cc-follow-form", timeout=10000)
