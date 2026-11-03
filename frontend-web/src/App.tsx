@@ -51,7 +51,7 @@ export default function App() {
           <Route path="/plans" element={<ComfortShell><PlanEditPage /></ComfortShell>} />
           <Route path="/stats" element={<Shell><StatsPage /></Shell>} />
           <Route path="/followups" element={<Shell><FollowupPage /></Shell>} />
-          <Route path="/admin" element={<Shell><AdminPage /></Shell>} />
+          <Route path="/admin" element={<ComfortShell><AdminPage /></ComfortShell>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

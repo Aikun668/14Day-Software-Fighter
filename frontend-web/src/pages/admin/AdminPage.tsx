@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Button, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tabs, Typography } from 'antd'
+import { Button, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tabs } from 'antd'
 import { apiFetch } from '../../api/client'
-import PageHeader from '../../components/PageHeader'
-
-const { Text } = Typography
+import { Card, HeroBar } from '../../components/clinic'
 
 interface DeviceModel {
   id: string
@@ -219,10 +217,14 @@ export default function AdminPage() {
   ]
 
   return (
-    <div>
-      <PageHeader title="内容与账号管理" subtitle="维护指导内容、装置型号与用户账号" />
+    <div className="cc-page cc-admin-page">
+      <HeroBar
+        eyebrow={<>管理端 · <span className="ok">{models.length + guides.length + users.length + kdocs.length} 项内容</span></>}
+        title="内容与账号管理"
+        sub="维护指导内容、装置型号与用户账号。管理端只做目录与台账，不涉及患者临床数据。"
+      />
 
-      <section className="page-section" style={{ borderBottom: 'none' }}>
+      <Card>
         <Tabs
           items={[
             {
@@ -230,7 +232,8 @@ export default function AdminPage() {
               label: `装置型号（${models.length}）`,
               children: (
                 <>
-                  <div className="toolbar toolbar-end">
+                  <div className="cc-admin-tools">
+                    <span className="cc-admin-note">登记在用的吸入装置类型，供建档与计划选用。</span>
                     <Button type="primary" onClick={() => setModelModal(true)}>新建型号</Button>
                   </div>
                   <Table rowKey="id" loading={loading} dataSource={models} pagination={false}
@@ -248,8 +251,8 @@ export default function AdminPage() {
               label: `指导版本（${guides.length}）`,
               children: (
                 <>
-                  <div className="toolbar">
-                    <Text type="secondary">提示：草稿需先「审核通过」，再「发布」；已发布版本不可原地修改，需新建版本。</Text>
+                  <div className="cc-admin-tools">
+                    <span className="cc-admin-note">草稿需先「审核通过」再「发布」；已发布版本不可原地修改，需新建版本。</span>
                     <Button type="primary" onClick={() => setGuideModal(true)}>新建指导草稿</Button>
                   </div>
                   <Table rowKey="id" loading={loading} dataSource={guides} pagination={false} columns={guideColumns} />
@@ -261,7 +264,8 @@ export default function AdminPage() {
               label: `账号（${users.length}）`,
               children: (
                 <>
-                  <div className="toolbar toolbar-end">
+                  <div className="cc-admin-tools">
+                    <span className="cc-admin-note">停用账号会立即失效其所有登录会话。</span>
                     <Button type="primary" onClick={() => setUserModal(true)}>新建账号</Button>
                   </div>
                   <Table rowKey="id" loading={loading} dataSource={users} pagination={false}
@@ -301,12 +305,10 @@ export default function AdminPage() {
               label: `知识内容（${kdocs.length}）`,
               children: (
                 <>
-                  <div className="toolbar toolbar-end">
+                  <div className="cc-admin-tools">
+                    <span className="cc-admin-note">知识文档按型号发布，经「审核 → 发布」后供患者端 AI 助手引用；草稿与未发布内容不可被检索。</span>
                     <Button type="primary" onClick={() => setKbModal(true)}>新建知识草稿</Button>
                   </div>
-                  <p className="muted" style={{ marginTop: 0 }}>
-                    知识文档按型号发布，经「审核 → 发布」后供患者端 AI 助手引用；草稿与未发布内容不可被检索。
-                  </p>
                   <Table rowKey="id" loading={loading} dataSource={kdocs} pagination={false}
                     columns={[
                       { title: '型号', dataIndex: 'device_model_id', render: (v: string) => models.find(m => m.id === v)?.model_name || v },
@@ -334,8 +336,8 @@ export default function AdminPage() {
               label: `审计日志（${audits.length}）`,
               children: (
                 <>
-                  <div className="toolbar">
-                    <Text type="secondary">记录关键写操作（建档、计划变更、登记撤销、内容发布、随访处理等）；不含密码与令牌。</Text>
+                  <div className="cc-admin-tools">
+                    <span className="cc-admin-note">记录关键写操作（建档、计划变更、登记撤销、内容发布、随访处理等）；不含密码与令牌。</span>
                   </div>
                   <Table rowKey="id" loading={loading} dataSource={audits} pagination={{ pageSize: 15 }}
                     columns={[
@@ -349,7 +351,7 @@ export default function AdminPage() {
             },
           ]}
         />
-      </section>
+      </Card>
 
       <Modal title="新建型号" open={modelModal} onCancel={() => setModelModal(false)} onOk={() => modelForm.submit()} destroyOnHidden>
         <Form form={modelForm} layout="vertical" onFinish={createModel}>
