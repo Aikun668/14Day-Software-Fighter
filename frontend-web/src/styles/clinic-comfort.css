@@ -307,6 +307,14 @@
   margin: 0;
 }
 
+button.cc-chip-btn {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* ── 刻度：产品签名件，软蓝已登记 / 浅灰未发现登记，同色温 ── */
 .cc-scale-wrap {
   overflow-x: auto;
@@ -851,6 +859,435 @@ button.cc-attn-row:hover {
   font-size: 12px;
 }
 
+/* ── 单列干活页：卡片上下相接，高度跟内容 ── */
+.cc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cc-record-side {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ── 统计与核查：矩阵和登记表是主角，总数只占一行 ── */
+.cc-stats-page .cc-hero {
+  padding-bottom: 16px;
+  margin-bottom: 0;
+}
+
+.cc-stats-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 4px 4px;
+}
+
+.cc-stats-tools .ant-picker {
+  border-radius: 14px;
+}
+
+.cc-stats-label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cc-stats-pick {
+  margin: 0;
+}
+
+.cc-stats-page .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.cc-stats-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 4px;
+}
+
+.cc-stats-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 20px;
+  margin: 0 4px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.cc-stats-lead .cc-stats-meta {
+  margin: 0;
+}
+
+.cc-stats-meta b {
+  margin-right: 6px;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-stats-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.cc-matrix-wrap {
+  overflow-x: auto;
+}
+
+.cc-matrix {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 8px 10px;
+}
+
+.cc-matrix th,
+.cc-matrix td {
+  padding: 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.cc-matrix thead th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cc-matrix .who {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 148px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.cc-matrix .rate {
+  padding-left: 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cc-matrix .rate span {
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.cc-matrix-who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cc-matrix-who span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.cc-matrix-who-static {
+  cursor: default;
+}
+
+.cc-matrix-who:hover {
+  color: var(--primary-text);
+}
+
+.cc-matrix-who:focus-visible,
+.cc-matrix-cell:focus-visible,
+.cc-roster tbody tr.clickable:focus-visible {
+  outline: 2px solid var(--primary-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.cc-matrix-cell {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  vertical-align: middle;
+}
+
+.cc-matrix-cell.ok {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1.5px var(--primary-ring);
+}
+
+.cc-matrix-cell.miss {
+  background: var(--miss-fill);
+  box-shadow: inset 0 0 0 1.5px var(--miss-ring);
+}
+
+.cc-matrix-cell.pending {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+
+.cc-matrix-cell.blank {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+.cc-legend .blank {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+.cc-matrix-legend {
+  margin-top: 4px;
+}
+
+.cc-roster-wrap {
+  overflow-x: auto;
+}
+
+.cc-roster {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cc-roster th,
+.cc-roster td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.cc-roster thead th {
+  padding-top: 0;
+  padding-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cc-roster tbody tr:last-child th,
+.cc-roster tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.cc-roster .num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cc-roster tbody tr.clickable {
+  cursor: pointer;
+}
+
+.cc-roster tbody tr.clickable:hover th,
+.cc-roster tbody tr.clickable:hover td {
+  background: var(--bg);
+}
+
+.cc-roster-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 600;
+}
+
+.cc-roster-name span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.cc-coverage {
+  display: inline-grid;
+  grid-template-columns: 72px 64px;
+  column-gap: 10px;
+  align-items: center;
+  min-width: 146px;
+}
+
+.cc-coverage-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--surface-soft);
+}
+
+.cc-coverage-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.cc-coverage-value {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.cc-miss-chart {
+  margin-bottom: 16px;
+}
+
+.cc-miss-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  width: max-content;
+  max-width: 100%;
+  height: 132px;
+}
+
+.cc-miss-col {
+  display: flex;
+  flex: 0 0 52px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 52px;
+  height: 100%;
+}
+
+.cc-miss-count {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-miss-plot {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-end;
+  width: 28px;
+  min-height: 0;
+}
+
+.cc-miss-bar {
+  width: 100%;
+  border-radius: 8px 8px 4px 4px;
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1.5px var(--primary-ring);
+}
+
+.cc-miss-day {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-stats-page .missing-times {
+  margin-top: 4px;
+}
+
+/* ── 随访中心：队列和记录是主角，表单按需出现 ── */
+.cc-follow-page .cc-hero,
+.cc-desk-page .cc-hero,
+.cc-patients-page .cc-hero {
+  padding-bottom: 16px;
+  margin-bottom: 0;
+}
+
+.cc-follow-form {
+  max-width: 100%;
+}
+
+.cc-follow-field {
+  margin-bottom: 22px;
+}
+
+.cc-follow-field label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cc-follow-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-bottom: 20px;
+}
+
+.cc-follow-submit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cc-follow-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cc-follow-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.cc-follow-item:last-child {
+  border-bottom: 0;
+}
+
+.cc-follow-when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.cc-follow-when strong {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-follow-when span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cc-follow-item p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 /* ── 外壳（Clinic Comfort 布局变体）：收页高，不撑到视口底 ── */
 .cc-shell {
   width: 100%;
@@ -1009,9 +1446,23 @@ body:has(.cc-shell),
     padding-bottom: 24px;
   }
 
-  .cc-plan-page .cc-hero {
+  .cc-plan-page .cc-hero,
+  .cc-stats-page .cc-hero,
+  .cc-follow-page .cc-hero,
+  .cc-desk-page .cc-hero,
+  .cc-patients-page .cc-hero {
     align-items: flex-start;
     padding-bottom: 16px;
+  }
+
+  .cc-stats-tools .ant-picker,
+  .cc-stats-pick .ant-select {
+    width: 100%;
+  }
+
+  .cc-coverage {
+    grid-template-columns: 48px 56px;
+    min-width: 0;
   }
 
   .cc-form-grid {

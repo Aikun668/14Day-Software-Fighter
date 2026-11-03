@@ -15,7 +15,8 @@ export interface TrendPoint {
   coverage_rate: number | null
 }
 
-const PURPLE = '#573BF4'
+/** Clinic Comfort 诊所蓝。趋势线只换颜色，计算仍用服务端 coverage_rate。 */
+const LINE = '#5B7CFF'
 
 /** N=0（当天无到期时点）的日子：coverage_rate 为 null，断开连线，并以空心点标在基线上 */
 function buildOption(trend: TrendPoint[]): EChartsOption {
@@ -41,16 +42,16 @@ function buildOption(trend: TrendPoint[]): EChartsOption {
       type: 'category',
       data: days,
       boundaryGap: false,
-      axisLabel: { color: '#6B6E7F', fontSize: 11 },
-      axisLine: { lineStyle: { color: '#E4E7EE' } },
+      axisLabel: { color: '#8B93A7', fontSize: 12 },
+      axisLine: { lineStyle: { color: '#E5EAF1' } },
     },
     yAxis: {
       type: 'value',
       min: 0,
       max: 100,
       interval: 50,
-      axisLabel: { color: '#6B6E7F', fontSize: 11, formatter: '{value}%' },
-      splitLine: { lineStyle: { color: '#F0F2F7' } },
+      axisLabel: { color: '#8B93A7', fontSize: 12, formatter: '{value}%' },
+      splitLine: { lineStyle: { color: '#EEF2F7' } },
     },
     series: [
       {
@@ -60,8 +61,8 @@ function buildOption(trend: TrendPoint[]): EChartsOption {
         connectNulls: false,
         symbol: 'circle',
         symbolSize: 8,
-        itemStyle: { color: PURPLE },
-        lineStyle: { color: PURPLE, width: 2.5 },
+        itemStyle: { color: LINE },
+        lineStyle: { color: LINE, width: 2.5 },
         label: { show: false },
       },
       {
@@ -70,7 +71,7 @@ function buildOption(trend: TrendPoint[]): EChartsOption {
         data: emptyPoints,
         symbol: 'circle',
         symbolSize: 7,
-        itemStyle: { color: '#fff', borderColor: '#C9CDD8', borderWidth: 1.5 },
+        itemStyle: { color: '#fff', borderColor: '#C8CEDA', borderWidth: 1.5 },
         tooltip: { show: false },
       },
     ],
@@ -117,12 +118,12 @@ export default function CoverageTrendChart({ trend }: Props) {
         aria-label="逐日覆盖率趋势（数据与下方说明一致）"
         style={{ width: '100%', height: 220, display: n === 0 ? 'none' : undefined }}
       />
-      {n === 0 && <p className="muted" style={{ margin: 0 }}>暂无趋势数据</p>}
+      {n === 0 && <p className="cc-empty-line">暂无趋势数据</p>}
       {trend.some((t) => t.N === 0) && trend.some((t) => t.N > 0) && (
-        <p className="muted" style={{ margin: '8px 0 0' }}>空心点表示当天没有到期的固定时点（不参与连线）。</p>
+        <p className="cc-empty-line" style={{ marginTop: 8 }}>空心点表示当天没有到期的固定时点（不参与连线）。</p>
       )}
       {n > 0 && trend.every((t) => t.N === 0) && (
-        <p className="muted" style={{ margin: '8px 0 0' }}>该区间内无固定计划时点（按需用药不计入覆盖率）。</p>
+        <p className="cc-empty-line" style={{ marginTop: 8 }}>该区间内无固定计划时点（按需用药不计入覆盖率）。</p>
       )}
     </div>
   )
