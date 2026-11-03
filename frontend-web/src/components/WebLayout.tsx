@@ -126,7 +126,10 @@ export default function WebLayout({ children }: { children: ReactNode }) {
   const roleLabel = isAdmin ? '管理员' : '医护'
 
   return (
-    <Layout className={isPatientDetailPage ? 'patient-detail-layout' : undefined} style={{ minHeight: '100vh', width: '100%' }}>
+    <Layout
+      className={isPatientDetailPage ? 'patient-detail-layout' : undefined}
+      style={{ minHeight: isPatientDetailPage ? 0 : '100vh', width: '100%', flexGrow: isPatientDetailPage ? 0 : undefined }}
+    >
       <Header
         className="patient-detail-header"
         style={{
@@ -194,7 +197,10 @@ export default function WebLayout({ children }: { children: ReactNode }) {
         )}
       </Header>
 
-      <Layout style={{ width: '100%' }}>
+      <Layout
+        className={isPatientDetailPage ? 'patient-detail-body' : undefined}
+        style={{ width: '100%', flexGrow: isPatientDetailPage ? 0 : undefined }}
+      >
         {/* 只有一个菜单项时（管理员）不占用侧栏宽度 */}
         {items.length > 1 && (
           <Sider
@@ -237,7 +243,15 @@ export default function WebLayout({ children }: { children: ReactNode }) {
             </div>
           </Sider>
         )}
-        <Content className="patient-detail-content" style={{ background: 'var(--bg)', padding: isPatientDetailPage ? '36px 40px 40px' : 28, flex: 1, minWidth: 0 }}>
+        <Content
+          className="patient-detail-content"
+          style={{
+            background: 'var(--bg)',
+            padding: isPatientDetailPage ? '36px 40px 40px' : 28,
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <div style={{ width: '100%' }}>{children}</div>
         </Content>
       </Layout>

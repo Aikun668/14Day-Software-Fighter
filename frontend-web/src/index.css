@@ -700,7 +700,7 @@ body,
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .patient-detail-page .cc-card {
@@ -933,6 +933,28 @@ body,
 .patient-detail-page .cc-revoked {
   color: var(--muted);
   font-size: 12px;
+}
+
+/* 患者详情收页高：外壳不再被 100vh / flex-grow 撑到视口底。 */
+html:has(.patient-detail-layout),
+body:has(.patient-detail-layout),
+#root:has(.patient-detail-layout) {
+  min-height: 0;
+  height: auto;
+}
+
+.patient-detail-layout.ant-layout {
+  flex-grow: 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  background: var(--bg);
+}
+
+.patient-detail-layout > .patient-detail-body.ant-layout {
+  flex-grow: 0;
+  width: 100%;
+  height: auto;
 }
 
 .patient-detail-layout .cc-crumb {
