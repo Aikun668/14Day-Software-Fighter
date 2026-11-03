@@ -118,11 +118,16 @@ interface TwoColumnProps {
   children: ReactNode
   /** 右栏（次） */
   aside: ReactNode
+  /**
+   * 默认两栏拉齐（图4 摘要对照）。
+   * 干活页传 natural：栏高随内容，短栏不撑满，也不把表单拉高去填空。
+   */
+  natural?: boolean
 }
 
-export function TwoColumn({ children, aside }: TwoColumnProps) {
+export function TwoColumn({ children, aside, natural }: TwoColumnProps) {
   return (
-    <div className="cc-split">
+    <div className={natural ? 'cc-split cc-split-natural' : 'cc-split'}>
       {/* 每栏各自包一层：一栏里可以放多张卡，卡与卡之间自动留 16px */}
       <div className="cc-split-col">{children}</div>
       <div className="cc-split-col">{aside}</div>
