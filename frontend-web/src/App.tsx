@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/auth/LoginPage'
 import ChangePasswordPage from './pages/auth/ChangePasswordPage'
 import WorkbenchPage from './pages/clinician/WorkbenchPage'
@@ -11,15 +11,6 @@ import AdminPage from './pages/admin/AdminPage'
 import WebLayout from './components/WebLayout'
 import { AuthProvider } from './features/auth/AuthContext'
 import { RequireAuth } from './features/auth/RequireAuth'
-
-// 业务页统一套 WebLayout（顶栏 + 左侧导航）
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <RequireAuth>
-      <WebLayout>{children}</WebLayout>
-    </RequireAuth>
-  )
-}
 
 // Clinic Comfort 外壳：侧栏钉在视口里，主栏自己滚。卡片仍按内容高。
 // 新页面要上 Clinic Comfort，就用它，而不是往 WebLayout 里加路径判断。
