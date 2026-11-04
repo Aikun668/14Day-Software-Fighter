@@ -7,7 +7,6 @@ import {
   FilterBar,
   HeroBar,
   PatientRow,
-  StatBand,
   type PatientRowItem,
 } from '../../components/clinic'
 
@@ -143,13 +142,12 @@ export default function PatientListPage() {
     } catch (e) { message.error((e as Error).message) }
   }
 
-  // 摘要卡：当前页与筛选后的一致口径（服务端 total 才是权威，这里用当前列表算绑定数）
-  const summary = useMemo(() => {
-    const bound = data.filter((p) => p.account_user_id).length
-    const unbound = data.length - bound
-    const labels = new Set(data.map((p) => cleanDemo(p.diagnosis_label)).filter(Boolean))
-    return { bound, unbound, labels: labels.size }
-  }, [data])
+  // 只有「还没绑定」会推动动作。口径是当前这一页，不是全库总数。
+  const unboundOnPage = useMemo(
+    () => data.filter((p) => !p.account_user_id).length,
+    [data],
+  )
+  const unboundOnly = accountFilter.length === 1 && accountFilter[0] === 'unbound'
 
   const rows: PatientRowItem[] = data.map((p) => ({
     key: p.id,
@@ -179,27 +177,38 @@ export default function PatientListPage() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
-    <div className="cc-page">
+    <div className="cc-page cc-patients-page">
       <HeroBar
         eyebrow={<>患者管理 · <span className={total > 0 ? 'ok' : undefined}>{total > 0 ? '系统正常' : '暂无患者'}</span></>}
         title="患者管理"
-        sub="下面是负责患者的档案、账号与诊断标签。"
+        sub={unboundOnPage > 0
+          ? `共 ${total} 位。这一页有 ${unboundOnPage} 位还没绑定账号。`
+          : `共 ${total} 位。用搜索、诊断或账号状态把人找出来。`}
         actions={
           <Button type="primary" onClick={() => setModalOpen(true)}>新建患者</Button>
         }
       />
 
-      <StatBand
-        label="患者摘要"
-        items={[
-          { key: 'total', label: '负责患者', value: total, meta: '当前筛选结果' },
-          { key: 'bound', label: '已绑定账号', value: summary.bound, meta: '可同步 App 登记' },
-          { key: 'unbound', label: '未绑定账号', value: summary.unbound, warn: summary.unbound > 0, meta: summary.unbound > 0 ? '需处理' : '已处理' },
-          { key: 'labels', label: '诊断标签', value: summary.labels, meta: '本页涉及的标签数' },
-        ]}
-      />
-
-      <Card title="患者列表" hint={`共 ${total} 位`}>
+      <Card
+        title="患者列表"
+        hint={unboundOnPage > 0
+          ? (unboundOnly
+            ? `本页 ${unboundOnPage} 位未绑定`
+            : (
+              <button
+                type="button"
+                className="cc-chip warn cc-chip-btn"
+                onClick={() => {
+                  setAccountFilter(['unbound'])
+                  setPage(1)
+                  void fetchList(1, search, diagnosisFilter, ['unbound'])
+                }}
+              >
+                筛出未绑定 · 本页 {unboundOnPage}
+              </button>
+            ))
+          : `共 ${total} 位`}
+      >
         <FilterBar
           search={
             <Input.Search

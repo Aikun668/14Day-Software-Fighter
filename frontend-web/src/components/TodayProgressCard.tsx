@@ -7,6 +7,9 @@ interface Props {
   asOf: string
 }
 
+/** 与 CoverageTrendChart、矩阵刻度同一诊所蓝。 */
+const RING = '#5B7CFF'
+
 function statusText(summary: DaySummary | null): string {
   if (!summary || summary.N === 0) return '今日暂无已到期时点'
   if (summary.missing > 0) return `还有 ${summary.missing} 个已到期时点未登记`
@@ -26,7 +29,7 @@ export default function TodayProgressCard({ loading, summary, asOf }: Props) {
           type="circle"
           size={96}
           percent={rate ?? 0}
-          strokeColor="#573BF4"
+          strokeColor={RING}
           format={() => <span className="num">{rate === null ? '—' : `${rate}%`}</span>}
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

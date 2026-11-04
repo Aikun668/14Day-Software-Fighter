@@ -21,7 +21,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   )
 }
 
-// Clinic Comfort 变体的外壳：收页高 + 侧栏品牌 + 面包屑。
+// Clinic Comfort 外壳：侧栏钉在视口里，主栏自己滚。卡片仍按内容高。
 // 新页面要上 Clinic Comfort，就用它，而不是往 WebLayout 里加路径判断。
 function ComfortShell({
   children,
@@ -49,8 +49,8 @@ export default function App() {
           <Route path="/patients" element={<ComfortShell><PatientListPage /></ComfortShell>} />
           <Route path="/patients/:id" element={<ComfortShell crumb={{ parent: '患者', parentTo: '/patients', current: '详情' }}><PatientDetailPage /></ComfortShell>} />
           <Route path="/plans" element={<ComfortShell><PlanEditPage /></ComfortShell>} />
-          <Route path="/stats" element={<Shell><StatsPage /></Shell>} />
-          <Route path="/followups" element={<Shell><FollowupPage /></Shell>} />
+          <Route path="/stats" element={<ComfortShell><StatsPage /></ComfortShell>} />
+          <Route path="/followups" element={<ComfortShell><FollowupPage /></ComfortShell>} />
           <Route path="/admin" element={<Shell><AdminPage /></Shell>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

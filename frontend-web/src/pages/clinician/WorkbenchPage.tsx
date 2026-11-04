@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button, Dropdown, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
-import EmptyState from '../../components/EmptyState'
 import MedicationBackfillModal from '../../components/MedicationBackfillModal'
 import TaskCloseModal from '../../components/TaskCloseModal'
 import { summarizeDay, type DaySummary, type MatrixResponse } from '../../components/todayCoverage'
@@ -12,7 +11,6 @@ import {
   CollapsibleList,
   HeroBar,
   QueueRow,
-  StatBand,
   TeamScale,
   TwoColumn,
   type AttentionItem,
@@ -55,7 +53,8 @@ function todayStatusText(summary: DaySummary | null): string {
   return '今日已到期时点已全部登记'
 }
 
-// M01 工作台（J036）：Clinic Comfort 两层。Hero + 四摘要 + 刻度/队列 | 需关注/随访。
+// M01 工作台（J036）：交班操作台。瘦摘要 + 刻度/需关注 + 待核查队列。
+// 待核查不收进侧栏，行里直接补登或处理。
 export default function WorkbenchPage() {
   const navigate = useNavigate()
   const [tasks, setTasks] = useState<Task[]>([])
@@ -108,15 +107,12 @@ export default function WorkbenchPage() {
 
   const patientName = (pid: string) => patients.find(p => p.id === pid)?.display_name || pid.slice(0, 8)
   const patientCode = (pid: string) => patients.find(p => p.id === pid)?.patient_code || ''
-  const dash = (v: number | null | undefined) => (loading || v == null ? '—' : String(v))
 
   // 需要关注：近 7 日有缺失时点的患者，缺失多在前，最多 3 个
   const watch = (overview?.rows ?? [])
     .filter((r) => r.missing_count > 0)
     .sort((a, b) => b.missing_count - a.missing_count)
     .slice(0, 3)
-
-  const todayRate = todaySummary?.rate ?? null
 
   const goPatient = (pid: string) => () => navigate(`/patients/${pid}`)
 
@@ -189,105 +185,50 @@ export default function WorkbenchPage() {
   ]
 
   return (
-    <div className="cc-page">
+    <div className="cc-page cc-desk-page">
       <HeroBar
         eyebrow={<>{today} · <span className={todaySummary ? 'ok' : undefined}>{todaySummary ? '系统正常' : '统计未更新'}</span></>}
         title="工作台"
-        sub="下面是今日登记覆盖、待核查队列与需要关注的患者。"
+        sub="刻度看近 7 日。待核查单独放在下面，行里可以直接补登或处理。"
         actions={
-          <>
-            <Dropdown menu={{ items: moreItems }} trigger={['click']}>
-              <Button>更多</Button>
-            </Dropdown>
-            <Button type="primary" onClick={() => navigate('/stats')}>查看统计</Button>
-          </>
+          <Dropdown menu={{ items: moreItems }} trigger={['click']}>
+            <Button>更多</Button>
+          </Dropdown>
         }
       />
 
-      <StatBand
-        label="今日与近 7 日摘要"
-        items={[
-          {
-            key: 'today',
-            label: '今日登记',
-            value: todaySummary?.rate == null ? '—' : `${todayRate}%`,
-            warn: (todaySummary?.missing ?? 0) > 0,
-            meta: todaySummary
-              ? todaySummary.N > 0
-                ? `已登记 ${todaySummary.M} / 已到期 ${todaySummary.N} · 截至 ${todayAsOf || '—'}`
-                : todayStatusText(todaySummary)
-              : '统计暂不可用',
-          },
-          {
-            key: 'coverage',
-            label: '近 7 日覆盖',
-            value: overview ? (overview.coverage_rate === null ? '—' : `${overview.coverage_rate}%`) : '—',
-            warn: (overview?.coverage_rate ?? 100) < 100,
-            meta: '登记覆盖 ≠ 依从性',
-          },
-          {
-            key: 'patients',
-            label: '负责患者',
-            value: dash(overview?.patient_count ?? patients.length),
-            meta: '近 7 日有计划时点',
-          },
-          {
-            key: 'tasks',
-            label: '待核查',
-            value: dash(tasks.length),
-            warn: tasks.length > 0,
-            meta: tasks.length ? '需处理' : '已清空',
-          },
-        ]}
-      />
-
-      <TwoColumn
-        aside={
-          <>
-            <AttentionPanel items={attention} count={attention.length} />
-
-            {recentFollowups.length > 0 && (
-              <Card title="近期随访" hint={`${recentFollowups.length} 条`}>
-                <ul className="cc-followup-list">
-                  <CollapsibleList
-                    collapseAt={4}
-                    items={recentFollowups.map((f) => (
-                      <li key={f.id}>
-                        <QueueRow
-                          tone="ok"
-                          name={patientName(f.patient_id)}
-                          extra={fmt(f.followed_at)}
-                          onClick={goPatient(f.patient_id)}
-                        />
-                      </li>
-                    ))}
-                  />
-                </ul>
-              </Card>
-            )}
-          </>
-        }
-      >
-        <Card title="近 7 日团队登记" hint="覆盖 ≠ 依从性" id="cc-week-scale">
-          {teamScale.days.length === 0 ? (
-            <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
-          ) : (
-            <TeamScale days={teamScale.days} cells={teamScale.cells} />
+      <div className="cc-stack">
+        <p className="cc-stats-meta" aria-label="今日登记与待核查">
+          <span>{loading ? '正在汇总今日登记…' : todayStatusText(todaySummary)}</span>
+          {todaySummary && todaySummary.N > 0 && (
+            <span>已登记 {todaySummary.M} / 已到期 {todaySummary.N}</span>
           )}
-        </Card>
+          {todayAsOf ? <span>截至 {todayAsOf}</span> : null}
+          <span>待核查 {loading ? '—' : tasks.length}</span>
+        </p>
 
-        <Card title="待核查任务" hint={`${tasks.length} 条`} id="cc-task-queue">
+        <TwoColumn
+          natural
+          aside={<AttentionPanel items={attention} count={attention.length} />}
+        >
+          <Card title="近 7 日团队登记" hint="覆盖 ≠ 依从性" id="cc-week-scale">
+            {teamScale.days.length === 0 ? (
+              <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
+            ) : (
+              <TeamScale days={teamScale.days} cells={teamScale.cells} />
+            )}
+          </Card>
+        </TwoColumn>
+
+        <Card title="待核查" hint={tasks.length > 0 ? `${tasks.length} 条` : '已清空'} id="cc-task-queue">
           {loading ? (
             <p className="cc-empty-line">加载中…</p>
           ) : tasks.length === 0 ? (
-            <EmptyState
-              title="暂无待核查任务"
-              hint="负责患者今日时点均已处理时，这里会是空的。"
-            />
+            <p className="cc-empty-line">暂无待核查任务。</p>
           ) : (
             <ul className="cc-task-list">
               <CollapsibleList
-                collapseAt={4}
+                collapseAt={6}
                 items={tasks.map((t) => (
                   <li key={t.id}>
                     <QueueRow
@@ -314,7 +255,27 @@ export default function WorkbenchPage() {
             </ul>
           )}
         </Card>
-      </TwoColumn>
+
+        {recentFollowups.length > 0 && (
+          <Card title="近期随访" hint={`${recentFollowups.length} 条`}>
+            <ul className="cc-followup-list">
+              <CollapsibleList
+                collapseAt={4}
+                items={recentFollowups.map((f) => (
+                  <li key={f.id}>
+                    <QueueRow
+                      tone="ok"
+                      name={patientName(f.patient_id)}
+                      extra={fmt(f.followed_at)}
+                      onClick={goPatient(f.patient_id)}
+                    />
+                  </li>
+                ))}
+              />
+            </ul>
+          </Card>
+        )}
+      </div>
 
       <MedicationBackfillModal
         open={!!backfill}
