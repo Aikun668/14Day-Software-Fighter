@@ -621,3 +621,27 @@
 | 证据 | 画廊 `docs/evidence/clinic-comfort-full-ui/06-stats-overview.png`（原图 `docs/evidence/clinic-comfort-rollout-2/stats-01-overview-desktop.png`）。对照 `followups-04-collapsed-desktop.png`。 |
 | 未改 / 风险 | 展开只改默认露出的行数。排序仍是缺失多的在前。不改 `/api/stats` 和统计定义。 |
 
+### 2026-11-04 · 侧栏铺满视口，登记情况先露 5 行
+
+画廊本来就是 Clinic Comfort。主人打开 `index.html` 觉得没变，是因为当时的 04 / 06 还拍着没修的摩擦：短页侧栏不到视口底，登记情况一次铺开。下面这两处按「2026-11-03 晚」那条复盘改完，画廊里的 04、06 已换成新图。图 7 报告内容没动，07 不换。
+
+**图4 患者详情 · 侧栏**
+
+| 栏 | 内容 |
+|----|------|
+| 问题 | 内容短的时候侧栏跟着收短，和改 Clinic Comfort 之前铺满视口的壳对不上。 |
+| 原因 | 外壳把页面收成「内容多高页多高」（`min-height: 0`）。侧栏是这一列，就一起短了。要补的是外壳高度，不是把卡片拉高。 |
+| 改动 | `.cc-shell` 至少 `100vh`。顶栏下面那一行 `flex: 1`，侧栏和 `.side-menu` 拉满这一列，退出停在栏底。主栏里的卡片不 stretch，也不垫空白卡。图4 两张内容卡仍各 263px。 |
+| 证据 | 改前 `docs/evidence/clinic-comfort-humanize/04-patient-detail-before.png`。改后 `04-patient-detail-after.png`，画廊 `docs/evidence/clinic-comfort-full-ui/04-patient-detail.png`，副本 `docs/evidence/clinic-comfort-rollout-2/patient-detail-sidebar-desktop.png`。视口 900：侧栏高 836、底边在 900；主内容高 570、底边在 670。 |
+| 未改 / 风险 | 内容高于一屏时，侧栏仍跟着整页长，和改之前的壳一样。登录页不走这套外壳。 |
+
+**图6 团队概览 · 登记情况**
+
+| 栏 | 内容 |
+|----|------|
+| 问题 | 登记表默认铺开全部行，页和侧栏被拉得很长。 |
+| 原因 | 随访中心已经是默认 5 条再「展开更多」。统计页没有用同一套。 |
+| 改动 | `ROSTER_STEP = 5`。排序仍是缺失多的在前，默认只露前 5 行。按钮是「展开更多（还剩 x）」，一次再露 5 行，可「收起」。换日期回到 5 行。 |
+| 证据 | 改前 `docs/evidence/clinic-comfort-humanize/06-stats-overview-before.png`（旧画廊图高 1898）。改后默认 `06-stats-overview-after.png`，整页高 1614，5 行缺失 7 / 6 / 5 / 4 / 4。展开 10 行、整页 1953：`06-stats-overview-expanded.png`。画廊 `06-stats-overview.png` 是收起后的这一张。 |
+| 未改 / 风险 | `/api/stats` 和统计定义没动。矩阵仍全部露出，所以这一页还是高于一屏，侧栏跟着页面走。图7 报告不改。 |
+

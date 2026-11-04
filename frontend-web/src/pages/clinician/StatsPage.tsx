@@ -107,6 +107,9 @@ const slotTime = (iso: string) => new Date(iso).toLocaleString('zh-CN', {
   month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
 })
 
+/** 与随访中心 VISIBLE_STEP 相同：登记情况默认先露缺失最多的这么多行。 */
+const ROSTER_STEP = 5
+
 // M04 统计与核查（J032）
 // 干活页：看团队覆盖矩阵和登记情况，或打开一位患者的报告。不是摘要仪表盘。
 export default function StatsPage() {
@@ -122,6 +125,7 @@ export default function StatsPage() {
   const [matrix, setMatrix] = useState<MatrixResponse | null>(null)
   const [overview, setOverview] = useState<Overview | null>(null)
   const [periodFollowups, setPeriodFollowups] = useState<Followup[]>([])
+  const [rosterCount, setRosterCount] = useState(ROSTER_STEP)
   const reportSeq = useRef(0)
 
   const fetchPatients = async () => {
@@ -132,6 +136,9 @@ export default function StatsPage() {
   }
 
   useEffect(() => { fetchPatients() }, [])
+
+  // 换日期后登记表回到默认 5 行，避免上一区间展开的行数套到新数据上
+  useEffect(() => { setRosterCount(ROSTER_STEP) }, [from, to])
 
   // 覆盖矩阵与患者登记情况均与所选患者无关，随日期区间变化刷新
   useEffect(() => {
@@ -201,6 +208,9 @@ export default function StatsPage() {
 
   const selectedPatient = patients.find((p) => p.id === selected)
   const overviewRows = [...(overview?.rows ?? [])].sort((a, b) => b.missing_count - a.missing_count)
+  const rosterShown = overviewRows.slice(0, rosterCount)
+  const rosterRemain = overviewRows.length - rosterShown.length
+  const rosterOpened = rosterCount > ROSTER_STEP && overviewRows.length > ROSTER_STEP
   const duplicateSlots = stats?.duplicate_slots ?? []
 
   return (
@@ -279,7 +289,7 @@ export default function StatsPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {overviewRows.map((row) => (
+                          {rosterShown.map((row) => (
                             <tr
                               key={row.patient_id}
                               className="clickable"
@@ -306,6 +316,28 @@ export default function StatsPage() {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                  )}
+                  {(rosterRemain > 0 || rosterOpened) && (
+                    <div className="cc-batch-actions">
+                      {rosterRemain > 0 && (
+                        <button
+                          type="button"
+                          className="cc-expand-toggle"
+                          onClick={() => setRosterCount((n) => Math.min(overviewRows.length, n + ROSTER_STEP))}
+                        >
+                          展开更多（还剩 {rosterRemain}）
+                        </button>
+                      )}
+                      {rosterOpened && (
+                        <button
+                          type="button"
+                          className="cc-expand-toggle cc-batch-collapse"
+                          onClick={() => setRosterCount(ROSTER_STEP)}
+                        >
+                          收起
+                        </button>
+                      )}
                     </div>
                   )}
                 </Card>

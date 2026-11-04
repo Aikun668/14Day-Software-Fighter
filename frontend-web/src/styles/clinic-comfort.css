@@ -1,6 +1,6 @@
 /* Clinic Comfort 共享层（DESIGN.md）。
    这是全站医护 Web 的视觉积木，不属于某一个页面：
-   Hero 留白 → 摘要卡带 → 双栏内容 → 收页高。
+   Hero 留白 → 摘要卡带 → 双栏内容。外壳铺满视口，卡片按内容高。
    结构（几列、间距、等高）在这里定；每屏显示什么内容由各页面自己决定。 */
 
 /* ── 弹层遮罩：Clinic Comfort 用浅底 + 模糊，不用死灰压暗 ──
@@ -1330,32 +1330,46 @@ button.cc-attn-row:hover {
   color: var(--ink-2);
 }
 
-/* ── 外壳（Clinic Comfort 布局变体）：收页高，不撑到视口底 ── */
+/* ── 外壳：至少一屏高，侧栏铺满视口（和改 Clinic Comfort 之前一样）。
+   主栏背景会跟着侧栏一样高，里面的卡片仍按内容高，不在这里垫空白卡、也不 stretch 卡片。 */
 .cc-shell {
   width: 100%;
-  height: auto;
-  min-height: 0;
-}
-
-html:has(.cc-shell),
-body:has(.cc-shell),
-#root:has(.cc-shell) {
-  min-height: 0;
+  min-height: 100vh;
   height: auto;
 }
 
 .cc-shell.ant-layout {
   flex-grow: 0;
   width: 100%;
+  min-height: 100vh;
   height: auto;
-  min-height: 0;
   background: var(--bg);
 }
 
 .cc-shell > .cc-shell-body.ant-layout {
-  flex-grow: 0;
+  flex: 1 1 auto;
   width: 100%;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.cc-shell .ant-layout-sider {
+  display: flex;
+  flex-direction: column;
+}
+
+.cc-shell .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   height: auto;
+  min-height: 100%;
+}
+
+.cc-shell .side-menu {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 100%;
 }
 
 .cc-crumb {

@@ -19,7 +19,8 @@ interface PatientHit {
 //
 // variant 决定外壳观感，不再靠 URL 判断：
 //   'standard' 传统布局（顶栏 56px、内容 padding 28px、页面撑到视口底）
-//   'comfort'  Clinic Comfort 变体（顶栏 64px、面包屑侧栏品牌、收页高）
+//   'comfort'  Clinic Comfort 变体（顶栏 64px、面包屑侧栏品牌）。
+//             外壳至少一屏高，侧栏才铺满视口；主栏里的卡仍按内容高。
 // 新页面要上 Clinic Comfort，显式传 variant="comfort" 即可，不再加路径判断。
 export default function WebLayout({
   children,
@@ -142,7 +143,7 @@ export default function WebLayout({
   return (
     <Layout
       className={isComfort ? 'cc-shell' : undefined}
-      style={{ minHeight: isComfort ? 0 : '100vh', width: '100%', flexGrow: isComfort ? 0 : undefined }}
+      style={{ minHeight: '100vh', width: '100%' }}
     >
       <Header
         className="cc-shell-header"
@@ -213,7 +214,7 @@ export default function WebLayout({
 
       <Layout
         className={isComfort ? 'cc-shell-body' : undefined}
-        style={{ width: '100%', flexGrow: isComfort ? 0 : undefined }}
+        style={{ width: '100%', flexGrow: isComfort ? 1 : undefined }}
       >
         {/* 只有一个菜单项时（管理员）不占用侧栏宽度 */}
         {items.length > 1 && (
