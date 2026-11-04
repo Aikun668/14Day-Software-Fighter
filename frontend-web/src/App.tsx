@@ -21,7 +21,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   )
 }
 
-// Clinic Comfort 变体的外壳：收页高 + 侧栏品牌 + 面包屑。
+// Clinic Comfort 外壳：侧栏钉在视口里，主栏自己滚。卡片仍按内容高。
 // 新页面要上 Clinic Comfort，就用它，而不是往 WebLayout 里加路径判断。
 function ComfortShell({
   children,

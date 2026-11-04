@@ -659,3 +659,17 @@
 | 证据 | 短页栏底贴着视口：画廊 `docs/evidence/clinic-comfort-full-ui/04-patient-detail.png`（侧栏高 836，底边在 900，`clinician_a` 和退出在栏底）。长页整栏跟着走：`docs/evidence/clinic-comfort-humanize/06-stats-overview-after.png`（整页高 1614，侧栏高 1550，用户区在页底）。工作台、患者、计划、随访用的是同一套 ComfortShell。 |
 | 未改 / 风险 | 下一步意向：全站 ComfortShell 侧栏统一成固定导航。用户区放哪等主人拍板：移出侧栏、收到顶栏，或仍留在侧栏里但 sticky、不随页滚。登录页不在这套壳里。在拍板前不要先把用户区删掉或挪走。 |
 
+### 2026-11-04 · 医护侧栏钉在视口，用户区停在栏底
+
+主人拍板：全站 ComfortShell 侧栏固定。用户和退出留在侧栏里，但钉在视口栏底，不跟主栏滚走。
+
+**全站医护壳 · 侧栏**
+
+| 栏 | 内容 |
+|----|------|
+| 问题 | 上一轮只把短页侧栏拉到视口底。内容一长，整栏连同底部的账号和退出一起滚走。全站医护页都是这一套壳。 |
+| 原因 | 侧栏高度跟着主栏内容长。用户区用栏底布局，页有多长它就落在多下面。要对齐的是图4 那种「侧栏始终在视口里」。 |
+| 改动 | 外壳锁成一屏（仍保留 `min-height: 100vh`）。主栏 `.cc-shell-content` 自己滚动，窗口不滚。侧栏高度等于视口减去顶栏，菜单过长时只滚菜单。账号和退出仍在 `.sider-foot`，停在视口栏底。卡片不拉高。登录页和管理端不走这套壳。 |
+| 证据 | 短页图4：`docs/evidence/clinic-comfort-humanize/04-sidebar-sticky-short.png`，画廊 `docs/evidence/clinic-comfort-full-ui/04-patient-detail.png`。视口 900，侧栏顶 64 底 900，用户区底边 900；主内容高 570、底边 670；两张内容卡仍各 263px。长页图6 滚前侧栏同样顶 64 底 900，主栏可滚高度 1550。滚到登记情况后（`contentScroll` 714）侧栏顶仍是 64、用户区底边仍是 900，窗口 `scrollY` 为 0：`06-sidebar-sticky-scrolled.png`，画廊 `06-stats-overview.png`。 |
+| 未改 / 风险 | 统计口径和登记展开没动。管理端仍是标准壳。窄屏侧栏收成图标时，用户名藏起，退出仍在栏底。 |
+

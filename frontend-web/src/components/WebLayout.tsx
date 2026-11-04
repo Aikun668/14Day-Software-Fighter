@@ -20,7 +20,8 @@ interface PatientHit {
 // variant 决定外壳观感，不再靠 URL 判断：
 //   'standard' 传统布局（顶栏 56px、内容 padding 28px、页面撑到视口底）
 //   'comfort'  Clinic Comfort 变体（顶栏 64px、面包屑侧栏品牌）。
-//             外壳至少一屏高，侧栏才铺满视口；主栏里的卡仍按内容高。
+//             外壳锁在一屏：侧栏钉住，菜单过长时只滚菜单，用户和退出停在视口栏底。
+//             主栏自己滚动；里面的卡仍按内容高。
 // 新页面要上 Clinic Comfort，显式传 variant="comfort" 即可，不再加路径判断。
 export default function WebLayout({
   children,
@@ -191,7 +192,7 @@ export default function WebLayout({
           />
         )}
 
-        {/* 医护的用户区固定在侧栏底部；管理员无侧栏，保留顶栏下拉 */}
+        {/* 管理员无侧栏，退出留在顶栏。医护的用户和退出在侧栏视口底，见 sider-foot。 */}
         {isAdmin && (
           <Dropdown
             menu={{
