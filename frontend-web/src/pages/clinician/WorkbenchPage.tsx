@@ -208,7 +208,6 @@ export default function WorkbenchPage() {
         </p>
 
         <TwoColumn
-          natural
           aside={<AttentionPanel items={attention} count={attention.length} />}
         >
           <Card title="近 7 日团队登记" hint="覆盖 ≠ 依从性" id="cc-week-scale">
