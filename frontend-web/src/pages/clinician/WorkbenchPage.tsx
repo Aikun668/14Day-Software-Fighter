@@ -41,9 +41,6 @@ const formatLocalDay = (d: Date) => {
   return `${y}-${m}-${day}`
 }
 
-const fmt = (iso: string) =>
-  new Date(iso).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-
 const WEEK_ZH = ['日', '一', '二', '三', '四', '五', '六']
 
 // M01 工作台（J036）：交班操作台。瘦摘要 + 刻度/需关注 + 待核查队列。
@@ -152,7 +149,6 @@ export default function WorkbenchPage() {
       mark: '今',
       tone: 'warn',
       title: `今日还有 ${todaySummary.missing} 个时点未登记`,
-      detail: '补登或核对后此处自动清零',
       chip: '去处理',
       chipTone: 'warn',
       onClick: () => document.getElementById('cc-task-queue')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
@@ -164,7 +160,6 @@ export default function WorkbenchPage() {
       mark: '核',
       tone: 'warn',
       title: `${tasks.length} 条待核查任务`,
-      detail: '任务未关闭',
       chip: '处理',
       chipTone: 'warn',
       onClick: () => document.getElementById('cc-task-queue')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
@@ -176,7 +171,6 @@ export default function WorkbenchPage() {
       mark: '稳',
       tone: 'info',
       title: '暂无需要关注的事项',
-      detail: '待核查与覆盖均正常',
       chip: '正常',
       chipTone: 'blue',
     })
@@ -204,20 +198,20 @@ export default function WorkbenchPage() {
       />
 
       <TwoColumn
-        aside={<AttentionPanel items={attention} count={attention.length} />}
+        aside={<AttentionPanel items={attention} />}
       >
         <Card title="近 7 日团队登记" id="cc-week-scale">
           {teamScale.days.length === 0 ? (
             <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
           ) : teamScale.cells.every((c) => c.due === 0) ? (
-            <p className="cc-empty-line">近 7 日团队内没有排程时点（无固定计划到期），不是零登记。</p>
+            <p className="cc-empty-line">近 7 日没有排程时点，不是零登记。</p>
           ) : (
             <TeamScale days={teamScale.days} cells={teamScale.cells} />
           )}
         </Card>
       </TwoColumn>
 
-        <Card title="待核查" hint={tasks.length > 0 ? `${tasks.length} 条` : '已清空'} id="cc-task-queue">
+        <Card title="待核查" id="cc-task-queue">
           {loading ? (
             <p className="cc-empty-line">加载中…</p>
           ) : tasks.length === 0 ? (
@@ -231,7 +225,6 @@ export default function WorkbenchPage() {
                     <QueueRow
                       name={patientName(t.patient_id)}
                       meta={patientCode(t.patient_id)}
-                      extra={fmt(t.created_at)}
                       onClick={goPatient(t.patient_id)}
                       actions={[
                         {

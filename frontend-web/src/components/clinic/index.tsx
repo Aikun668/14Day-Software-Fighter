@@ -147,7 +147,8 @@ export interface AttentionItem {
   /** 图标与整体色调：warn = 待处理，info = 中性提示 */
   tone: 'warn' | 'info'
   title: string
-  detail: string
+  /** 灰字解释行；纯行动项可以不传（减法：不挣位置的说明不渲染） */
+  detail?: string
   /** 右侧芯片文字 */
   chip: string
   chipTone: 'warn' | 'blue'
@@ -157,13 +158,13 @@ export interface AttentionItem {
 
 interface AttentionPanelProps {
   items: AttentionItem[]
-  /** 卡头右侧显示的条数 */
+  /** 卡头右侧计数；默认不显示（减法：条数一眼能数，不重复） */
   count?: number
 }
 
 export function AttentionPanel({ items, count }: AttentionPanelProps) {
   return (
-    <Card title="需关注" hint={`${count ?? items.length} 项`}>
+    <Card title="需关注" hint={count === undefined ? undefined : `${count} 项`}>
       <div className="cc-attn">
         {items.map((item) => {
           const body = (
@@ -171,7 +172,7 @@ export function AttentionPanel({ items, count }: AttentionPanelProps) {
               <div className={`cc-attn-ico ${item.tone}`} aria-hidden="true">{item.mark}</div>
               <div className="cc-attn-body">
                 <strong>{item.title}</strong>
-                <span>{item.detail}</span>
+                {item.detail ? <span>{item.detail}</span> : null}
               </div>
               <span className={`cc-chip ${item.chipTone}`}>{item.chip}</span>
             </>
