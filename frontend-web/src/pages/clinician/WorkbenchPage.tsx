@@ -47,12 +47,6 @@ const fmt = (iso: string) =>
 
 const WEEK_ZH = ['日', '一', '二', '三', '四', '五', '六']
 
-function todayStatusText(summary: DaySummary | null): string {
-  if (!summary || summary.N === 0) return '今日暂无已到期时点'
-  if (summary.missing > 0) return `还有 ${summary.missing} 个已到期时点未登记`
-  return '今日已到期时点已全部登记'
-}
-
 // M01 工作台（J036）：交班操作台。瘦摘要 + 刻度/需关注 + 待核查队列。
 // 待核查不收进侧栏，行里直接补登或处理。
 export default function WorkbenchPage() {
@@ -218,10 +212,7 @@ export default function WorkbenchPage() {
 
       <div className="cc-stack">
         <p className="cc-stats-meta" aria-label="今日登记与待核查">
-          <span>{loading ? '正在汇总今日登记…' : todayStatusText(todaySummary)}</span>
-          {todaySummary && todaySummary.N > 0 && (
-            <span>已登记 {todaySummary.M} / 已到期 {todaySummary.N}</span>
-          )}
+          <span>已登记 {loading ? '—' : (todaySummary?.M ?? 0)} / 已到期 {loading ? '—' : (todaySummary?.N ?? 0)}</span>
           {todayAsOf ? <span>截至 {todayAsOf}</span> : null}
           <span>待核查 {loading ? '—' : tasks.length}</span>
         </p>
@@ -229,7 +220,7 @@ export default function WorkbenchPage() {
         <TwoColumn
           aside={<AttentionPanel items={attention} count={attention.length} />}
         >
-          <Card title="近 7 日团队登记" hint="覆盖 ≠ 依从性" id="cc-week-scale">
+          <Card title="近 7 日团队登记" id="cc-week-scale">
             {teamScale.days.length === 0 ? (
               <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
             ) : teamScale.cells.every((c) => c.due === 0) ? (
