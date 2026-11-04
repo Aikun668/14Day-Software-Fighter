@@ -536,3 +536,22 @@
 | 页面 | `frontend-web/src/pages/clinician/PatientListPage.tsx` |
 | 桌面截图 | `docs/evidence/clinic-comfort-rollout-2/patients-01-list-desktop.png`、`patients-02-unbound-desktop.png` |
 
+### 2026-11-04 · 今日环去掉旧紫，并收一份优化后全站画廊
+
+**色**
+
+`TodayProgressCard` 圆环的 `strokeColor` 还是旧靛紫 `#573BF4`。改成诊所蓝 `#5B7CFF`，与 `CoverageTrendChart` 和矩阵刻度同一主色。只动这一处颜色，统计口径、接口和统计页结构都不动。`frontend-web/src` 里已没有 `#573BF4` / `#573bf4`。
+
+**画廊**
+
+`docs/evidence/clinic-comfort-full-ui/index.html`。15 张，分组和说明句式对齐 `docs/evidence/full-ui-2026-10-26/index.html`。图片复制进该目录，相对路径，`file://` 可直接打开。页头用诊所蓝软胶囊，不再用旧紫。
+
+图 6 / 图 7 已在 PR #3 改完。原图仍是：
+
+- `docs/evidence/clinic-comfort-rollout-2/stats-01-overview-desktop.png`
+- `docs/evidence/clinic-comfort-rollout-2/stats-02-report-desktop.png`
+
+画廊副本是 `06-stats-overview.png`、`07-stats-report.png`。
+
+图 14 知识内容、图 15 审计日志原先没有现成文件。管理端 Clinic Comfort 外壳在 `refactor/clinic-comfort-shared-layer`（本分支没改管理端页面）。用该外壳对着演示库实拍了这两个页签：知识内容 3 条已发布稿，审计日志 32 条。页签下划线和主按钮是 `rgb(91, 124, 255)`。
+

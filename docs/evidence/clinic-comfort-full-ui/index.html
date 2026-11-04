@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clinic Comfort 全站截图 · 优化后</title>
+<!--
+  图片均为复制进本目录的 PNG（相对路径，file:// 可打开），不是软链。
+  01 login-01-desktop.png（shared-layer，与本分支文件相同）
+  02 clinic-comfort-rollout-2/workbench-01-desk-desktop.png
+  03 clinic-comfort-rollout-2/patients-01-list-desktop.png
+  04 clinic-comfort-shared-layer/shared-01-patient-detail.png
+  05 clinic-comfort-plan-edit/plans-02-selected.png（干活页，无四张摘要卡）
+  06–07 clinic-comfort-rollout-2/stats-01-overview-desktop.png、stats-02-report-desktop.png（PR #3）
+  08 clinic-comfort-rollout-2/followups-04-collapsed-desktop.png
+  09–10 shared-layer modal-09-task-close.png、modal-10-backfill.png
+  11–13 shared-layer admin-11-models.png、admin-12-guides.png、admin-13-accounts.png
+  14–15 在 shared-layer 管理端外壳上实拍：知识内容页签、审计日志页签（该分支已是 Clinic Comfort，本分支代码未改管理端）。
+-->
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --line: #e5eaf1;
+    --line-soft: #eef2f7;
+    --ink: #1a1d26;
+    --ink-2: #4a5160;
+    --muted: #8b93a7;
+    --brand: #5b7cff;
+    --brand-soft: #e8eeff;
+    --brand-ink: #3d56c7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 36px 40px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  .sub { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .meta span {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+    font-size: 12px;
+  }
+  main { padding: 8px 40px 56px; max-width: 1440px; margin: 0 auto; }
+  section { margin-top: 34px; }
+  h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .shot {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  }
+  .shot:hover {
+    border-color: #c5d0ff;
+    box-shadow: 0 8px 24px rgba(91, 124, 255, .12);
+    transform: translateY(-2px);
+  }
+  .thumb {
+    position: relative;
+    height: 460px;
+    background: #eef2f7;
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 55%, rgba(255,255,255,.9) 100%);
+    pointer-events: none;
+  }
+  .zoom {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(26, 29, 38, .72);
+    color: #fff;
+    font-size: 12px;
+  }
+  .cap { padding: 14px 16px 16px; }
+  .cap b { display: block; font-size: 14px; font-weight: 600; }
+  .cap span { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
+  .tall .thumb { height: 560px; }
+  .modal .thumb { height: 360px; background: #eef2f7; }
+  footer {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  @media (max-width: 900px) {
+    header, main, footer { padding-left: 18px; padding-right: 18px; }
+    .grid { grid-template-columns: 1fr; }
+    .thumb { height: 420px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Clinic Comfort 全站截图 · 优化后</h1>
+  <p class="sub">登录、工作台、患者管理、患者详情、用药计划、统计与核查、随访中心、管理端，共 15 张。主色为诊所蓝。</p>
+  <div class="meta">
+    <span>2026-11-04</span>
+    <span>1440 × 900 视口</span>
+    <span>clinician_a / admin</span>
+    <span>除弹窗外均为整页长图</span>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>认证</h2>
+    <div class="grid">
+      <a class="shot" href="01-login.png" target="_blank">
+        <div class="thumb"><img src="01-login.png" alt="登录页" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>01 · 登录页</b><span>软底「吸」标和诊所蓝主按钮，账号密码进入医护端。</span></div>
+      </a>
+      <a class="shot" href="02-workbench.png" target="_blank">
+        <div class="thumb"><img src="02-workbench.png" alt="工作台" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>02 · 工作台</b><span>一行今日与待核查，近 7 日刻度对照需关注，队列里直接补登或处理。</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>患者与计划</h2>
+    <div class="grid">
+      <a class="shot" href="03-patients.png" target="_blank">
+        <div class="thumb"><img src="03-patients.png" alt="患者管理" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>03 · 患者管理</b><span>负责患者列表；未绑定用表头芯片筛出，实心按钮只有新建患者。</span></div>
+      </a>
+      <a class="shot tall" href="04-patient-detail.png" target="_blank">
+        <div class="thumb"><img src="04-patient-detail.png" alt="患者详情" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>04 · 患者详情</b><span>李先生：问候与四项摘要，近 7 日时点对照需关注（演示数据）。</span></div>
+      </a>
+      <a class="shot" href="05-plans.png" target="_blank">
+        <div class="thumb"><img src="05-plans.png" alt="用药计划" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>05 · 用药计划编辑</b><span>为李先生填写新计划，右侧对照已关闭的历史版本。</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>统计与核查</h2>
+    <div class="grid">
+      <a class="shot" href="06-stats-overview.png" target="_blank">
+        <div class="thumb"><img src="06-stats-overview.png" alt="统计与核查 · 团队概览" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>06 · 团队概览</b><span>覆盖率写在矩阵上方；已登记为软蓝，未发现登记为浅灰。</span></div>
+      </a>
+      <a class="shot tall" href="07-stats-report.png" target="_blank">
+        <div class="thumb"><img src="07-stats-report.png" alt="统计与核查 · 患者报告" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>07 · 患者报告</b><span>林女士：覆盖率、逐日趋势、缺失时点、来源、随访与重复登记。</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>随访与任务闭环</h2>
+    <div class="grid">
+      <a class="shot" href="08-followups.png" target="_blank">
+        <div class="thumb"><img src="08-followups.png" alt="随访中心" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>08 · 随访中心</b><span>待核查队列和随访记录；记录默认五行，多出的可以展开。</span></div>
+      </a>
+      <a class="shot modal" href="09-task-close-modal.png" target="_blank">
+        <div class="thumb"><img src="09-task-close-modal.png" alt="任务处理弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>09 · 任务处理弹窗</b><span>必填处理说明，可选安排一次操作复训提醒。</span></div>
+      </a>
+      <a class="shot modal" href="10-medication-backfill-modal.png" target="_blank">
+        <div class="thumb"><img src="10-medication-backfill-modal.png" alt="补登用药弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>10 · 补登用药弹窗</b><span>近 7 日未登记时点平铺点选，确认后补登。</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>管理端</h2>
+    <div class="grid">
+      <a class="shot" href="11-admin-device-models.png" target="_blank">
+        <div class="thumb"><img src="11-admin-device-models.png" alt="装置型号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>11 · 装置型号</b><span>pMDI / DPI / SMI 型号目录。</span></div>
+      </a>
+      <a class="shot" href="12-admin-guides.png" target="_blank">
+        <div class="thumb"><img src="12-admin-guides.png" alt="指导版本" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>12 · 指导版本</b><span>指导稿审核与发布状态。</span></div>
+      </a>
+      <a class="shot" href="13-admin-accounts.png" target="_blank">
+        <div class="thumb"><img src="13-admin-accounts.png" alt="账号管理" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>13 · 账号</b><span>医护、管理员与患者账号。</span></div>
+      </a>
+      <a class="shot" href="14-admin-knowledge.png" target="_blank">
+        <div class="thumb"><img src="14-admin-knowledge.png" alt="知识内容" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>14 · 知识内容</b><span>三份已发布的装置知识稿，审核发布后供患者端引用。</span></div>
+      </a>
+      <a class="shot tall" href="15-admin-audit.png" target="_blank">
+        <div class="thumb"><img src="15-admin-audit.png" alt="审计日志" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>15 · 审计日志</b><span>计划修订、随访、指导与知识发布等关键写操作留痕。</span></div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  截图目录：docs/evidence/clinic-comfort-full-ui · 点击任意卡片可在新标签页查看原始长图。图 6 / 图 7 的统计页改版已在 PR #3 完成，原图在 docs/evidence/clinic-comfort-rollout-2/stats-01-overview-desktop.png 与 stats-02-report-desktop.png。
+</footer>
+</body>
+</html>
