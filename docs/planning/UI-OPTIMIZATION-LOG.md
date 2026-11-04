@@ -555,3 +555,69 @@
 
 图 14 知识内容、图 15 审计日志原先没有现成文件。管理端 Clinic Comfort 外壳在 `refactor/clinic-comfort-shared-layer`（本分支没改管理端页面）。用该外壳对着演示库实拍了这两个页签：知识内容 3 条已发布稿，审计日志 32 条。页签下划线和主按钮是 `rgb(91, 124, 255)`。
 
+### 2026-11-03 晚（America/New_York）· 全站画廊复盘
+
+主人当晚看完 Clinic Comfort 全站画廊，要求以后每次改动都留下：当时什么别扭、为什么改、改了什么。画廊文件见上一条（落盘记为 2026-11-04）。这条只记复盘，不改界面。
+
+还有一些人性化问题主人说得出来「有」，但还叫不出名字。先空着，等能指到某一屏、某一块再写。不提前编问题。
+
+#### 复盘约定
+
+从此每条 Clinic Comfort / UI 改动至少写这五栏：
+
+| 栏 | 写什么 |
+|----|--------|
+| 问题 | 哪里别扭，主人或使用时卡在哪 |
+| 原因 | 为什么动它：任务对不对、够不够好扫、是不是 token / 外壳 |
+| 改动 | 实际改了什么 |
+| 证据 | 路径（页面、截图、日志条目） |
+| 未改 / 风险 | 没动的口径、接口、或还没验证的假设。没有就写「无」 |
+
+已有条目不改写。缺一行「问题 / 原因」的，用下面的索引补指针。图 1 登录、图 2 工作台、图 3 患者列表的「为什么」已经写在各自正文里，索引不重复。
+
+#### 已有改动索引（问题 / 原因）
+
+| 条目 | 问题 | 原因 | 证据 |
+|------|------|------|------|
+| 共享层 | 范式写死在患者详情的选择器和「看 URL 决定外壳」上，下一屏就要再抄一套 | 先把外壳和结构组件抽出来，各屏复用 | `frontend-web/src/styles/clinic-comfort.css`、`frontend-web/src/components/clinic/index.tsx`；`docs/evidence/clinic-comfort-shared-layer/` |
+| 图4 患者详情 | 首屏被档案和流水占住，看不清是谁、怎样、下一步 | 收成决策台：问候、摘要、近 7 日刻度、需关注。页高跟着内容 | 上文「复盘节点 · 图4」；画廊 `docs/evidence/clinic-comfort-full-ui/04-patient-detail.png` |
+| 图5 用药计划 | 套了图4 的四张大数字，填计划时用不上 | 这页的任务是写新计划、对照历史 | `frontend-web/src/pages/clinician/PlanEditPage.tsx`；`docs/evidence/clinic-comfort-plan-edit/plans-02-selected.png` |
+| 图6 团队概览 | 团队覆盖率做成大数字主角，要扫的是矩阵和登记表 | 收成日期、一行元信息、矩阵、登记情况。口径不改 | `frontend-web/src/pages/clinician/StatsPage.tsx`；`docs/evidence/clinic-comfort-rollout-2/stats-01-overview-desktop.png`（画廊 `06-stats-overview.png`） |
+| 图7 患者报告 | 覆盖率环和三列指标读起来像仪表盘 | 同一人的报告按原内容单列往下排 | `docs/evidence/clinic-comfort-rollout-2/stats-02-report-desktop.png`（画廊 `07-stats-report.png`） |
+| 图8 随访中心 | 空表单也占着半屏；记录贴边，一屏拉得很长 | 队列和记录才是要扫的。表单点开才出现。默认最多 5 条，其余「展开更多」 | `frontend-web/src/pages/clinician/FollowupPage.tsx`；`docs/evidence/clinic-comfort-rollout-2/followups-04-collapsed-desktop.png` |
+| 管理端外壳 | 管理端还是旧页头，和医护端不是一套 | 装置型号、指导版本、账号收进同一张管理卡。代码在 `refactor/clinic-comfort-shared-layer`，本分支没改管理端 | 画廊 `11-admin-device-models.png` 至 `15-admin-audit.png` |
+| 今日环旧紫 | 圆环仍硬编码 `#573BF4`，趋势线和矩阵已经是诊所蓝 | 只对齐颜色，不改统计定义 | `frontend-web/src/components/TodayProgressCard.tsx` |
+| 全站画廊 | 优化后的 15 屏散在多个目录，不能一次看完 | 按 10 月 26 日那份的分组和说明句式收成一页 | `docs/evidence/clinic-comfort-full-ui/index.html` |
+
+#### 画廊上新点出的问题（未改）
+
+**总观**
+
+| 栏 | 内容 |
+|----|------|
+| 问题 | 很多地方还不够好用、不够顺。画廊逐屏看下来，别扭已经超出配色和外壳，卡在布局本身。 |
+| 原因 | 前几轮主要在收 token、共享层，以及别再套「四张摘要卡」。好不好扫、侧栏和内容怎么一起长，还没当成每页的完成标准。 |
+| 改动 | 无。本条只记录。 |
+| 证据 | `docs/evidence/clinic-comfort-full-ui/` |
+| 未改 / 风险 | 还有一批叫不出名字的问题。等能指到具体屏再记、再改。 |
+
+**图4 患者详情 · 侧边栏过短**
+
+| 栏 | 内容 |
+|----|------|
+| 问题 | 侧栏的高度和看上去的长度跟优化前对不上，像被截短了，和原来的壳不匹配。 |
+| 原因 | 假设，不当成已核实的改法：ComfortShell 按内容收高时，主栏内容短，侧栏可能跟着收短，而不是像旧布局那样铺满视口。共享层验证里图4 整页约 710px，视口 900px，收页高是当时故意的。 |
+| 改动 | 无。 |
+| 证据 | 画廊 `docs/evidence/clinic-comfort-full-ui/04-patient-detail.png`；上文共享层条目「整页高 710px < 视口 900px」。 |
+| 未改 / 风险 | 假设还没验证。补高度时不要把内容卡拉满（上文节奏教训：不用 stretch 硬拉格）。若以后修，只核对外壳和侧栏要不要单独铺满视口，和内容收高分开。 |
+
+**图6 统计与核查 · 团队概览**
+
+| 栏 | 内容 |
+|----|------|
+| 问题 | 侧栏被拉得很长。这一页把矩阵和整张登记情况一次铺开，页有多高，侧栏就多高。 |
+| 原因 | 登记情况默认露出全部行。随访中心已经是默认一段再「展开更多」，统计页没有用同一套，所以整页（画廊图高 1898px）和侧栏一起被撑高。 |
+| 改动 | 无。主人要求下一步：登记情况改成展开模式，精神与随访中心相同（默认 N 条 + 「展开更多」），页面和侧栏不必这么高。 |
+| 证据 | 画廊 `docs/evidence/clinic-comfort-full-ui/06-stats-overview.png`（原图 `docs/evidence/clinic-comfort-rollout-2/stats-01-overview-desktop.png`）。对照 `followups-04-collapsed-desktop.png`。 |
+| 未改 / 风险 | 展开只改默认露出的行数。排序仍是缺失多的在前。不改 `/api/stats` 和统计定义。 |
+
