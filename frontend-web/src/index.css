@@ -7,7 +7,9 @@
   --line-soft: #EEF2F7;
   --ink: #1A1D26;
   --ink-2: #4A5160;
-  --muted: #8B93A7;
+  /* muted 加深到全底色 ≥4.5:1（检测器 17 条 low-contrast 的根因；
+     原值 #8B93A7 在白底只有 3.1:1，仍保留灰阶感但可读） */
+  --muted: #626C85;
   --primary: #5B7CFF;
   --primary-soft: #E8EEFF;
   --primary-text: #3D56C7;
@@ -23,10 +25,11 @@
   --miss-fill: #EEF1F6;
   --miss-ring: #C8CEDA;
   --chip-violet: #F0EBFF;
-  /* 状态：已登记软蓝、待处理暖色提示。缺失不用红色惩罚。 */
-  --ok: #1F9D7A;
+  /* 状态：已登记软蓝、待处理暖色提示。缺失不用红色惩罚。
+     ok/warn 文字色加深到浅底 ≥4.5:1（#1F9D7A/#D97706 只有 3.1:1） */
+  --ok: #167757;
   --ok-soft: #E4F7F1;
-  --warn: #D97706;
+  --warn: #B45309;
   --warn-soft: #FFF4E5;
   --bad: #B02A2A;
   /* 数字字体：仪表感等宽数字，Windows 走 Bahnschrift、macOS 走 DIN Alternate */

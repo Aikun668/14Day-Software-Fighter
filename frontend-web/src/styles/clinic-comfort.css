@@ -1108,7 +1108,8 @@ button.cc-attn-row:hover {
   box-shadow: inset 0 0 0 1px var(--line-soft);
 }
 
-.cc-legend .blank {
+.cc-legend .blank,
+.cc-legend .none {
   background: transparent;
   box-shadow: inset 0 0 0 1px var(--line-soft);
 }

@@ -1,4 +1,4 @@
-// J006 视觉变量唯一来源映射（UI_DESIGN §2）。工程实现时以 prototype/styles.css 的 :root 为准。
+﻿// J006 视觉变量唯一来源映射（UI_DESIGN §2）。工程实现时以 prototype/styles.css 的 :root 为准。
 import type { ThemeConfig } from 'antd'
 
 export const webTheme: ThemeConfig = {
@@ -8,9 +8,9 @@ export const webTheme: ThemeConfig = {
     colorLink: '#3D56C7',
     colorText: '#1A1D26',
     colorTextSecondary: '#4A5160',
-    colorTextTertiary: '#8B93A7',
-    // 占位符对齐 Clinic Comfort 的 muted，避免再回到靛紫灰
-    colorTextPlaceholder: '#8B93A7',
+    colorTextTertiary: '#626C85',
+    // 占位符对齐 Clinic Comfort 的 muted（加深到 4.5:1+），避免回到靛紫灰
+    colorTextPlaceholder: '#626C85',
     colorBgBase: '#F4F6F9',
     colorBgContainer: '#FFFFFF',
     colorBorder: '#E5EAF1',
@@ -29,6 +29,10 @@ export const webTheme: ThemeConfig = {
     // 卡片轻阴影；下拉与弹层再抬一层
     boxShadowTertiary: '0 1px 2px rgba(26, 29, 38, 0.04)',
     boxShadowSecondary: '0 8px 24px rgba(26, 29, 38, 0.06)',
+    // 去掉 antd 弹层的回弹缓动（motionEaseOutBack 带 1.46 超调，
+    // Clinic Comfort 的动效纪律是克制，不弹跳）
+    motionEaseOutBack: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+    motionEaseInBack: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
     fontFamily:
       'Inter, PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, -apple-system, sans-serif',
   },
@@ -61,7 +65,7 @@ export const webTheme: ThemeConfig = {
     },
     Table: {
       headerBg: '#FFFFFF',
-      headerColor: '#8B93A7',
+      headerColor: '#626C85',
       headerSplitColor: 'transparent',
       borderColor: '#EEF2F7',
       rowHoverBg: '#F4F6F9',
@@ -69,7 +73,7 @@ export const webTheme: ThemeConfig = {
       cellPaddingInline: 16,
     },
     Tabs: {
-      itemColor: '#8B93A7',
+      itemColor: '#626C85',
       itemHoverColor: '#4A5160',
       itemSelectedColor: '#5B7CFF',
       inkBarColor: '#5B7CFF',

@@ -105,7 +105,7 @@ export default function WorkbenchPage() {
     load()
   }, [refreshKey])
 
-  const patientName = (pid: string) => patients.find(p => p.id === pid)?.display_name || pid.slice(0, 8)
+  const patientName = (pid: string) => patients.find(p => p.id === pid)?.display_name || '未命名患者'
   const patientCode = (pid: string) => patients.find(p => p.id === pid)?.patient_code || ''
 
   // 需要关注：近 7 日有缺失时点的患者，缺失多在前，最多 3 个
@@ -140,18 +140,34 @@ export default function WorkbenchPage() {
   }, [weekMatrix])
 
   // 需关注面板：未绑定 / 缺失 / 待核查 三类里挑最该处理的
+  // 覆盖项给分母（缺 X / 应 Y）+ 覆盖率，30 秒交班里才分得出轻重
   const attention: AttentionItem[] = []
   if (watch.length > 0) {
     const top = watch[0]
+    const due = top.N
+    const rate = due > 0 && top.coverage_rate !== null ? `${top.coverage_rate}%` : '—'
     attention.push({
       key: 'coverage',
       mark: '覆',
       tone: 'warn',
       title: `${top.display_name} 近 7 日覆盖偏低`,
-      detail: `缺 ${top.missing_count} 个时点`,
+      detail: `缺 ${top.missing_count} / 应 ${due} · 覆盖 ${rate}`,
       chip: '查看',
       chipTone: 'warn',
       onClick: goPatient(top.patient_id),
+    })
+  }
+  // 今日有未登记时点时给下钻入口（原来只是文字，用户要自己跳统计页找）
+  if (!loading && todaySummary && todaySummary.missing > 0) {
+    attention.push({
+      key: 'today-missing',
+      mark: '今',
+      tone: 'warn',
+      title: `今日还有 ${todaySummary.missing} 个时点未登记`,
+      detail: '补登或核对后此处自动清零',
+      chip: '去处理',
+      chipTone: 'warn',
+      onClick: () => document.getElementById('cc-task-queue')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
     })
   }
   if (tasks.length > 0) {
@@ -189,11 +205,14 @@ export default function WorkbenchPage() {
       <HeroBar
         eyebrow={<>{today} · <span className={todaySummary ? 'ok' : undefined}>{todaySummary ? '系统正常' : '统计未更新'}</span></>}
         title="工作台"
-        sub="刻度看近 7 日。待核查单独放在下面，行里可以直接补登或处理。"
+        sub="先看刻度上的登记覆盖，再处理下面的待核查。"
         actions={
-          <Dropdown menu={{ items: moreItems }} trigger={['click']}>
-            <Button>更多</Button>
-          </Dropdown>
+          <>
+            <Dropdown menu={{ items: moreItems }} trigger={['click']}>
+              <Button>更多</Button>
+            </Dropdown>
+            <Button onClick={() => setRefreshKey((k) => k + 1)} aria-label="刷新工作台数据">刷新</Button>
+          </>
         }
       />
 
@@ -213,6 +232,8 @@ export default function WorkbenchPage() {
           <Card title="近 7 日团队登记" hint="覆盖 ≠ 依从性" id="cc-week-scale">
             {teamScale.days.length === 0 ? (
               <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
+            ) : teamScale.cells.every((c) => c.due === 0) ? (
+              <p className="cc-empty-line">近 7 日团队内没有排程时点（无固定计划到期），不是零登记。</p>
             ) : (
               <TeamScale days={teamScale.days} cells={teamScale.cells} />
             )}

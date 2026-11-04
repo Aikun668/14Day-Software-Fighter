@@ -484,12 +484,14 @@ export function TeamScale({ days, cells }: TeamScaleProps) {
           {cells.map((cell, index) => {
             const day = days[index]
             const rate = cell && cell.due > 0 ? Math.round((cell.registered / cell.due) * 1000) / 10 : null
+            // due=0（无排程）与 due>0 未登记（未发现登记）必须分开画：
+            // 前者是「没有安排」，后者是「该登记但没记录」——都画灰格会把空病区读成全员漏登记
             const kind: ScaleCellKind = !cell || cell.due === 0
               ? 'none'
               : cell.registered >= cell.due ? 'ok' : cell.registered > 0 ? 'pending' : 'miss'
             const label = !cell || cell.due === 0
-              ? `${day?.date ?? ''} 无到期时点`
-              : `${day?.date ?? ''} 已登记 ${cell.registered} / 已到期 ${cell.due}${rate === null ? '' : `（${rate}%）`}`
+              ? `${day?.date ?? ''} 无排程时点`
+              : `${day?.date ?? ''} 已登记 ${cell.registered} / 应登记 ${cell.due}${rate === null ? '' : `（${rate}%）`}`
             return (
               <div
                 key={day?.key ?? index}
@@ -505,6 +507,7 @@ export function TeamScale({ days, cells }: TeamScaleProps) {
         <li><i className="ok" aria-hidden="true" />全部登记</li>
         <li><i className="pending" aria-hidden="true" />部分登记</li>
         <li><i className="miss" aria-hidden="true" />未发现登记</li>
+        <li><i className="none" aria-hidden="true" />无排程</li>
       </ul>
     </>
   )
