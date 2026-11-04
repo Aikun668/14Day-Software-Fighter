@@ -22,7 +22,6 @@ interface Task {
   assigned_to: string | null; created_at: string; closed_at: string | null
 }
 interface Patient { id: string; patient_code: string; display_name: string }
-interface Followup { id: string; patient_id: string; followed_at: string; feedback: string | null }
 interface CoverageRow {
   patient_id: string; patient_code: string; display_name: string
   N: number; M: number; coverage_rate: number | null; missing_count: number
@@ -53,11 +52,9 @@ export default function WorkbenchPage() {
   const navigate = useNavigate()
   const [tasks, setTasks] = useState<Task[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
-  const [recentFollowups, setRecentFollowups] = useState<Followup[]>([])
   const [overview, setOverview] = useState<Overview | null>(null)
   const [loading, setLoading] = useState(true)
   const [todaySummary, setTodaySummary] = useState<DaySummary | null>(null)
-  const [todayAsOf, setTodayAsOf] = useState('')
   const [weekMatrix, setWeekMatrix] = useState<MatrixResponse | null>(null)
   const [today] = useState(() => new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
   // 补登弹窗：记录当前操作的患者；refreshKey 用于补登成功后重拉数据
@@ -79,21 +76,18 @@ export default function WorkbenchPage() {
         // 近 7 日团队矩阵：用于工作台的单行团队刻度
         const weekWin = `from=${formatLocalDay(new Date(end.getFullYear(), end.getMonth(), end.getDate() - 6))}&to=${formatLocalDay(tomorrow)}`
 
-        const [t, p, ov, fu, mx, wk] = await Promise.all([
+        const [t, p, ov, mx, wk] = await Promise.all([
           apiFetch<{ items: Task[] }>('/api/tasks?status=OPEN&page_size=20'),
           apiFetch<{ items: Patient[] }>('/api/patients?page_size=100'),
           apiFetch<Overview>(`/api/stats/overview?${win}`).catch(() => null),
-          apiFetch<{ items: Followup[] }>('/api/followups?page_size=5').catch(() => ({ items: [] as Followup[] })),
           apiFetch<MatrixResponse>(`/api/stats/matrix?${todayWin}`).catch(() => null),
           apiFetch<MatrixResponse>(`/api/stats/matrix?${weekWin}`).catch(() => null),
         ])
         setTasks(t.items)
         setPatients(p.items)
         setOverview(ov)
-        setRecentFollowups(fu.items.slice(0, 5))
         setTodaySummary(mx ? summarizeDay(mx, todayKey) : null)
         setWeekMatrix(wk)
-        setTodayAsOf(end.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }))
       } catch (e) { message.error((e as Error).message) } finally { setLoading(false) }
     }
     load()
@@ -199,7 +193,6 @@ export default function WorkbenchPage() {
       <HeroBar
         eyebrow={<>{today} · <span className={todaySummary ? 'ok' : undefined}>{todaySummary ? '系统正常' : '统计未更新'}</span></>}
         title="工作台"
-        sub="先看刻度上的登记覆盖，再处理下面的待核查。"
         actions={
           <>
             <Dropdown menu={{ items: moreItems }} trigger={['click']}>
@@ -210,26 +203,19 @@ export default function WorkbenchPage() {
         }
       />
 
-      <div className="cc-stack">
-        <p className="cc-stats-meta" aria-label="今日登记与待核查">
-          <span>已登记 {loading ? '—' : (todaySummary?.M ?? 0)} / 已到期 {loading ? '—' : (todaySummary?.N ?? 0)}</span>
-          {todayAsOf ? <span>截至 {todayAsOf}</span> : null}
-          <span>待核查 {loading ? '—' : tasks.length}</span>
-        </p>
-
-        <TwoColumn
-          aside={<AttentionPanel items={attention} count={attention.length} />}
-        >
-          <Card title="近 7 日团队登记" id="cc-week-scale">
-            {teamScale.days.length === 0 ? (
-              <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
-            ) : teamScale.cells.every((c) => c.due === 0) ? (
-              <p className="cc-empty-line">近 7 日团队内没有排程时点（无固定计划到期），不是零登记。</p>
-            ) : (
-              <TeamScale days={teamScale.days} cells={teamScale.cells} />
-            )}
-          </Card>
-        </TwoColumn>
+      <TwoColumn
+        aside={<AttentionPanel items={attention} count={attention.length} />}
+      >
+        <Card title="近 7 日团队登记" id="cc-week-scale">
+          {teamScale.days.length === 0 ? (
+            <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
+          ) : teamScale.cells.every((c) => c.due === 0) ? (
+            <p className="cc-empty-line">近 7 日团队内没有排程时点（无固定计划到期），不是零登记。</p>
+          ) : (
+            <TeamScale days={teamScale.days} cells={teamScale.cells} />
+          )}
+        </Card>
+      </TwoColumn>
 
         <Card title="待核查" hint={tasks.length > 0 ? `${tasks.length} 条` : '已清空'} id="cc-task-queue">
           {loading ? (
@@ -266,27 +252,6 @@ export default function WorkbenchPage() {
             </ul>
           )}
         </Card>
-
-        {recentFollowups.length > 0 && (
-          <Card title="近期随访" hint={`${recentFollowups.length} 条`}>
-            <ul className="cc-followup-list">
-              <CollapsibleList
-                collapseAt={4}
-                items={recentFollowups.map((f) => (
-                  <li key={f.id}>
-                    <QueueRow
-                      tone="ok"
-                      name={patientName(f.patient_id)}
-                      extra={fmt(f.followed_at)}
-                      onClick={goPatient(f.patient_id)}
-                    />
-                  </li>
-                ))}
-              />
-            </ul>
-          </Card>
-        )}
-      </div>
 
       <MedicationBackfillModal
         open={!!backfill}
