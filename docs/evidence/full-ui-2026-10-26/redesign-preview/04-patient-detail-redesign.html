@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>患者详情 · 刻度决策台预览 — P-004 李先生</title>
+<style>
+  :root {
+    --bg: #F8F9FC;
+    --surface: #FFFFFF;
+    --line: #E6E9F1;
+    --line-2: #F0F2F7;
+    --ink: #0F0D27;
+    --ink-2: #3D3D56;
+    --muted: #6B6E7F;
+    --brand: #573BF4;
+    --brand-hover: #4A2FE0;
+    --brand-soft: #EFECFE;
+    --brand-text: #4D3BA7;
+    --missed: #24243E;
+    --ok: #0F766E;
+    --ok-soft: #E6F4F2;
+    --warn-soft: #F3F4F9;
+    --radius: 10px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 2px rgba(15, 13, 39, 0.04);
+    --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font-family: inherit; }
+  a { color: var(--brand-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Shell */
+  .app {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+  }
+  .nav {
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav-brand {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 4px 12px 20px;
+    letter-spacing: 0.02em;
+  }
+  .nav-brand span {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .nav-section {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0.04em;
+    padding: 16px 12px 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    color: var(--ink-2);
+    cursor: default;
+  }
+  .nav-item.active {
+    background: var(--brand-soft);
+    color: var(--brand-text);
+    font-weight: 500;
+  }
+  .nav-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; opacity: 0.45;
+  }
+  .nav-item.active .nav-dot { opacity: 1; background: var(--brand); }
+
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    gap: 16px;
+  }
+  .topbar-title {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .search {
+    width: 280px;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+    padding: 20px 48px 48px;
+    box-sizing: border-box;
+  }
+
+  /* Compare toggle */
+  .compare-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .preview-label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .preview-label strong { color: var(--ink-2); font-weight: 500; }
+  .toggle-btn {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .toggle-btn[aria-pressed="true"] {
+    border-color: var(--brand);
+    color: var(--brand-text);
+    background: var(--brand-soft);
+  }
+  .cut-note {
+    display: none;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    background: #FFFBEB;
+    border: 1px solid #F5E6A8;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .cut-note.show { display: block; }
+  .cut-note h4 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .cut-note ul { margin: 0; padding-left: 18px; }
+  .cut-note li { margin: 2px 0; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--brand-text);
+    margin-bottom: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  /* Decision desk header */
+  .desk {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px 18px;
+    box-shadow: var(--shadow);
+  }
+  .desk-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .identity h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .badge-demo {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 4px;
+    background: var(--warn-soft);
+    color: var(--ink-2);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .identity-meta {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .identity-meta b { color: var(--ink-2); font-weight: 500; }
+
+  .actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { border-color: #D5DAE8; }
+  .btn-primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+    font-weight: 500;
+  }
+  .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+  .more-wrap { position: relative; }
+  .more-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    min-width: 160px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 16px rgba(15, 13, 39, 0.08);
+    padding: 4px;
+    z-index: 20;
+  }
+  .more-menu.open { display: block; }
+  .more-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .more-menu button:hover { background: var(--bg); }
+
+  /* Alert banner */
+  .alert {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+  .alert-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  .chip-miss {
+    border-color: transparent;
+    background: var(--missed);
+    color: #fff;
+  }
+  .alert-link {
+    font-size: 13px;
+    color: var(--brand-text);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* Profile collapse */
+  .profile-fold {
+    margin-top: 10px;
+  }
+  .profile-fold summary {
+    list-style: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    user-select: none;
+  }
+  .profile-fold summary::-webkit-details-marker { display: none; }
+  .profile-fold summary::before {
+    content: "▸ ";
+    color: var(--muted);
+  }
+  .profile-fold[open] summary::before { content: "▾ "; }
+  .profile-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 20px;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+  }
+  .profile-grid dt { color: var(--muted); margin: 0 0 2px; font-size: 12px; }
+  .profile-grid dd { margin: 0; color: var(--ink); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin: 20px 0 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab {
+    height: 40px;
+    padding: 0 4px;
+    margin-right: 28px;
+    border: none;
+    background: none;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    position: relative;
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.active {
+    color: var(--brand);
+    font-weight: 500;
+  }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    background: var(--brand);
+    border-radius: 1px 1px 0 0;
+  }
+
+  .panel { display: none; padding-top: 18px; }
+  .panel.active { display: block; }
+
+  /* Treatment + scale */
+  .split {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.4fr);
+    gap: 16px;
+  }
+  @media (max-width: 960px) {
+    .app { grid-template-columns: 1fr; }
+    .nav { display: none; }
+    .split { grid-template-columns: 1fr; }
+    .profile-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .drug {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 8px;
+  }
+  .meta-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .meta-rows span { color: var(--muted); }
+
+  .coverage-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .coverage-num {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .coverage-num .rate {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .coverage-num .frac {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .coverage-hint {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* Scale */
+  .scale {
+    display: grid;
+    grid-template-columns: 52px repeat(7, 1fr);
+    gap: 6px 4px;
+    align-items: center;
+  }
+  .scale-corner { font-size: 11px; color: var(--muted); }
+  .scale-day {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+  .scale-day strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+  .scale-slot-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .cell {
+    height: 28px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    position: relative;
+  }
+  .cell.ok {
+    background: var(--brand-soft);
+    border-color: #D9D2FC;
+  }
+  .cell.ok::after {
+    content: "";
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 8px; height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    background: var(--brand);
+  }
+  .cell.miss {
+    background: var(--missed);
+  }
+  .cell.miss::after {
+    content: "";
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 10px; height: 2px;
+    margin: -1px 0 0 -5px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 1px;
+  }
+  .cell.pending {
+    background: var(--surface);
+    border: 1px dashed var(--line);
+  }
+  .cell.future {
+    background: var(--line-2);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend i {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -2px;
+  }
+  .legend .l-ok { background: var(--brand-soft); border: 1px solid #D9D2FC; position: relative; }
+  .legend .l-miss { background: var(--missed); }
+  .legend .l-pending { background: #fff; border: 1px dashed var(--line); }
+
+  /* Attention + recent */
+  .stack { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+  .section-title {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .attn-list { list-style: none; margin: 0; padding: 0; }
+  .attn-list li {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .attn-list li:last-child { border-bottom: none; padding-bottom: 0; }
+  .attn-list li:first-child { padding-top: 0; }
+  .attn-main { min-width: 0; }
+  .attn-title { font-size: 14px; color: var(--ink); font-weight: 500; }
+  .attn-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .attn-action {
+    flex-shrink: 0;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--brand-text);
+    cursor: pointer;
+  }
+  .attn-action:hover { background: var(--brand-soft); border-color: transparent; }
+
+  .change-list { list-style: none; margin: 0; padding: 0; }
+  .change-list li {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .change-list li:last-child { border-bottom: none; padding-bottom: 0; }
+  .change-list li:first-child { padding-top: 0; }
+  .change-kind {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--brand-text);
+  }
+  .change-kind.fu { color: var(--ok); }
+  .change-body { font-size: 13px; color: var(--ink); }
+  .change-body small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .change-time { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .footnote {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* History */
+  .hist-day {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .hist-day summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    user-select: none;
+  }
+  .hist-day summary::-webkit-details-marker { display: none; }
+  .hist-day-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .hist-day-left::before {
+    content: "▸";
+    color: var(--muted);
+    font-weight: 400;
+    width: 12px;
+  }
+  .hist-day[open] .hist-day-left::before { content: "▾"; }
+  .hist-sum {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .hist-body {
+    border-top: 1px solid var(--line-2);
+    padding: 4px 16px 12px;
+  }
+  .hist-row {
+    display: grid;
+    grid-template-columns: 52px 56px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-time { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 4px;
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--ink-2);
+    width: fit-content;
+  }
+  .tag-reg { background: var(--ok-soft); color: var(--ok); }
+  .tag-fu { background: #FFF4E5; color: #9A6700; }
+  .tag-plan { background: var(--brand-soft); color: var(--brand-text); }
+  .tag-tr { background: #FCE7F3; color: #9D174D; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="nav" aria-label="主导航">
+      <div class="nav-brand">吸入治疗管理<span>医护工作台</span></div>
+      <div class="nav-section">临床工作</div>
+      <div class="nav-item"><span class="nav-dot"></span>工作台</div>
+      <div class="nav-item active"><span class="nav-dot"></span>患者管理</div>
+      <div class="nav-item"><span class="nav-dot"></span>用药计划</div>
+      <div class="nav-section">数据分析</div>
+      <div class="nav-item"><span class="nav-dot"></span>统计总览</div>
+      <div class="nav-item"><span class="nav-dot"></span>随访中心</div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-title">吸入治疗指导与依从性辅助管理软件</div>
+        <input class="search" type="search" placeholder="搜索患者姓名或编号" readonly />
+      </header>
+
+      <div class="content">
+        <div class="compare-bar">
+          <div class="preview-label">预览稿 · 图4 患者详情 · <strong>Operate / distill + shape</strong> · 未改生产代码</div>
+          <button type="button" class="toggle-btn" id="compareToggle" aria-pressed="false">对比：现状问题标注</button>
+        </div>
+
+        <div class="cut-note" id="cutNote" role="note">
+          <h4>相对 10-26 长截图，本预览砍掉 / 降级了什么</h4>
+          <ul>
+            <li>砍：顶栏四颗并排操作钮 → 只留 1 个实心主按钮 +「更多」</li>
+            <li>砍：首屏六列表头 + 无限「动态」流水账 → 默认「概览」，历史按日折叠</li>
+            <li>降：整张档案表 → 一行告警条 + 可折叠档案</li>
+            <li>加：近 7 日 × 2 时点<strong>刻度</strong>作为判断锚点；口径写明「登记覆盖 ≠ 依从性」</li>
+            <li>禁词：不用「漏药」，统一「未发现登记」；不用红做惩罚色</li>
+          </ul>
+        </div>
+
+        <button type="button" class="back">← 返回患者列表</button>
+
+        <section class="desk" aria-label="决策台">
+          <div class="desk-top">
+            <div class="identity">
+              <h1>李先生 · P-004 <span class="badge-demo">演示数据</span></h1>
+              <div class="identity-meta">COPD · 负责医护跟进中 · 近 7 日登记覆盖 <b>6/14（42.9%）</b></div>
+            </div>
+            <div class="actions">
+              <div class="more-wrap">
+                <button type="button" class="btn" id="moreBtn" aria-expanded="false" aria-haspopup="true">更多</button>
+                <div class="more-menu" id="moreMenu" role="menu">
+                  <button type="button" role="menuitem">补登用药</button>
+                  <button type="button" role="menuitem">编辑信息</button>
+                  <button type="button" role="menuitem">绑定装置</button>
+                  <button type="button" role="menuitem">修订计划</button>
+                  <button type="button" role="menuitem">写随访</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary">绑定账号</button>
+            </div>
+          </div>
+
+          <div class="alert" role="status">
+            <div class="alert-left">
+              <span class="chip chip-miss">账号未绑定</span>
+              <span class="chip">装置未绑定</span>
+            </div>
+          </div>
+
+          <details class="profile-fold">
+            <summary>档案与备注</summary>
+            <dl class="profile-grid">
+              <div><dt>患者编号</dt><dd>P-004</dd></div>
+              <div><dt>显示名</dt><dd>李先生</dd></div>
+              <div><dt>诊断标签</dt><dd>慢性阻塞性肺疾病（COPD）</dd></div>
+              <div><dt>登录账号</dt><dd>未绑定</dd></div>
+              <div><dt>吸入装置</dt><dd>未绑定</dd></div>
+              <div><dt>备注</dt><dd>DEMO 演示数据，非真实患者</dd></div>
+            </dl>
+          </details>
+        </section>
+
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="overview">概览</button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-tab="history">历史</button>
+        </div>
+
+        <div class="panel active" id="panel-overview" role="tabpanel">
+          <div class="split">
+            <div class="card">
+              <p class="card-label">当前治疗</p>
+              <p class="drug">氟替卡松 / 沙美特罗</p>
+              <div class="meta-rows">
+                <div><span>计划</span> · 固定 · 08:00 / 20:00</div>
+                <div><span>版本</span> · v2（现行）</div>
+                <div><span>装置</span> · 暂无装置记录</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="coverage-head">
+                <div>
+                  <p class="card-label" style="margin:0 0 4px">近 7 日登记覆盖</p>
+                  <div class="coverage-num">
+                    <span class="rate">42.9%</span>
+                    <span class="frac">6 / 14 个时点</span>
+                  </div>
+                </div>
+                <div class="coverage-hint">覆盖率 ≠ 依从性</div>
+              </div>
+
+              <div class="scale" aria-label="近七日早晚时点刻度">
+                <div class="scale-corner"></div>
+                <div class="scale-day"><strong>28</strong>二</div>
+                <div class="scale-day"><strong>29</strong>三</div>
+                <div class="scale-day"><strong>30</strong>四</div>
+                <div class="scale-day"><strong>31</strong>五</div>
+                <div class="scale-day"><strong>1</strong>六</div>
+                <div class="scale-day"><strong>2</strong>日</div>
+                <div class="scale-day"><strong>3</strong>一</div>
+
+                <div class="scale-slot-label">08:00</div>
+                <div class="cell ok" title="10/28 08:00 已登记"></div>
+                <div class="cell miss" title="10/29 08:00 未发现登记"></div>
+                <div class="cell ok" title="10/30 08:00 已登记"></div>
+                <div class="cell miss" title="10/31 08:00 未发现登记"></div>
+                <div class="cell miss" title="11/1 08:00 未发现登记"></div>
+                <div class="cell ok" title="11/2 08:00 已登记"></div>
+                <div class="cell miss" title="11/3 08:00 未发现登记"></div>
+
+                <div class="scale-slot-label">20:00</div>
+                <div class="cell ok" title="10/28 20:00 已登记"></div>
+                <div class="cell miss" title="10/29 20:00 未发现登记"></div>
+                <div class="cell ok" title="10/30 20:00 已登记"></div>
+                <div class="cell miss" title="10/31 20:00 未发现登记"></div>
+                <div class="cell miss" title="11/1 20:00 未发现登记"></div>
+                <div class="cell ok" title="11/2 20:00 已登记"></div>
+                <div class="cell miss" title="11/3 20:00 未发现登记"></div>
+              </div>
+
+              <div class="legend">
+                <span><i class="l-ok"></i>已登记</span>
+                <span><i class="l-miss"></i>未发现登记</span>
+                <span><i class="l-pending"></i>未到时点</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <h2 class="section-title">需关注</h2>
+              <ul class="attn-list">
+                <li>
+                  <div class="attn-main">
+                    <div class="attn-title">账号未绑定</div>
+                  </div>
+                  <button type="button" class="attn-action">去绑定</button>
+                </li>
+                <li>
+                  <div class="attn-main">
+                    <div class="attn-title">近 7 日缺 8 个时点</div>
+                  </div>
+                  <button type="button" class="attn-action">补登</button>
+                </li>
+                <li>
+                  <div class="attn-main">
+                    <div class="attn-title">最近随访提示夜间未登记风险</div>
+                    <div class="attn-desc">10/21：夜间咳嗽，数日前有未发现登记</div>
+                  </div>
+                  <button type="button" class="attn-action">写随访</button>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h2 class="section-title">近期变化</h2>
+              <ul class="change-list">
+                <li>
+                  <div class="change-kind fu">随访</div>
+                  <div class="change-body">
+                    反馈夜间咳嗽与未登记风险；措施：加强夜间提醒教育
+                  </div>
+                  <div class="change-time">10/21</div>
+                </li>
+                <li>
+                  <div class="change-kind">计划</div>
+                  <div class="change-body">
+                    用药计划更新为 v2（固定）· 氟替卡松/沙美特罗 · 08:00 / 20:00
+                  </div>
+                  <div class="change-time">10/18</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-history" role="tabpanel">
+          <details class="hist-day" open>
+            <summary>
+              <span class="hist-day-left">10月24日<span class="hist-sum">登记 2</span></span>
+            </summary>
+            <div class="hist-body">
+              <div class="hist-row"><span class="hist-time">20:05</span><span class="tag tag-reg">登记</span><span>用药登记 · 患者自述 · 固定时点</span></div>
+              <div class="hist-row"><span class="hist-time">08:05</span><span class="tag tag-reg">登记</span><span>用药登记 · 患者自述 · 固定时点</span></div>
+            </div>
+          </details>
+
+          <details class="hist-day">
+            <summary>
+              <span class="hist-day-left">10月21日<span class="hist-sum">随访 1 · 登记 1</span></span>
+            </summary>
+            <div class="hist-body">
+              <div class="hist-row"><span class="hist-time">15:20</span><span class="tag tag-fu">随访</span><span>近有夜间咳嗽；称 3 日前有未登记情况</span></div>
+              <div class="hist-row"><span class="hist-time">08:04</span><span class="tag tag-reg">登记</span><span>用药登记 · 患者自述 · 固定时点</span></div>
+            </div>
+          </details>
+
+          <details class="hist-day">
+            <summary>
+              <span class="hist-day-left">10月18日<span class="hist-sum">计划 1 · 训练 1 · 登记 2</span></span>
+            </summary>
+            <div class="hist-body">
+              <div class="hist-row"><span class="hist-time">09:10</span><span class="tag tag-plan">计划</span><span>更新为 v2（现行）· 氟替卡松/沙美特罗 · 08:00 / 20:00</span></div>
+              <div class="hist-row"><span class="hist-time">07:48</span><span class="tag tag-tr">训练</span><span>操作自检（患者自述）· 自检完成</span></div>
+              <div class="hist-row"><span class="hist-time">20:05</span><span class="tag tag-reg">登记</span><span>用药登记 · 患者自述 · 固定时点</span></div>
+              <div class="hist-row"><span class="hist-time">08:05</span><span class="tag tag-reg">登记</span><span>用药登记 · 患者自述 · 固定时点</span></div>
+            </div>
+          </details>
+
+          <details class="hist-day">
+            <summary>
+              <span class="hist-day-left">10月17日<span class="hist-sum">随访 1 · 训练 1 · 登记 2</span></span>
+            </summary>
+            <div class="hist-body">
+              <div class="hist-row"><span class="hist-time">16:00</span><span class="tag tag-fu">随访</span><span>登记情况尚可；确认无装置问题</span></div>
+              <div class="hist-row"><span class="hist-time">07:48</span><span class="tag tag-tr">训练</span><span>操作自检 · 部分步骤有困难</span></div>
+            </div>
+          </details>
+
+          <details class="hist-day">
+            <summary>
+              <span class="hist-day-left">更早日期<span class="hist-sum">含 10/11 计划 v1 等</span></span>
+            </summary>
+            <div class="hist-body">
+              <div class="hist-row"><span class="hist-time">—</span><span class="tag tag-plan">计划</span><span>初始 v1 计划生效（演示摘要）</span></div>
+            </div>
+          </details>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var toggle = document.getElementById('compareToggle');
+      var note = document.getElementById('cutNote');
+      toggle.addEventListener('click', function () {
+        var on = toggle.getAttribute('aria-pressed') === 'true';
+        toggle.setAttribute('aria-pressed', on ? 'false' : 'true');
+        note.classList.toggle('show', !on);
+      });
+
+      var moreBtn = document.getElementById('moreBtn');
+      var moreMenu = document.getElementById('moreMenu');
+      moreBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = moreMenu.classList.toggle('open');
+        moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', function () {
+        moreMenu.classList.remove('open');
+        moreBtn.setAttribute('aria-expanded', 'false');
+      });
+
+      var tabs = document.querySelectorAll('.tab');
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          tabs.forEach(function (t) {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+          });
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected', 'true');
+          document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+          document.getElementById('panel-' + tab.getAttribute('data-tab')).classList.add('active');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
