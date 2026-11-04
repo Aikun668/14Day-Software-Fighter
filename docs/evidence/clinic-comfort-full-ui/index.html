@@ -3,38 +3,28 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Clinic Comfort 全站截图 · 优化后</title>
+<title>Clinic Comfort 全站截图 · 2026-11-04（当前分支实拍）</title>
 <!--
-  图片均为复制进本目录的 PNG（相对路径，file:// 可打开），不是软链。
-  01 login-01-desktop.png（shared-layer，与本分支文件相同）
-  02 clinic-comfort-rollout-2/workbench-01-desk-desktop.png
-  03 clinic-comfort-rollout-2/patients-01-list-desktop.png
-  04 短页：侧栏钉在视口（clinic-comfort-humanize/04-sidebar-sticky-short.png）
-  05 clinic-comfort-plan-edit/plans-02-selected.png（干活页，无四张摘要卡）
-  06 长页滚到登记情况，侧栏仍钉住（clinic-comfort-humanize/06-sidebar-sticky-scrolled.png）
-  07 clinic-comfort-rollout-2/stats-02-report-desktop.png（报告内容未改）
-  08 clinic-comfort-rollout-2/followups-04-collapsed-desktop.png
-  09–10 shared-layer modal-09-task-close.png、modal-10-backfill.png
-  11–13 shared-layer admin-11-models.png、admin-12-guides.png、admin-13-accounts.png
-  14–15 在 shared-layer 管理端外壳上实拍：知识内容页签、审计日志页签（该分支已是 Clinic Comfort，本分支代码未改管理端）。
+  2026-11-04 由 capture_gallery.py 对当前 preview/clinic-comfort-full 分支实拍：
+  含工作台两栏等高修复。15 屏中图7（患者报告）与图6 同页不同页签，选页用 06 即可。
 -->
 <style>
   :root {
-    --bg: #f4f6f9;
+    --bg: #F4F6F9;
     --surface: #ffffff;
-    --line: #e5eaf1;
-    --line-soft: #eef2f7;
-    --ink: #1a1d26;
-    --ink-2: #4a5160;
-    --muted: #8b93a7;
-    --brand: #5b7cff;
-    --brand-soft: #e8eeff;
-    --brand-ink: #3d56c7;
+    --line: #E5EAF1;
+    --line-soft: #EEF2F7;
+    --ink: #1A1D26;
+    --ink-2: #4A5160;
+    --muted: #8B93A7;
+    --primary: #5B7CFF;
+    --primary-soft: #E8EEFF;
+    --primary-text: #3D56C7;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
   body {
-    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    font-family: Inter, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
   }
@@ -43,14 +33,14 @@
     background: var(--surface);
     border-bottom: 1px solid var(--line);
   }
-  h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
   .sub { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
   .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
   .meta span {
     padding: 4px 10px;
     border-radius: 999px;
-    background: var(--brand-soft);
-    color: var(--brand-ink);
+    background: var(--primary-soft);
+    color: var(--primary-text);
     font-size: 12px;
   }
   main { padding: 8px 40px 56px; max-width: 1440px; margin: 0 auto; }
@@ -72,21 +62,21 @@
     display: block;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 20px;
     overflow: hidden;
     color: inherit;
     text-decoration: none;
     transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
   }
   .shot:hover {
-    border-color: #c5d0ff;
-    box-shadow: 0 8px 24px rgba(91, 124, 255, .12);
+    border-color: #C5D0FF;
+    box-shadow: 0 8px 24px rgba(26, 29, 38, 0.06);
     transform: translateY(-2px);
   }
   .thumb {
     position: relative;
     height: 460px;
-    background: #eef2f7;
+    background: var(--bg);
     overflow: hidden;
   }
   .thumb img {
@@ -116,7 +106,7 @@
   .cap b { display: block; font-size: 14px; font-weight: 600; }
   .cap span { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
   .tall .thumb { height: 560px; }
-  .modal .thumb { height: 360px; background: #eef2f7; }
+  .modal .thumb { height: 400px; background: var(--line-soft); }
   footer {
     max-width: 1440px;
     margin: 0 auto;
@@ -133,12 +123,12 @@
 </head>
 <body>
 <header>
-  <h1>Clinic Comfort 全站截图 · 优化后</h1>
-  <p class="sub">登录、工作台、患者管理、患者详情、用药计划、统计与核查、随访中心、管理端，共 15 张。主色为诊所蓝。</p>
+  <h1>吸入治疗指导与依从性辅助管理软件 · Clinic Comfort 全站截图</h1>
+  <p class="sub">当前 preview/clinic-comfort-full 分支实拍（含工作台等高修复），共 14 张。点卡片看原图，选两张要优化的屏。</p>
   <div class="meta">
     <span>2026-11-04</span>
     <span>1440 × 900 视口</span>
-    <span>clinician_a / admin</span>
+    <span>clinician_a / admin · 密码 123</span>
     <span>除弹窗外均为整页长图</span>
   </div>
 </header>
@@ -149,61 +139,51 @@
     <div class="grid">
       <a class="shot" href="01-login.png" target="_blank">
         <div class="thumb"><img src="01-login.png" alt="登录页" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>01 · 登录页</b><span>软底「吸」标和诊所蓝主按钮，账号密码进入医护端。</span></div>
-      </a>
-      <a class="shot" href="02-workbench.png" target="_blank">
-        <div class="thumb"><img src="02-workbench.png" alt="工作台" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>02 · 工作台</b><span>一行今日与待核查，近 7 日刻度对照需关注，队列里直接补登或处理。</span></div>
+        <div class="cap"><b>01 · 登录页</b><span>软底方块品牌 + 20px 圆角白卡</span></div>
       </a>
     </div>
   </section>
 
   <section>
-    <h2>患者与计划</h2>
+    <h2>医护端</h2>
     <div class="grid">
+      <a class="shot" href="02-workbench.png" target="_blank">
+        <div class="thumb"><img src="02-workbench.png" alt="工作台" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>02 · 工作台</b><span>瘦摘要 + 近7日团队刻度/需关注 + 待核查队列</span></div>
+      </a>
       <a class="shot" href="03-patients.png" target="_blank">
         <div class="thumb"><img src="03-patients.png" alt="患者管理" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>03 · 患者管理</b><span>负责患者列表；未绑定用表头芯片筛出，实心按钮只有新建患者。</span></div>
+        <div class="cap"><b>03 · 患者管理</b><span>表是主角：搜索/筛选在表头，未绑定芯片一键筛</span></div>
       </a>
       <a class="shot tall" href="04-patient-detail.png" target="_blank">
         <div class="thumb"><img src="04-patient-detail.png" alt="患者详情" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>04 · 患者详情</b><span>李先生：问候与四项摘要。侧栏钉在这一屏，用户和退出停在栏底；卡片仍按内容高。</span></div>
+        <div class="cap"><b>04 · 患者详情</b><span>P-004 李先生：Hero + 近7日时点刻度 | 需关注</span></div>
       </a>
       <a class="shot" href="05-plans.png" target="_blank">
         <div class="thumb"><img src="05-plans.png" alt="用药计划" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>05 · 用药计划编辑</b><span>为李先生填写新计划，右侧对照已关闭的历史版本。</span></div>
+        <div class="cap"><b>05 · 用药计划编辑</b><span>患者选择在 Hero，左表单右历史版本</span></div>
       </a>
-    </div>
-  </section>
-
-  <section>
-    <h2>统计与核查</h2>
-    <div class="grid">
-      <a class="shot" href="06-stats-overview.png" target="_blank">
-        <div class="thumb"><img src="06-stats-overview.png" alt="统计与核查 · 团队概览" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>06 · 团队概览</b><span>主栏滚到登记情况时，侧栏仍钉在视口里，用户和退出不跟着走。登记情况先露缺失最多的 5 位。</span></div>
+      <a class="shot tall" href="06-stats.png" target="_blank">
+        <div class="thumb"><img src="06-stats.png" alt="统计与核查" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>06 · 统计与核查</b><span>覆盖矩阵（软蓝/浅灰刻度同款）+ 登记情况排行</span></div>
       </a>
-      <a class="shot tall" href="07-stats-report.png" target="_blank">
-        <div class="thumb"><img src="07-stats-report.png" alt="统计与核查 · 患者报告" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>07 · 患者报告</b><span>林女士：覆盖率、逐日趋势、缺失时点、来源、随访与重复登记。</span></div>
-      </a>
-    </div>
-  </section>
-
-  <section>
-    <h2>随访与任务闭环</h2>
-    <div class="grid">
-      <a class="shot" href="08-followups.png" target="_blank">
+      <a class="shot tall" href="08-followups.png" target="_blank">
         <div class="thumb"><img src="08-followups.png" alt="随访中心" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>08 · 随访中心</b><span>待核查队列和随访记录；记录默认五行，多出的可以展开。</span></div>
+        <div class="cap"><b>08 · 随访中心</b><span>队列干活页：待核查 + 记录一行三列，默认 5 条可展开</span></div>
       </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>弹窗</h2>
+    <div class="grid">
       <a class="shot modal" href="09-task-close-modal.png" target="_blank">
-        <div class="thumb"><img src="09-task-close-modal.png" alt="任务处理弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>09 · 任务处理弹窗</b><span>必填处理说明，可选安排一次操作复训提醒。</span></div>
+        <div class="thumb"><img src="09-task-close-modal.png" alt="处理任务弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>09 · 处理任务弹窗</b><span>诊所蓝主按钮 + 浅色模糊遮罩</span></div>
       </a>
       <a class="shot modal" href="10-medication-backfill-modal.png" target="_blank">
         <div class="thumb"><img src="10-medication-backfill-modal.png" alt="补登用药弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>10 · 补登用药弹窗</b><span>近 7 日未登记时点平铺点选，确认后补登。</span></div>
+        <div class="cap"><b>10 · 补登用药弹窗</b><span>时点平铺点选，选中态软蓝描边</span></div>
       </a>
     </div>
   </section>
@@ -211,32 +191,32 @@
   <section>
     <h2>管理端</h2>
     <div class="grid">
-      <a class="shot" href="11-admin-device-models.png" target="_blank">
-        <div class="thumb"><img src="11-admin-device-models.png" alt="装置型号" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>11 · 装置型号</b><span>pMDI / DPI / SMI 型号目录。</span></div>
+      <a class="shot" href="11-admin.png" target="_blank">
+        <div class="thumb"><img src="11-admin.png" alt="装置型号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>11 · 装置型号</b><span>瘦 Hero + 卡内页签（型号/指导/账号/知识/审计）</span></div>
       </a>
       <a class="shot" href="12-admin-guides.png" target="_blank">
         <div class="thumb"><img src="12-admin-guides.png" alt="指导版本" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>12 · 指导版本</b><span>指导稿审核与发布状态。</span></div>
+        <div class="cap"><b>12 · 指导版本</b><span>草稿 → 审核通过 → 发布按钮链</span></div>
       </a>
       <a class="shot" href="13-admin-accounts.png" target="_blank">
-        <div class="thumb"><img src="13-admin-accounts.png" alt="账号管理" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>13 · 账号</b><span>医护、管理员与患者账号。</span></div>
+        <div class="thumb"><img src="13-admin-accounts.png" alt="账号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>13 · 账号</b><span>角色/状态胶囊，停用带二次确认</span></div>
       </a>
       <a class="shot" href="14-admin-knowledge.png" target="_blank">
         <div class="thumb"><img src="14-admin-knowledge.png" alt="知识内容" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>14 · 知识内容</b><span>三份已发布的装置知识稿，审核发布后供患者端引用。</span></div>
+        <div class="cap"><b>14 · 知识内容</b><span>片段数与审核状态，查看弹窗</span></div>
       </a>
-      <a class="shot tall" href="15-admin-audit.png" target="_blank">
+      <a class="shot" href="15-admin-audit.png" target="_blank">
         <div class="thumb"><img src="15-admin-audit.png" alt="审计日志" loading="lazy" /><span class="zoom">查看原图</span></div>
-        <div class="cap"><b>15 · 审计日志</b><span>计划修订、随访、指导与知识发布等关键写操作留痕。</span></div>
+        <div class="cap"><b>15 · 审计日志</b><span>关键写操作留痕，分页 15 条</span></div>
       </a>
     </div>
   </section>
 </main>
 
 <footer>
-  截图目录：docs/evidence/clinic-comfort-full-ui · 点击任意卡片可在新标签页查看原始长图。图 6 / 图 7 的统计页改版已在 PR #3 完成，原图在 docs/evidence/clinic-comfort-rollout-2/stats-01-overview-desktop.png 与 stats-02-report-desktop.png。
+  截图目录：docs/evidence/clinic-comfort-full-ui · 2026-11-04 由 capture_gallery.py 实拍当前分支 · 点击任意卡片在新标签页查看原始长图。
 </footer>
 </body>
 </html>
