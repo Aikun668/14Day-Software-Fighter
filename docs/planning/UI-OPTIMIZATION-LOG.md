@@ -720,3 +720,13 @@
 **证据**：02f-compare-distill2.png（左=第一轮后，右=第二轮后）；DOM 实测三卡头 hint 全 null、attn 灰字数=1（仅分母行）、行时间=null。build 过，lint 12/0。
 
 **未改**：B1 空态/加载态文案（必要状态）；图例四项（用户已判保留）。
+
+### 2026-11-05 · 工作台 distill 第三轮：砍「卡里卡」
+
+**问题**：用户指出还有多余，尤其「框里框」。定位：需关注卡是白卡，里面三条各自套灰底圆角盒（background --bg + 14px padding + 14px 圆角）——白卡里套卡，distill 明令禁止的 nesting。
+
+**改动**：`.cc-attn-row` 去底色/圆角/内边距盒形态，改行间 1px 细线分隔（与队列行同一把尺）；hover 反馈从灰底改为标题变诊所蓝（可点行的 affordance 保留）。
+
+**证据**：DOM 实测 attn-row bg=rgba(0,0,0,0)、borderBottom 1px #EEF2F7；02h-compare-no-nest.png（左=有灰盒，右=细线版）。
+
+**顺带**：本轮排查中发现 PostgreSQL 服务未启动导致登录 500（前端无错），已重启数据库 5432 恢复。记录在案：dev 机的 PG 不在 Windows 服务列表里，是 pg_ctl 手动管的。

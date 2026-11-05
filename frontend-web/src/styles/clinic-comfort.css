@@ -784,11 +784,10 @@ button.cc-chip-btn {
   font-size: 13px;
 }
 
-/* ── 需关注：少而准，淡底行 + 芯片 ── */
+/* ── 需关注：少而准。行不套底色盒（白卡里套卡是违例），行间细线分隔 ── */
 .cc-attn {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .cc-attn-row {
@@ -796,21 +795,25 @@ button.cc-chip-btn {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 14px;
+  padding: 13px 0;
   border: 0;
-  border-radius: 14px;
-  background: var(--bg);
+  border-bottom: 1px solid var(--line-soft);
+  background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
+}
+
+.cc-attn-row:last-child {
+  border-bottom: 0;
 }
 
 button.cc-attn-row {
   cursor: pointer;
 }
 
-button.cc-attn-row:hover {
-  background: var(--surface-soft);
+button.cc-attn-row:hover .cc-attn-body strong {
+  color: var(--primary-text);
 }
 
 .cc-attn-ico {
