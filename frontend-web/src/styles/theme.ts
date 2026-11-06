@@ -1,4 +1,4 @@
-﻿// J006 视觉变量唯一来源映射（UI_DESIGN §2）。工程实现时以 prototype/styles.css 的 :root 为准。
+// J006 视觉变量唯一来源映射（UI_DESIGN §2）。工程实现时以 prototype/styles.css 的 :root 为准。
 import type { ThemeConfig } from 'antd'
 
 export const webTheme: ThemeConfig = {
@@ -20,7 +20,8 @@ export const webTheme: ThemeConfig = {
     borderRadiusLG: 20,
     // Web 控件高 40px（UI_DESIGN §4）
     controlHeight: 40,
-    fontSize: 14,
+    // 正文基准 15px（--fs-body；14 时代正文偏小，向 16px 底线靠）
+    fontSize: 15,
     // 标签、小按钮等小字不低于 13px（阅读底线，见 visual-language）
     fontSizeSM: 13,
     // 派生色显式写死：antd 默认从页面底色推导，会让弹层变灰、布局底色偏暗

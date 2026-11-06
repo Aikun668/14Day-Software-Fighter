@@ -730,3 +730,19 @@
 **证据**：DOM 实测 attn-row bg=rgba(0,0,0,0)、borderBottom 1px #EEF2F7；02h-compare-no-nest.png（左=有灰盒，右=细线版）。
 
 **顺带**：本轮排查中发现 PostgreSQL 服务未启动导致登录 500（前端无错），已重启数据库 5432 恢复。记录在案：dev 机的 PG 不在 Windows 服务列表里，是 pg_ctl 手动管的。
+
+### 2026-11-05 · 全站字号阶梯重排（web-design skill 对齐）
+
+**问题**：原六级字号里 12/13/14 三级挤在一起（每级只差 1px，扫读分不出层级）；正文 14px 低于 web-design skill 的 16px 底线；全部硬编码 px 不尊重浏览器缩放；rem 根被 html{font-size:14px} 污染。
+
+**改动**（参照 pascalorg/web-design SKILL.md Typography 章节）：
+- 六级并五级、每级明确拉开：hero 32 / page 24 / section 16→18 / body 14→15 / meta 12,13→13。
+- token 全部改 rem（1rem=16px 根不动，用户缩放浏览器字号全站跟随）。
+- **修了隐性 bug**：html 上设过 font-size:14px，把 rem 根缩小，1.125rem 实算只有 16.875px；html 回归 1rem，正文落在 body 层。
+- 卡头标题 18px + line-height 1.3 + letter-spacing -0.01em；页标题补 -0.02em + text-wrap: balance。
+- 硬编码清理：14px→body token、13px/12px→meta token、15px→body token；antd fontSize 14→15。
+- 保留特例：展示大数 20/22/24/28/32（数字主角，DESIGN.md 规格）、窄屏紧凑 11px（640px 以下空间优先）。
+
+**证据**：02i-workbench-type-scale.png；DOM 计算值 heroTitle 32 / cardHead 18 / rowName 15 / eyebrow 13 / legend 13 / btn 15。build 过，lint 12/0。
+
+**未改**：统计大数与窄屏 11px（特例见上）；DESIGN.md frontmatter 的 typography 段（下次动 DESIGN.md 时同步五级阶梯）。
