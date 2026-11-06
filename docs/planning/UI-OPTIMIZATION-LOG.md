@@ -759,3 +759,13 @@
 **证据**：02j-workbench-scale.png；DOM 实测 7 列、格宽 75px、cellShadow=true、图例在卡头（legendInHead=true、legendBelow=false）。
 
 **未改**：TimeScale 的下方图例（患者详情空间结构不同，未反馈不动）。
+
+### 2026-11-05 · 团队刻度填满卡高（悬空太高修复）
+
+**问题**：用户反馈刻度卡「悬空太高，下面空太多」。量化：格子底到卡底 65px（卡头到格子才 18px）。根因：右栏需关注卡内容更高，左卡被等高规则拉到 223px，但卡内内容不拉伸，多出的 47px 全堆在格子下面。
+
+**改动**：等高单卡改为纵向 flex——`.cc-scale-wrap` 与 `.cc-team-scale` 吃满剩余高度（grid-template-rows: auto 1fr + .cc-cell height:100%/min-height:40px），格子长高填卡，底部只留 24px 常规内边距。
+
+**证据**：02k-workbench-scale-fill.png；DOM 实测 cellH 40→81px、gridBottomToCardBottom 65→24px、两卡仍等高 223px。
+
+**未改**：窄屏（≤640px）格子固定 28px 不参与拉伸（媒体查询在后，覆盖生效）。
