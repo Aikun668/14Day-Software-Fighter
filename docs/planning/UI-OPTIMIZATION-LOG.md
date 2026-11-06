@@ -769,3 +769,13 @@
 **证据**：02k-workbench-scale-fill.png；DOM 实测 cellH 40→81px、gridBottomToCardBottom 65→24px、两卡仍等高 223px。
 
 **未改**：窄屏（≤640px）格子固定 28px 不参与拉伸（媒体查询在后，覆盖生效）。
+
+### 2026-11-06 · 团队刻度改「下移」而非「拉伸」（用户纠偏）
+
+**问题**：上一轮把格子拉高到 81px 填卡，用户不要变形——「不需要变换大小，只是下移，宽敞的感觉」。
+
+**改动**：还原格子 40px 与 grid rows auto auto；等高单卡改 flex 后用 margin-top:auto 把刻度区往下推（卡头→刻度 18→55px），卡底保留 24px 常规内边距。间距行距 16px/14px 不变。
+
+**证据**：02l-workbench-scale-down.png；DOM 实测 cellH=40、headToGrid=55、gridToBottom=24。
+
+**教训**：等高卡有富余高度时，先问「内容该下移还是该放大」——用户要的是排版呼吸感，不是组件变形。

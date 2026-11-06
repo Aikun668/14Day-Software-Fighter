@@ -276,21 +276,17 @@
   grid-template-rows: 1fr;
 }
 
-/* 等高单卡：卡体是纵向 flex，让卡头后的内容区（如刻度）吃满剩余高度，
-   不在卡底堆白 —— 格子长高比留一截空好看。 */
+/* 等高单卡：卡体纵向 flex，内容区与卡底之间用 margin-top:auto 把刻度
+   往下推——格子尺寸不变（40px），位置下移，卡底不再堆白。
+   与卡头之间也拉开一档，整体更宽敞。 */
 .cc-split-col > .cc-card:only-child {
   display: flex;
   flex-direction: column;
 }
 
 .cc-split-col > .cc-card:only-child > .cc-scale-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.cc-split-col > .cc-card:only-child > .cc-scale-wrap > .cc-team-scale {
-  flex: 1;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 /* 干活页：两栏顶对齐，高度各走各的。单卡不再吃掉 1fr 去凑另一栏的高度。 */
@@ -467,19 +463,13 @@ button.cc-chip-btn {
 }
 
 /* 单行团队刻度：列=日期，没有左侧时点列，所以列模板与 .cc-scale 不同。
-   两行网格：第一行日期表头，第二行格子。
-   行高 1fr：两栏等高时多余高度给格子吃掉，不在卡底堆白。
+   两行网格：第一行日期表头，第二行格子，格子固定 40px 不拉伸。
    列放宽（min 48px）、间距加大：交班扫读时每天是一块可看的区域，不是窄缝。 */
 .cc-team-scale {
   grid-template-columns: repeat(7, minmax(48px, 1fr));
-  grid-template-rows: auto 1fr;
-  gap: 12px 14px;
+  grid-template-rows: auto auto;
+  gap: 16px 14px;
   min-width: 0;
-}
-
-.cc-team-scale .cc-cell {
-  height: 100%;
-  min-height: 40px;
 }
 
 .cc-team-scale .cc-scale-day strong {
