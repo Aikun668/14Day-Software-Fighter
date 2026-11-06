@@ -11,6 +11,7 @@ import {
   CollapsibleList,
   HeroBar,
   QueueRow,
+  ScaleLegend,
   TeamScale,
   TwoColumn,
   type AttentionItem,
@@ -200,7 +201,11 @@ export default function WorkbenchPage() {
       <TwoColumn
         aside={<AttentionPanel items={attention} />}
       >
-        <Card title="近 7 日团队登记" id="cc-week-scale">
+        <Card
+          title="近 7 日团队登记"
+          hint={<ScaleLegend kinds={['ok', 'pending', 'miss', 'none']} />}
+          id="cc-week-scale"
+        >
           {teamScale.days.length === 0 ? (
             <p className="cc-empty-line">近 7 日暂无可显示的登记数据。</p>
           ) : teamScale.cells.every((c) => c.due === 0) ? (

@@ -462,6 +462,27 @@ export function QueueRow({ tone = 'warn', name, meta, extra, actions, onClick }:
   )
 }
 
+/* ── 刻度图例：色块 + 文案。默认放卡头右侧（hint 位），不占格子下方一整行 ── */
+
+export function ScaleLegend({ kinds }: { kinds: ScaleCellKind[] }) {
+  const LABELS: Record<string, string> = {
+    ok: '全部登记',
+    pending: '部分登记',
+    miss: '未发现登记',
+    none: '无排程',
+  }
+  return (
+    <span className="cc-legend-inline">
+      {kinds.map((k) => (
+        <span key={k} className="cc-legend-item">
+          <i className={k} aria-hidden="true" />
+          {LABELS[k] ?? k}
+        </span>
+      ))}
+    </span>
+  )
+}
+
 /* ── 单行团队刻度：一行格子，列=日期（工作台「近 7 日团队覆盖」） ── */
 
 interface TeamScaleProps {
@@ -504,12 +525,6 @@ export function TeamScale({ days, cells }: TeamScaleProps) {
           })}
         </div>
       </div>
-      <ul className="cc-legend">
-        <li><i className="ok" aria-hidden="true" />全部登记</li>
-        <li><i className="pending" aria-hidden="true" />部分登记</li>
-        <li><i className="miss" aria-hidden="true" />未发现登记</li>
-        <li><i className="none" aria-hidden="true" />无排程</li>
-      </ul>
     </>
   )
 }

@@ -746,3 +746,16 @@
 **证据**：02i-workbench-type-scale.png；DOM 计算值 heroTitle 32 / cardHead 18 / rowName 15 / eyebrow 13 / legend 13 / btn 15。build 过，lint 12/0。
 
 **未改**：统计大数与窄屏 11px（特例见上）；DESIGN.md frontmatter 的 typography 段（下次动 DESIGN.md 时同步五级阶梯）。
+
+### 2026-11-05 · 工作台团队刻度三处修正（用户反馈）
+
+**问题**（用户截图逐条）：① 颜色解释（图例）孤悬格子下方一行，放左侧更顺；② 日期+格子挤在 36px 窄列里，「30/五」的排布要展开、更宽松；③ 无排程的格子没有框（图例却画了框，不一致）。
+
+**改动**：
+- 图例从刻度下方移到卡头 hint 位（标题右侧横排）：新增 ScaleLegend 内联图例组件，TeamScale 不再自带 ul 图例；TimeScale（患者详情）图例保持原位。
+- 团队刻度列放宽：minmax(36→48px)，列间距 8→14px、行距 10→12px；日期数字 13→15px（正文尺）。
+- .cc-cell 基础态补 inset 1px 浅框：无排程也有框，空 ≠ 不存在，与图例一致。
+
+**证据**：02j-workbench-scale.png；DOM 实测 7 列、格宽 75px、cellShadow=true、图例在卡头（legendInHead=true、legendBelow=false）。
+
+**未改**：TimeScale 的下方图例（患者详情空间结构不同，未反馈不动）。

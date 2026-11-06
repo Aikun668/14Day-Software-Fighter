@@ -352,7 +352,9 @@ button.cc-chip-btn {
 .cc-cell {
   height: 40px;
   border-radius: 10px;
+  /* 无排程也有框：与图例一致，空 ≠ 不存在 */
   background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
 }
 
 .cc-cell.ok {
@@ -404,13 +406,61 @@ button.cc-chip-btn {
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
+/* 内联图例（卡头 hint 位）：色块 + 文案，横排不换行挤压 */
+.cc-legend-inline {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  color: var(--muted);
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+}
+
+.cc-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cc-legend-item i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.cc-legend-item i.ok {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--primary-ring);
+}
+
+.cc-legend-item i.miss {
+  background: var(--miss-fill);
+  box-shadow: inset 0 0 0 1px var(--miss-ring);
+}
+
+.cc-legend-item i.pending {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.cc-legend-item i.none {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
 /* 单行团队刻度：列=日期，没有左侧时点列，所以列模板与 .cc-scale 不同。
-   两行网格：第一行日期表头，第二行格子，各 7 列。 */
+   两行网格：第一行日期表头，第二行格子，各 7 列。
+   列放宽（min 48px）、间距加大：交班扫读时每天是一块可看的区域，不是窄缝。 */
 .cc-team-scale {
-  grid-template-columns: repeat(7, minmax(36px, 1fr));
+  grid-template-columns: repeat(7, minmax(48px, 1fr));
   grid-template-rows: auto auto;
-  gap: 10px 8px;
+  gap: 12px 14px;
   min-width: 0;
+}
+
+.cc-team-scale .cc-scale-day strong {
+  font-size: var(--fs-body);
 }
 
 /* ── 队列行：白卡里的行动行 ── */
