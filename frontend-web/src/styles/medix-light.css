@@ -337,6 +337,8 @@
   border: 1px solid var(--ml-line);
   border-radius: 0.5rem;
   box-shadow: none;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .ml-shell .ml-surface-head,
@@ -345,6 +347,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  flex-wrap: wrap;
   min-height: 2.75rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--ml-line);
@@ -452,6 +455,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 1rem;
   margin: 0 0 1.25rem;
 }
@@ -619,5 +623,602 @@
 @media (max-width: 480px) {
   .ml-shell .ml-account-name {
     max-width: 5.5rem;
+  }
+}
+
+/* 02 工作台 / 03 患者列表。仍只在 .ml-shell / .ml-page 内生效。 */
+
+.ml-shell .ml-workbench,
+.ml-shell .ml-patients,
+.ml-page .ml-workbench,
+.ml-page .ml-patients {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ml-shell .ml-split,
+.ml-page .ml-split {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  margin-bottom: 1.25rem;
+  min-width: 0;
+}
+
+.ml-shell .ml-split > *,
+.ml-page .ml-split > *,
+.ml-shell .ml-queue,
+.ml-page .ml-queue {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ml-shell .ml-count,
+.ml-page .ml-count {
+  margin-left: 0.375rem;
+  color: var(--ml-muted);
+  font-weight: 500;
+}
+
+.ml-shell .ml-empty,
+.ml-page .ml-empty,
+.ml-shell .ml-block-error,
+.ml-page .ml-block-error,
+.ml-shell .ml-hint,
+.ml-page .ml-hint {
+  margin: 0;
+  padding: 1rem;
+  font-size: var(--ml-fs-body);
+  line-height: 1.5;
+}
+
+.ml-shell .ml-empty,
+.ml-page .ml-empty {
+  color: var(--ml-muted);
+}
+
+.ml-shell .ml-hint,
+.ml-page .ml-hint {
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+}
+
+.ml-shell .ml-block-error,
+.ml-page .ml-block-error {
+  color: var(--ml-warn-ink);
+}
+
+.ml-shell .ml-legend,
+.ml-page .ml-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.875rem;
+  justify-content: flex-end;
+}
+
+.ml-shell .ml-legend-item,
+.ml-page .ml-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.ml-shell .ml-swatch,
+.ml-page .ml-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--ml-border);
+  background: var(--ml-surface);
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.ml-shell .ml-swatch.is-full,
+.ml-page .ml-swatch.is-full {
+  background: var(--ml-teal);
+  border-color: var(--ml-teal);
+}
+
+.ml-shell .ml-swatch.is-partial,
+.ml-page .ml-swatch.is-partial {
+  border-color: var(--ml-teal);
+}
+
+.ml-shell .ml-swatch.is-partial i,
+.ml-page .ml-swatch.is-partial i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: var(--ml-teal);
+}
+
+.ml-shell .ml-swatch.is-miss,
+.ml-page .ml-swatch.is-miss {
+  background: color-mix(in srgb, var(--ml-apricot) 38%, white);
+  border-color: var(--ml-apricot);
+}
+
+.ml-shell .ml-scale-wrap,
+.ml-page .ml-scale-wrap {
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.ml-shell .ml-scale,
+.ml-page .ml-scale {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(4.5rem, 1fr));
+  grid-template-rows: auto auto;
+  gap: 0.75rem;
+  min-width: 36rem;
+}
+
+.ml-shell .ml-scale-day,
+.ml-page .ml-scale-day {
+  text-align: center;
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+  line-height: 1.4;
+}
+
+.ml-shell .ml-scale-day strong,
+.ml-page .ml-scale-day strong {
+  display: block;
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  font-weight: 500;
+}
+
+.ml-shell .ml-day-cell,
+.ml-page .ml-day-cell {
+  position: relative;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ml-border);
+  background: var(--ml-surface);
+  color: #08352c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ml-shell .ml-day-cell.is-full,
+.ml-page .ml-day-cell.is-full {
+  background: var(--ml-teal);
+  border-color: var(--ml-teal);
+}
+
+.ml-shell .ml-day-cell.is-partial,
+.ml-page .ml-day-cell.is-partial {
+  border-color: var(--ml-teal);
+}
+
+.ml-shell .ml-day-cell.is-partial::before,
+.ml-page .ml-day-cell.is-partial::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: var(--ml-teal);
+}
+
+.ml-shell .ml-day-cell.is-miss,
+.ml-page .ml-day-cell.is-miss {
+  background: color-mix(in srgb, var(--ml-apricot) 38%, white);
+  border-color: var(--ml-apricot);
+  color: #6e431f;
+}
+
+.ml-shell .ml-day-cell svg,
+.ml-page .ml-day-cell svg {
+  position: relative;
+  z-index: 1;
+}
+
+.ml-shell .ml-attn-person,
+.ml-page .ml-attn-person,
+.ml-shell .ml-attn-line,
+.ml-page .ml-attn-line {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 3.5rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--ml-line);
+}
+
+.ml-shell .ml-attn-person:first-child,
+.ml-page .ml-attn-person:first-child,
+.ml-shell .ml-attn-line:first-child,
+.ml-page .ml-attn-line:first-child {
+  border-top: 0;
+}
+
+.ml-shell .ml-attn-main,
+.ml-page .ml-attn-main {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ml-shell .ml-attn-rate,
+.ml-page .ml-attn-rate {
+  margin-left: auto;
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ml-shell .ml-attn-line span,
+.ml-page .ml-attn-line span {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--ml-fs-body);
+}
+
+.ml-shell .ml-text-btn,
+.ml-page .ml-text-btn,
+.ml-shell .ml-fold,
+.ml-page .ml-fold {
+  border: 0;
+  background: transparent;
+  color: var(--ml-ink);
+  font: inherit;
+  font-size: var(--ml-fs-caption);
+  line-height: 1.4;
+  padding: 0.375rem 0.25rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ml-shell .ml-table-wrap,
+.ml-page .ml-table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.ml-shell .ml-table,
+.ml-page .ml-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 36rem;
+}
+
+.ml-shell .ml-queue .ml-table,
+.ml-page .ml-queue .ml-table {
+  min-width: 28rem;
+}
+
+.ml-shell .ml-table th,
+.ml-page .ml-table th {
+  height: 2.75rem;
+  padding: 0 1rem;
+  background: var(--ml-head);
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ml-shell .ml-table td,
+.ml-page .ml-table td {
+  height: 3.5rem;
+  padding: 0 1rem;
+  border-top: 1px solid var(--ml-line);
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  line-height: 1.5;
+  vertical-align: middle;
+}
+
+.ml-shell .ml-table th:last-child,
+.ml-page .ml-table th:last-child,
+.ml-shell .ml-table td:last-child,
+.ml-page .ml-table td:last-child {
+  text-align: right;
+}
+
+.ml-shell .ml-col-patient,
+.ml-page .ml-col-patient { width: 30%; }
+.ml-shell .ml-col-diagnosis,
+.ml-page .ml-col-diagnosis { width: 36%; }
+.ml-shell .ml-col-account,
+.ml-page .ml-col-account { width: 18%; }
+.ml-shell .ml-col-ops,
+.ml-page .ml-col-ops { width: 16%; }
+
+.ml-shell .ml-click-row,
+.ml-page .ml-click-row {
+  cursor: pointer;
+}
+
+.ml-shell .ml-click-row:hover td,
+.ml-page .ml-click-row:hover td {
+  background: var(--ml-bg);
+}
+
+.ml-shell .ml-click-row:focus-visible,
+.ml-page .ml-click-row:focus-visible {
+  outline: 2px solid var(--ml-brand);
+  outline-offset: -2px;
+}
+
+.ml-shell .ml-row-actions,
+.ml-page .ml-row-actions,
+.ml-shell .ml-queue-actions,
+.ml-page .ml-queue-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.ml-shell .ml-quiet,
+.ml-page .ml-quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--ml-border);
+  border-radius: 0.375rem;
+  background: var(--ml-surface);
+  color: var(--ml-ink);
+  font: inherit;
+  font-size: var(--ml-fs-caption);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ml-shell .ml-quiet:hover,
+.ml-page .ml-quiet:hover {
+  background: var(--ml-bg);
+}
+
+.ml-shell .ml-fold-row,
+.ml-page .ml-fold-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem 0.75rem;
+}
+
+.ml-shell .ml-table-foot,
+.ml-page .ml-table-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--ml-line);
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+}
+
+.ml-shell .ml-pager,
+.ml-page .ml-pager {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.ml-shell .ml-patients-tools,
+.ml-page .ml-patients-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.ml-shell .ml-filter-search,
+.ml-page .ml-filter-search {
+  width: 14rem;
+}
+
+.ml-shell .ml-filter-diagnosis,
+.ml-page .ml-filter-diagnosis {
+  width: 11rem;
+}
+
+.ml-shell .ml-filter-account,
+.ml-page .ml-filter-account {
+  width: 9rem;
+}
+
+.ml-shell .ml-patients .ml-identity-name,
+.ml-page .ml-patients .ml-identity-name {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.ml-shell .ml-dialog-body,
+.ml-page .ml-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ml-shell .ml-modal-who,
+.ml-page .ml-modal-who {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ml-shell .ml-modal-name,
+.ml-page .ml-modal-name {
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.ml-shell .ml-field-label,
+.ml-page .ml-field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-caption);
+  line-height: 1.4;
+}
+
+.ml-shell .ml-field-error,
+.ml-page .ml-field-error {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--ml-warn-ink);
+  font-size: var(--ml-fs-caption);
+  line-height: 1.4;
+}
+
+.ml-shell .ml-slot-list,
+.ml-page .ml-slot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.ml-shell .ml-slot,
+.ml-page .ml-slot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--ml-ink);
+  font: inherit;
+  font-size: var(--ml-fs-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ml-shell .ml-slot.is-selected,
+.ml-page .ml-slot.is-selected {
+  background: var(--ml-brand-soft);
+}
+
+.ml-shell .ml-slot:disabled,
+.ml-page .ml-slot:disabled {
+  color: var(--ml-muted);
+  cursor: not-allowed;
+}
+
+.ml-shell .ml-radio,
+.ml-page .ml-radio {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--ml-border);
+  background: var(--ml-surface);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+.ml-shell .ml-slot.is-selected .ml-radio,
+.ml-page .ml-slot.is-selected .ml-radio {
+  border-color: var(--ml-brand);
+  box-shadow: inset 0 0 0 0.25rem var(--ml-brand);
+}
+
+.ml-shell .ml-slot-time,
+.ml-page .ml-slot-time {
+  flex: 1 1 auto;
+}
+
+.ml-shell .ml-slot-state,
+.ml-page .ml-slot-state {
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+}
+
+.ml-shell .ml-quiet:focus-visible,
+.ml-page .ml-quiet:focus-visible,
+.ml-shell .ml-day-cell:focus-visible,
+.ml-page .ml-day-cell:focus-visible,
+.ml-shell .ml-fold:focus-visible,
+.ml-page .ml-fold:focus-visible,
+.ml-shell .ml-text-btn:focus-visible,
+.ml-page .ml-text-btn:focus-visible,
+.ml-shell .ml-attn-main:focus-visible,
+.ml-page .ml-attn-main:focus-visible,
+.ml-shell .ml-slot:focus-visible,
+.ml-page .ml-slot:focus-visible {
+  outline: 2px solid var(--ml-brand);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .ml-shell .ml-split,
+  .ml-page .ml-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .ml-shell .ml-heading-actions,
+  .ml-page .ml-heading-actions,
+  .ml-shell .ml-patients-tools,
+  .ml-page .ml-patients-tools {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .ml-shell .ml-filter-search,
+  .ml-page .ml-filter-search,
+  .ml-shell .ml-filter-diagnosis,
+  .ml-page .ml-filter-diagnosis,
+  .ml-shell .ml-filter-account,
+  .ml-page .ml-filter-account {
+    width: 100%;
+  }
+}
+
+@media (pointer: coarse) {
+  .ml-shell .ml-quiet,
+  .ml-page .ml-quiet {
+    min-height: 2.75rem;
+    height: auto;
   }
 }
