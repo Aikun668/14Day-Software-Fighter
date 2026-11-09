@@ -4,6 +4,7 @@ import { App as AntdApp, ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import './index.css'
 import './styles/clinic-comfort.css'
+import './styles/medix-light.css'
 import App from './App.tsx'
 import { webTheme } from './styles/theme.ts'
 

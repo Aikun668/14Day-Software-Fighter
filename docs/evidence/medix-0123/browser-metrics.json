@@ -1,0 +1,351 @@
+{
+  "capturedAt": "2026-11-09T15:47:45.377Z",
+  "mock": true,
+  "report": {
+    "search": {
+      "path": "/workbench",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": true,
+      "hasCcShell": false,
+      "siderWidth": 240,
+      "topLeft": 240,
+      "topHeight": 80,
+      "selectedBg": "rgb(244, 240, 255)",
+      "selectedAfter": "0px",
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [
+        "工作台",
+        "患者管理",
+        "用药计划",
+        "统计与核查",
+        "随访中心"
+      ],
+      "primaryBg": null,
+      "cardWidth": null,
+      "cardRadius": null,
+      "cardShadow": null,
+      "fields": [],
+      "logoutText": "退出"
+    },
+    "collapsed1024": {
+      "path": "/workbench",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1024,
+      "innerWidth": 1024,
+      "innerHeight": 800,
+      "hasMlFrame": true,
+      "hasCcShell": false,
+      "siderWidth": 64,
+      "topLeft": 64,
+      "topHeight": 80,
+      "selectedBg": "rgb(244, 240, 255)",
+      "selectedAfter": "0px",
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [
+        "工作台",
+        "患者管理",
+        "用药计划",
+        "统计与核查",
+        "随访中心"
+      ],
+      "primaryBg": null,
+      "cardWidth": null,
+      "cardRadius": null,
+      "cardShadow": null,
+      "fields": [],
+      "logoutText": "退出"
+    },
+    "narrow390": {
+      "path": "/workbench",
+      "htmlFontSize": "16px",
+      "scrollWidth": 408,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "hasMlFrame": true,
+      "hasCcShell": false,
+      "siderWidth": 0,
+      "topLeft": 0,
+      "topHeight": 80,
+      "selectedBg": "rgb(244, 240, 255)",
+      "selectedAfter": "0px",
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [
+        "工作台",
+        "患者管理",
+        "用药计划",
+        "统计与核查",
+        "随访中心"
+      ],
+      "primaryBg": null,
+      "cardWidth": null,
+      "cardRadius": null,
+      "cardShadow": null,
+      "fields": [],
+      "logoutText": "退出"
+    },
+    "plans": {
+      "path": "/plans",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": false,
+      "hasCcShell": true,
+      "siderWidth": null,
+      "topLeft": null,
+      "topHeight": null,
+      "selectedBg": "rgb(232, 238, 255)",
+      "selectedAfter": "0px",
+      "groupTitles": 2,
+      "badges": 0,
+      "siderFoot": 1,
+      "menu": [
+        "工作台",
+        "患者管理",
+        "用药计划",
+        "统计与核查",
+        "随访中心"
+      ],
+      "primaryBg": null,
+      "cardWidth": null,
+      "cardRadius": null,
+      "cardShadow": null,
+      "fields": [],
+      "logoutText": null
+    },
+    "afterLogout": {
+      "path": "/login",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": false,
+      "hasCcShell": false,
+      "siderWidth": null,
+      "topLeft": null,
+      "topHeight": null,
+      "selectedBg": null,
+      "selectedAfter": null,
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [],
+      "primaryBg": null,
+      "cardWidth": null,
+      "cardRadius": null,
+      "cardShadow": null,
+      "fields": [],
+      "logoutText": null
+    },
+    "protected": {
+      "path": "/login",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": false,
+      "hasCcShell": false,
+      "siderWidth": null,
+      "topLeft": null,
+      "topHeight": null,
+      "selectedBg": null,
+      "selectedAfter": null,
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [],
+      "primaryBg": "rgb(129, 70, 255)",
+      "cardWidth": 504,
+      "cardRadius": "8px",
+      "cardShadow": "none",
+      "fields": [
+        {
+          "top": 423,
+          "bottom": 463,
+          "w": 430
+        },
+        {
+          "top": 523,
+          "bottom": 563,
+          "w": 385
+        }
+      ],
+      "logoutText": null
+    },
+    "admin": {
+      "path": "/admin",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": false,
+      "hasCcShell": true,
+      "siderWidth": null,
+      "topLeft": null,
+      "topHeight": null,
+      "selectedBg": null,
+      "selectedAfter": null,
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [],
+      "primaryBg": "rgb(91, 124, 255)",
+      "cardWidth": null,
+      "cardRadius": null,
+      "cardShadow": null,
+      "fields": [],
+      "logoutText": null
+    },
+    "adminModal": {
+      "okBg": "rgb(91, 124, 255)",
+      "rootClass": "ant-modal-root css-dev-only-do-not-override-i19pbt css-var-_r_0_ ant-modal-css-var",
+      "hasMlFrame": false,
+      "hasCcShell": true
+    },
+    "must": {
+      "path": "/change-password",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": false,
+      "hasCcShell": false,
+      "siderWidth": null,
+      "topLeft": null,
+      "topHeight": null,
+      "selectedBg": null,
+      "selectedAfter": null,
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [],
+      "primaryBg": "rgb(91, 124, 255)",
+      "cardWidth": null,
+      "cardRadius": null,
+      "cardShadow": null,
+      "fields": [],
+      "logoutText": null
+    },
+    "loadingRequestsDuring": 1,
+    "loadingRequestsAfter": 1,
+    "loadingLanded": "http://127.0.0.1:5180/workbench",
+    "anonDetail": {
+      "path": "/login",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": false,
+      "hasCcShell": false,
+      "siderWidth": null,
+      "topLeft": null,
+      "topHeight": null,
+      "selectedBg": null,
+      "selectedAfter": null,
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [],
+      "primaryBg": "rgb(129, 70, 255)",
+      "cardWidth": 504,
+      "cardRadius": "8px",
+      "cardShadow": "none",
+      "fields": [
+        {
+          "top": 423,
+          "bottom": 463,
+          "w": 430
+        },
+        {
+          "top": 523,
+          "bottom": 563,
+          "w": 385
+        }
+      ],
+      "logoutText": null
+    },
+    "anonAdmin": {
+      "path": "/login",
+      "htmlFontSize": "16px",
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "hasMlFrame": false,
+      "hasCcShell": false,
+      "siderWidth": null,
+      "topLeft": null,
+      "topHeight": null,
+      "selectedBg": null,
+      "selectedAfter": null,
+      "groupTitles": 0,
+      "badges": 0,
+      "siderFoot": 0,
+      "menu": [],
+      "primaryBg": "rgb(129, 70, 255)",
+      "cardWidth": 504,
+      "cardRadius": "8px",
+      "cardShadow": "none",
+      "fields": [
+        {
+          "top": 423,
+          "bottom": 463,
+          "w": 430
+        },
+        {
+          "top": 523,
+          "bottom": 563,
+          "w": 385
+        }
+      ],
+      "logoutText": null
+    }
+  },
+  "retake": {
+    "login390": {
+      "scroll": 390,
+      "inner": 390,
+      "card": {}
+    },
+    "login200": {
+      "scroll": 720,
+      "innerW": 720,
+      "innerH": 450,
+      "card": {
+        "top": 24,
+        "bottom": 460.984375,
+        "width": 504
+      },
+      "inputs": [
+        {
+          "top": 215.796875,
+          "bottom": 255.890625,
+          "width": 430
+        },
+        {
+          "top": 315.1875,
+          "bottom": 355.1875,
+          "width": 385
+        }
+      ]
+    },
+    "shell390": {
+      "scroll": 390,
+      "inner": 390,
+      "logout": 46
+    },
+    "modal": {
+      "root": "ant-modal-root css-dev-only-do-not-override-i19pbt css-var-_r_2_ ant-modal-css-var ml-shell",
+      "ok": "rgb(129, 70, 255)"
+    },
+    "capturedAt": "2026-11-09T15:48:52.036Z"
+  }
+}

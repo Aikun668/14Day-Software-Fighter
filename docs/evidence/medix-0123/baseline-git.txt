@@ -1,0 +1,28 @@
+=== git status ===
+On branch cursor/medix-light-shell-login-8593
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	frontend-web/package-lock.json
+	package-lock.json
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+=== HEAD ===
+f26bedfe5abf0e3537f5e13063259e815aad08de
+
+=== branch ===
+cursor/medix-light-shell-login-8593
+
+=== log -1 ===
+commit f26bedfe5abf0e3537f5e13063259e815aad08de
+Author:     杨玉璋 <3349428357@qq.com>
+AuthorDate: Sun Nov 8 22:12:41 2026 -0800
+Commit:     杨玉璋 <3349428357@qq.com>
+CommitDate: Sun Nov 8 22:12:41 2026 -0800
+
+    docs: 画廊 2026-11-08 全站重拍（含字号阶梯+刻度+distill 全部最新改动）
+
+=== diff stat ===
+
+=== date ===
+2026-11-09T15:24:40Z
