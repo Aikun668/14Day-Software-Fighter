@@ -125,6 +125,12 @@
   background: var(--ml-bg);
 }
 
+.ml-topbar-title {
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  font-weight: 500;
+}
+
 .ml-topbar {
   height: 5rem;
   flex: 0 0 5rem;
@@ -271,8 +277,30 @@
 
 .ml-shell-layout.is-narrow .ml-content,
 .ml-shell-layout.is-narrow .ml-topbar {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.ml-shell-layout.is-narrow .ml-topbar-search {
+  flex-basis: 0;
+  max-width: none;
+}
+
+.ml-shell-layout.is-narrow .ml-account-name {
+  display: none;
+}
+
+.ml-shell-layout.is-narrow {
+  overflow-x: clip;
+}
+
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
 }
 
 .ml-shell .ml-drawer-title {
@@ -1102,6 +1130,20 @@
   color: var(--ml-warn-ink);
   font-size: var(--ml-fs-caption);
   line-height: 1.4;
+}
+
+.ml-shell.ml-backfill .ml-slot-list {
+  max-height: 12rem;
+}
+
+.ml-shell .ml-slot:has(input:disabled) {
+  color: var(--ml-muted);
+  cursor: not-allowed;
+}
+
+.ml-mode-switch {
+  display: flex;
+  gap: 1rem;
 }
 
 .ml-shell .ml-slot-list,

@@ -6,7 +6,8 @@ import { useAuth } from '../../features/auth/AuthContext.tsx'
 import doctorUrl from '../../assets/medix/doctor-assistant.svg'
 import logoUrl from '../../assets/medix/logo.svg'
 import neutralUrl from '../../assets/medix/avatar-neutral.svg'
-import { IconFollowups, IconPatients, IconPlans, IconStats, IconWorkbench } from '../navIcons.tsx'
+import { IconAccounts, IconAudit, IconDevices, IconFollowups, IconGuides, IconKnowledge, IconPatients, IconPlans, IconStats, IconWorkbench } from '../navIcons.tsx'
+import { normalizeAdminTab } from '../../pages/admin/adminShared.tsx'
 import MedixThemeBoundary from './MedixThemeBoundary.tsx'
 
 interface PatientHit {
@@ -108,8 +109,15 @@ export default function MedixAppShell({ children }: { children: ReactNode }) {
   }, [keyword, roster])
 
   const isAdmin = user?.role === 'ADMIN'
+  const adminTab = normalizeAdminTab(new URLSearchParams(location.search).get('tab'))
   const items: MenuProps['items'] = isAdmin
-    ? [{ key: '/admin', label: '内容与账号管理' }]
+    ? [
+        { key: 'model', icon: <IconDevices />, label: '装置型号' },
+        { key: 'guide', icon: <IconGuides />, label: '指导版本' },
+        { key: 'user', icon: <IconAccounts />, label: '账号管理' },
+        { key: 'kb', icon: <IconKnowledge />, label: '知识内容' },
+        { key: 'audit', icon: <IconAudit />, label: '审计日志' },
+      ]
     : [
         { key: '/workbench', icon: <IconWorkbench />, label: '工作台' },
         { key: '/patients', icon: <IconPatients />, label: '患者管理' },
@@ -119,13 +127,19 @@ export default function MedixAppShell({ children }: { children: ReactNode }) {
       ]
 
   const keys = (items ?? []).map((item) => String(item?.key))
-  const selectedKey = keys.find((key) => location.pathname === key || location.pathname.startsWith(`${key}/`))
-    ?? location.pathname
+  const selectedKey = isAdmin
+    ? adminTab
+    : keys.find((key) => location.pathname === key || location.pathname.startsWith(`${key}/`))
+      ?? location.pathname
   const collapsed = viewport === 'medium'
   const showSearch = user?.role === 'CLINICIAN'
 
   const go = (key: string) => {
     setNavOpen(false)
+    if (isAdmin) {
+      navigate(`/admin?tab=${key}`)
+      return
+    }
     navigate(key)
   }
 
@@ -160,6 +174,7 @@ export default function MedixAppShell({ children }: { children: ReactNode }) {
             >
               <MenuIcon />
             </button>
+            {isAdmin ? <span className="ml-topbar-title">内容与账号管理</span> : null}
             {showSearch && (
               <div className="ml-topbar-search">
                 <AutoComplete

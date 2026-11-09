@@ -69,6 +69,51 @@ export function IconPlans(props: IconProps) {
   )
 }
 
+export function IconDevices(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="7" y="3" width="10" height="18" rx="2" />
+      <path d="M10 7h4M10 11h4M10 15h2" />
+    </Svg>
+  )
+}
+
+export function IconGuides(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6 4.5h9.5A2.5 2.5 0 0 1 18 7v12.5H8.5A2.5 2.5 0 0 0 6 17V4.5z" />
+      <path d="M6 17h12M9 8.5h6M9 12h4" />
+    </Svg>
+  )
+}
+
+export function IconAccounts(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="9" cy="9" r="2.4" />
+      <circle cx="16" cy="10" r="2" />
+      <path d="M4.5 18c.5-2.6 2.4-4 4.5-4s4 1.4 4.5 4M14 14.2c1.4-.2 2.8.5 3.5 2.3" />
+    </Svg>
+  )
+}
+
+export function IconKnowledge(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M5 5.5h6.5v13H7A2 2 0 0 1 5 16.5v-11zM19 5.5h-6.5v13H17a2 2 0 0 0 2-2v-11z" />
+    </Svg>
+  )
+}
+
+export function IconAudit(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6 4.5h12v15H6z" />
+      <path d="M9 9h6M9 12.5h6M9 16h3" />
+    </Svg>
+  )
+}
+
 /** 随访中心：对话气泡 */
 export function IconFollowups(props: IconProps) {
   return (

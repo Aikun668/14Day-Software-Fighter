@@ -103,6 +103,7 @@ export function TrendChart({ points, visible = true }: { points: DailyCoverage[]
         axisLabel: {
           color: MUTED,
           fontSize,
+          hideOverlap: true,
           interval: points.length <= 8 ? 0 : Math.ceil(points.length / 8) - 1,
           formatter: (value: string) => value.slice(5).replace('-', '/'),
         },
