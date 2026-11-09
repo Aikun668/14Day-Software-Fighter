@@ -150,7 +150,7 @@ export default function WorkbenchPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [queueOpen, setQueueOpen] = useState(false)
   const [backfill, setBackfill] = useState<{ id: string; name: string } | null>(null)
-  const [closing, setClosing] = useState<{ id: string; patientId: string; patientName: string } | null>(null)
+  const [closing, setClosing] = useState<{ id: string; patientId: string; patientName: string; taskType?: string } | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -418,7 +418,7 @@ export default function WorkbenchPage() {
                               <button
                                 type="button"
                                 className="ml-quiet"
-                                onClick={() => setClosing({ id: task.id, patientId: task.patient_id, patientName: name })}
+                                onClick={() => setClosing({ id: task.id, patientId: task.patient_id, patientName: name, taskType: task.task_type })}
                               >
                                 <IconCheckSquare />
                                 处理任务

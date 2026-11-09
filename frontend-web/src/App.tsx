@@ -28,7 +28,8 @@ function ComfortShell({
   )
 }
 
-// Medix Light 外壳只挂工作台和患者列表。详情、计划、统计、随访、管理端仍走 Comfort。
+// Medix Light 外壳挂工作台、患者列表、用药计划、统计与核查、随访中心。
+// 详情和管理端继续 Comfort，避免染到未迁移页。
 function MedixShell({ children }: { children: React.ReactNode }) {
   return (
     <RequireAuth>
@@ -48,9 +49,9 @@ export default function App() {
           <Route path="/workbench" element={<MedixShell><WorkbenchPage /></MedixShell>} />
           <Route path="/patients" element={<MedixShell><PatientListPage /></MedixShell>} />
           <Route path="/patients/:id" element={<ComfortShell crumb={{ parent: '患者', parentTo: '/patients', current: '详情' }}><PatientDetailPage /></ComfortShell>} />
-          <Route path="/plans" element={<ComfortShell><PlanEditPage /></ComfortShell>} />
-          <Route path="/stats" element={<ComfortShell><StatsPage /></ComfortShell>} />
-          <Route path="/followups" element={<ComfortShell><FollowupPage /></ComfortShell>} />
+          <Route path="/plans" element={<MedixShell><PlanEditPage /></MedixShell>} />
+          <Route path="/stats" element={<MedixShell><StatsPage /></MedixShell>} />
+          <Route path="/followups" element={<MedixShell><FollowupPage /></MedixShell>} />
           <Route path="/admin" element={<ComfortShell><AdminPage /></ComfortShell>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

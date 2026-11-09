@@ -72,10 +72,13 @@ interface Props {
   rows: MatrixRow[]
   /** 点患者名进入该患者的报告。不传则名字只是文字。 */
   onPatient?: (patientId: string) => void
+  /** medix 只加样式钩子。默认外观保持 Clinic Comfort。 */
+  appearance?: 'medix'
 }
 
 /** 负责患者 × 日期的覆盖矩阵。每格有文字 aria-label 与 Tooltip，状态不只靠颜色。 */
-export default function CoverageHeatmap({ days, rows, onPatient }: Props) {
+export default function CoverageHeatmap({ days, rows, onPatient, appearance }: Props) {
+  const medix = appearance === 'medix'
   if (rows.length === 0) {
     return <p className="cc-empty-line">暂无负责患者</p>
   }
@@ -84,7 +87,7 @@ export default function CoverageHeatmap({ days, rows, onPatient }: Props) {
   }
 
   return (
-    <div className="cc-matrix-wrap">
+    <div className={medix ? 'cc-matrix-wrap ml-matrix-host' : 'cc-matrix-wrap'}>
       <table className="cc-matrix">
         <thead>
           <tr>
@@ -102,12 +105,12 @@ export default function CoverageHeatmap({ days, rows, onPatient }: Props) {
                 {onPatient ? (
                   <button type="button" className="cc-matrix-who" onClick={() => onPatient(row.patient_id)}>
                     {row.display_name}
-                    <span>{row.patient_code}</span>
+                    {medix ? null : <span>{row.patient_code}</span>}
                   </button>
                 ) : (
                   <span className="cc-matrix-who cc-matrix-who-static">
                     {row.display_name}
-                    <span>{row.patient_code}</span>
+                    {medix ? null : <span>{row.patient_code}</span>}
                   </span>
                 )}
               </th>
