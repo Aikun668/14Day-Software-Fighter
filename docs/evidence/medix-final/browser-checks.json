@@ -1,0 +1,93 @@
+{
+  "mock": true,
+  "checks": [
+    {
+      "name": "07 显示 85.7% 与 12/14",
+      "ok": true,
+      "detail": "李先生（P-004）\n登记覆盖\n85.7%\n已登记 / 应记录\n12 / 14\n未发现登记\n2\n每日登记覆盖\ni\n数据表\n未发现登记时点\n11/04 20:00\n11/07 08:00\n登记来源\ni\n患者自述\n10\n医护观察\n3\n随访摘要\n查看全部\n时间\t反馈\t措施\t后续\n11/09 10:30\t需核对登记\t电话随访\t继续随访\n重复登记\n应记录时间\t有效登记条数\n11/05 08:00\t2"
+    },
+    {
+      "name": "07 来源是事件数 10 和 3",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "07 有未登记、随访和重复登记",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "07 没有基础管理报告大标题",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "07 窄屏不整页横滚",
+      "ok": true,
+      "detail": "[\"BUTTON.ml-logout right=427 w=46\",\"DIV.ant-select ant-select-outlined ml-report-select css-var-_r_2_ ant-select-css-var right=497 w=160\",\"DIV.ant-select-content ant-select-content-has-value right=466 w=117\",\"INPUT.ant-select-input right=466 w=117\",\"DIV.ant-select-suffix right=485 w=13\",\"SPAN.anticon anticon-down right=485 w=13\",\"svg.[object SVGAnimatedString] right=485 w=13\",\"path.[object SVGAnimatedString] right=484 w=11\"]"
+    },
+    {
+      "name": "10 展示已登记和未到时点",
+      "ok": true,
+      "detail": "补登用药\n李先生\n按时点\n按需\n选择计划时点\n11月9日 08:00\n可补登\n11月9日 20:00\n已登记\n11月10日 23:30\n未到时点\n实际用药时间（必填）\n备注（选填）\n取消\n确认补登"
+    },
+    {
+      "name": "10 有实际用药时间",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "未选时点不发登记",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "管理端有五项导航",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "管理员顶栏没有患者搜索",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已发布指导可以查看步骤",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "需改密按接口显示是",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "患者账号可以出现在列表",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "审计图出现且没有停用账号假事件",
+      "ok": true,
+      "detail": "吸入治疗管理\n装置型号\n指导版本\n账号管理\n知识内容\n审计日志\n内容与账号管理\nadmin\n退出\n审计日志\n近 7 日\n\n读取截至 2026-11-10T01:20:42+08:00\n\n操作趋势 合计 7 次\n操作类型\n数据表\n事件记录\n全部类型\n2026-11-09\n10:06\n发布指导\n›\n2026-11-08\n10:05\n审核指导\n›\n2026-11-"
+    },
+    {
+      "name": "审计页没有写入请求",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "failed": 0,
+  "posts": [
+    {
+      "url": "/api/auth/login",
+      "method": "POST",
+      "body": "{\"account\":\"clinician_a\",\"password\":\"secret\"}"
+    },
+    {
+      "url": "/api/auth/login",
+      "method": "POST",
+      "body": "{\"account\":\"admin\",\"password\":\"secret\"}"
+    }
+  ]
+}

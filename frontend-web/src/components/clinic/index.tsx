@@ -192,7 +192,7 @@ export function AttentionPanel({ items, count }: AttentionPanelProps) {
 
 /* ── 刻度：产品签名件。软蓝已登记 / 浅灰未发现登记 / 未到时点描边 ── */
 
-export type ScaleCellKind = 'ok' | 'miss' | 'pending' | 'none'
+export type ScaleCellKind = 'ok' | 'miss' | 'partial' | 'pending' | 'none'
 
 export interface ScaleDay {
   key: string
@@ -247,12 +247,13 @@ function ScaleRow({ slot }: { slot: ScaleSlot }) {
     <>
       <div className="cc-scale-slot">{slot.label}</div>
       {slot.cells.map((cell, index) => (
-        <div
-          key={`${slot.key}-${index}`}
-          className={cell.kind === 'none' ? 'cc-cell' : `cc-cell ${cell.kind}`}
-          title={cell.label}
-          aria-label={cell.label}
-        />
+          <div
+            key={`${slot.key}-${index}`}
+            className={cell.kind === 'none' ? 'cc-cell' : `cc-cell ${cell.kind}`}
+            title={cell.label}
+            aria-label={cell.label}
+            tabIndex={0}
+          />
       ))}
     </>
   )

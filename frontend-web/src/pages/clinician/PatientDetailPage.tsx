@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button, DatePicker, Drawer, Dropdown, Empty, Form, Input, Modal, Select, Spin, message } from 'antd'
 import dayjs from 'dayjs'
 import { apiFetch } from '../../api/client'
 import MedicationBackfillModal from '../../components/MedicationBackfillModal'
+import TemporaryCredentialResult from '../../components/medix/TemporaryCredentialResult'
+import { collectPages } from './medixPaging'
+import { addDays, civilDate, derivePlanPhase, shanghaiToday } from './medixClinicalModel'
 import {
   AttentionPanel,
   Card,
@@ -71,13 +74,26 @@ function cleanDemoMarker(value: string) {
   return value.replace(/\s*[(（]DEMO[)）]/gi, '').trim()
 }
 
-function rangeOf(now = dayjs()) {
-  const start = now.startOf('day').subtract(6, 'day')
-  return {
-    from: start.format('YYYY-MM-DD'),
-    to: now.startOf('day').add(1, 'day').format('YYYY-MM-DD'),
-    start,
-  }
+function detailWindow(now = Date.now()) {
+  const today = shanghaiToday(now)
+  return { from: addDays(today, -6), to: addDays(today, 1), end: today }
+}
+
+function shanghaiMidnight(value: unknown) {
+  const day = dayjs.isDayjs(value)
+    ? value.format('YYYY-MM-DD')
+    : typeof value === 'string'
+      ? value.slice(0, 10)
+      : ''
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new Error('请选择日期')
+  return `${day}T00:00:00+08:00`
+}
+
+function eventSourceLabel(source: string) {
+  if (source === 'PATIENT_REPORT') return '患者自述'
+  if (source === 'CLINICIAN_OBSERVED') return '医护观察'
+  if (source === 'DEVICE') return '设备'
+  return source || '未知来源'
 }
 
 function shanghaiParts(iso: string) {
@@ -98,7 +114,7 @@ function shanghaiParts(iso: string) {
 }
 
 function formatRate(stats: CoverageStats | null) {
-  if (!stats || stats.N <= 0 || stats.coverage_rate == null) return '—'
+  if (!stats || stats.N < 0 || stats.M < 0 || stats.M > stats.N || stats.N <= 0 || stats.coverage_rate == null) return '—'
   return `${stats.coverage_rate}%`
 }
 
@@ -114,40 +130,97 @@ export default function PatientDetailPage() {
   const [coverageStats, setCoverageStats] = useState<CoverageStats | null>(null)
   const [slots, setSlots] = useState<DailySlot[]>([])
   const [tasks, setTasks] = useState<ClinicTask[] | null>(null)
-  const [rangeStart, setRangeStart] = useState(() => rangeOf().from)
+  const [rangeStart, setRangeStart] = useState(() => detailWindow().from)
+  const [rangeEnd, setRangeEnd] = useState(() => detailWindow().end)
+  const [plansError, setPlansError] = useState<string | null>(null)
+  const [slotsError, setSlotsError] = useState<string | null>(null)
+  const [coverageError, setCoverageError] = useState<string | null>(null)
+  const [eventsError, setEventsError] = useState<string | null>(null)
+  const [tasksError, setTasksError] = useState<string | null>(null)
+  const [tasksIncomplete, setTasksIncomplete] = useState(false)
+  const [eventPage, setEventPage] = useState(1)
+  const [credential, setCredential] = useState<{ account: string; temporaryPassword: string } | null>(null)
+  const loadSeq = useRef(0)
   const [loading, setLoading] = useState(true)
   const [backfillOpen, setBackfillOpen] = useState(false)
   const [recordsOpen, setRecordsOpen] = useState(false)
 
   const load = async (patientId: string) => {
-    const range = rangeOf()
-    const [p, pl, ev, coverage, slotRes, taskRes] = await Promise.all([
-      apiFetch<PatientDetail>(`/api/patients/${patientId}`),
-      apiFetch<{ items: Plan[] }>(`/api/patients/${patientId}/medication-plans?include_history=true&page_size=100`).catch(() => ({ items: [] as Plan[] })),
-      apiFetch<{ items: Event[]; total: number }>(`/api/patients/${patientId}/medication-events?page_size=50`).catch(() => ({ items: [] as Event[], total: 0 })),
-      apiFetch<CoverageStats>(`/api/patients/${patientId}/stats?from=${range.from}&to=${range.to}`).catch(() => null),
-      apiFetch<{ items: DailySlot[] }>(`/api/patients/${patientId}/daily-slots?from=${range.from}&to=${range.to}`).catch(() => ({ items: [] as DailySlot[] })),
-      apiFetch<{ items: ClinicTask[] }>(`/api/tasks?patient_id=${patientId}&page_size=50`).catch(() => null),
+    const seq = ++loadSeq.current
+    const current = () => loadSeq.current === seq
+    const range = detailWindow()
+    const patientResult = await apiFetch<PatientDetail>(`/api/patients/${patientId}`)
+    if (!current()) return
+    const [plansResult, eventsResult, coverageResult, slotsResult, tasksResult] = await Promise.allSettled([
+      collectPages<Plan>(
+        (page, pageSize) => apiFetch(`/api/patients/${patientId}/medication-plans?include_history=true&page=${page}&page_size=${pageSize}`),
+        { alive: current },
+      ),
+      apiFetch<{ items: Event[]; total: number }>(`/api/patients/${patientId}/medication-events?page=1&page_size=20`),
+      apiFetch<CoverageStats>(`/api/patients/${patientId}/stats?from=${range.from}&to=${range.to}`),
+      apiFetch<{ items: DailySlot[] }>(`/api/patients/${patientId}/daily-slots?from=${range.from}&to=${range.to}`),
+      collectPages<ClinicTask>(
+        (page, pageSize) => apiFetch(`/api/tasks?patient_id=${patientId}&page=${page}&page_size=${pageSize}`),
+        { alive: current, maxPages: 20 },
+      ),
     ])
-    setPatient(p)
-    setPlans(pl.items)
-    setEvents(ev.items)
-    setEventTotal(ev.total ?? ev.items.length)
-    setCoverageStats(coverage)
-    setSlots(slotRes.items)
-    setTasks(taskRes ? taskRes.items : null)
+    if (!current()) return
+    setPatient(patientResult)
     setRangeStart(range.from)
+    setRangeEnd(range.end)
+    setEventPage(1)
     setAsOf(Date.now())
+    if (plansResult.status === 'fulfilled' && plansResult.value.complete) {
+      setPlans(plansResult.value.items)
+      setPlansError(null)
+    } else {
+      setPlans([])
+      setPlansError(plansResult.status === 'rejected' ? (plansResult.reason as Error).message : '计划未完整读取')
+    }
+    if (eventsResult.status === 'fulfilled' && Array.isArray(eventsResult.value?.items)) {
+      setEvents(eventsResult.value.items)
+      setEventTotal(eventsResult.value.total ?? eventsResult.value.items.length)
+      setEventsError(null)
+    } else {
+      setEvents([])
+      setEventTotal(0)
+      setEventsError(eventsResult.status === 'rejected' ? (eventsResult.reason as Error).message : '登记记录不可用')
+    }
+    if (coverageResult.status === 'fulfilled') {
+      setCoverageStats(coverageResult.value)
+      setCoverageError(null)
+    } else {
+      setCoverageStats(null)
+      setCoverageError(coverageResult.reason instanceof Error ? coverageResult.reason.message : '统计不可用')
+    }
+    if (slotsResult.status === 'fulfilled' && Array.isArray(slotsResult.value?.items)) {
+      setSlots(slotsResult.value.items)
+      setSlotsError(null)
+    } else {
+      setSlots([])
+      setSlotsError(slotsResult.status === 'rejected' ? (slotsResult.reason as Error).message : '时点不可用')
+    }
+    if (tasksResult.status === 'fulfilled') {
+      setTasks(tasksResult.value.items)
+      setTasksIncomplete(!tasksResult.value.complete)
+      setTasksError(tasksResult.value.complete ? null : '待随访未读全')
+    } else {
+      setTasks(null)
+      setTasksIncomplete(false)
+      setTasksError(tasksResult.reason instanceof Error ? tasksResult.reason.message : '任务不可用')
+    }
   }
 
   useEffect(() => {
     if (!id) return
-    let alive = true
     setLoading(true)
-    load(id)
-      .catch((e) => { if (alive) message.error((e as Error).message) })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
+    setPatient(null)
+    const run = load(id)
+    const expected = loadSeq.current
+    run
+      .catch((error) => { if (loadSeq.current === expected) message.error((error as Error).message) })
+      .finally(() => { if (loadSeq.current === expected) setLoading(false) })
+    return () => { loadSeq.current += 1 }
   }, [id])
 
   const reload = async () => {
@@ -160,21 +233,24 @@ export default function PatientDetailPage() {
   }
 
   const activePlans = plans
-    .filter((plan) => plan.ends_at === null)
+    .filter((plan) => derivePlanPhase(plan, asOf) === 'active')
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at))
   const regularPlan = activePlans.find((plan) => plan.plan_type === 'REGULAR') ?? null
   const headlinePlan = regularPlan ?? activePlans[0] ?? null
 
   const days = useMemo(
-    () => Array.from({ length: 7 }, (_, index) => dayjs(rangeStart).add(index, 'day')),
+    () => Array.from({ length: 7 }, (_, index) => addDays(rangeStart, index)),
     [rangeStart],
   )
 
   const slotByCell = useMemo(() => {
-    const map = new Map<string, DailySlot>()
+    const map = new Map<string, DailySlot[]>()
     for (const slot of slots) {
       const parts = shanghaiParts(slot.scheduled_at)
-      map.set(`${parts.day}|${parts.time}`, slot)
+      const key = `${parts.day}|${parts.time}`
+      const list = map.get(key) ?? []
+      list.push(slot)
+      map.set(key, list)
     }
     return map
   }, [slots])
@@ -221,22 +297,28 @@ export default function PatientDetailPage() {
   const submitBindAcct = async (v: { account: string; initial_password?: string }) => {
     setBusy(true)
     try {
-      const r = await apiFetch<{ temporary_password: string | null }>(`/api/patients/${id}/account`, {
+      const created = await apiFetch<{ temporary_password: string | null }>(`/api/patients/${id}/account`, {
         method: 'POST', body: JSON.stringify(v),
       })
-      message.success(r.temporary_password
-        ? `账号已创建，临时密码（一次性展示，请立即转告）：${r.temporary_password}`
-        : '账号绑定成功')
       setBindAcctOpen(false)
       bindAcctForm.resetFields()
-      await reload()
+      if (created.temporary_password) setCredential({ account: v.account, temporaryPassword: created.temporary_password })
+      else message.success('账号绑定成功')
+      try { await reload() } catch { message.warning('已保存，刷新失败，请重试读取') }
+      return
     } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
   }
 
   const openBindDev = async () => {
     try {
-      const ms = await apiFetch<{ items: { id: string; model_name: string }[] }>('/api/device-models?page_size=100')
-      setDeviceOptions(ms.items.map((m) => ({ value: m.id, label: m.model_name })))
+      const ms = await collectPages<{ id: string; model_name: string }>(
+        (page, pageSize) => apiFetch(`/api/device-models?page=${page}&page_size=${pageSize}`),
+      )
+      if (!ms.complete) {
+        message.error('型号目录未完整读取')
+        return
+      }
+      setDeviceOptions(ms.items.map((item) => ({ value: item.id, label: item.model_name })))
       setBindDevOpen(true)
     } catch (e) { message.error((e as Error).message) }
   }
@@ -246,7 +328,7 @@ export default function PatientDetailPage() {
     try {
       await apiFetch(`/api/patients/${id}/devices`, {
         method: 'POST',
-        body: JSON.stringify({ device_model_id: v.device_model_id, effective_from: `${v.effective_from}T00:00:00+08:00` }),
+        body: JSON.stringify({ device_model_id: v.device_model_id, effective_from: shanghaiMidnight(v.effective_from) }),
       })
       message.success('装置已绑定（旧装置生效期自动关闭）')
       setBindDevOpen(false)
@@ -265,7 +347,7 @@ export default function PatientDetailPage() {
       await apiFetch(`/api/medication-plans/${revOpen.id}/revisions`, {
         method: 'POST',
         body: JSON.stringify({
-          starts_at: `${v.starts_at}T00:00:00+08:00`,
+          starts_at: shanghaiMidnight(v.starts_at),
           drug_label: v.drug_label || undefined,
           daily_times: revOpen.plan_type === 'REGULAR' ? daily : undefined,
         }),
@@ -313,11 +395,16 @@ export default function PatientDetailPage() {
   const isDemoData = [patient.diagnosis_label, patient.note, ...plans.map((plan) => plan.drug_label)]
     .some((value) => value?.includes('DEMO'))
   const unbound = !patient.account_user_id
-  const missingCount = coverageStats ? Math.max(coverageStats.N - coverageStats.M, 0) : null
-  const openTaskCount = tasks?.filter((task) => task.status === 'OPEN' || task.status === 'IN_PROGRESS').length ?? null
+  const statsAnomaly = Boolean(coverageStats && (coverageStats.N < 0 || coverageStats.M < 0 || coverageStats.M > coverageStats.N))
+  const missingCount = !coverageStats || statsAnomaly ? null : Math.max(coverageStats.N - coverageStats.M, 0)
+  const openTaskCount = !tasks || tasksError || tasksIncomplete
+    ? null
+    : tasks.filter((task) => task.status === 'OPEN' || task.status === 'IN_PROGRESS').length
   const duplicateCount = coverageStats?.duplicate_slots?.length ?? 0
 
-  const drugLine = headlinePlan
+  const drugLine = plansError
+    ? '计划信息不可用。'
+    : headlinePlan
     ? headlinePlan.plan_type === 'REGULAR' && headlinePlan.daily_times?.length
       ? `${cleanDemoMarker(headlinePlan.drug_label)} · ${headlinePlan.daily_times.map((time) => String(time.local_time).slice(0, 5)).join(' / ')}。下面是近 7 日登记覆盖与待办。`
       : `${cleanDemoMarker(headlinePlan.drug_label)} · 按需。下面是近 7 日登记覆盖与待办。`
@@ -327,8 +414,8 @@ export default function PatientDetailPage() {
     ? { key: 'bind', label: '绑定账号', onClick: () => setBindAcctOpen(true) }
     : (missingCount ?? 0) > 0
       ? { key: 'backfill', label: '补登用药', onClick: () => setBackfillOpen(true) }
-      : (openTaskCount ?? 0) > 0
-        ? { key: 'follow', label: '去随访', onClick: () => navigate('/followups') }
+        : (openTaskCount ?? 0) > 0
+          ? { key: 'follow', label: '去随访', onClick: () => navigate(`/followups?patientId=${id}`) }
         : null
 
   const attention: AttentionItem[] = []
@@ -377,19 +464,20 @@ export default function PatientDetailPage() {
       detail: '任务仍未关闭',
       chip: '去处理',
       chipTone: 'warn',
-      onClick: () => navigate('/followups'),
+      onClick: () => navigate(`/followups?patientId=${id}`),
     })
   }
   const shownAttention = attention.slice(0, 2)
-  if (shownAttention.length === 0) {
+  const dataGap = Boolean(plansError || slotsError || coverageError || tasksError || tasksIncomplete)
+  if (shownAttention.length === 0 && dataGap) {
     shownAttention.push({
-      key: 'clear',
-      mark: '稳',
-      tone: 'info',
-      title: '暂无需关注',
-      detail: '近 7 日没有待处理事项',
-      chip: '正常',
-      chipTone: 'blue',
+      key: 'gap',
+      mark: '缺',
+      tone: 'warn',
+      title: '数据未完整',
+      detail: '有一块没有读全，不能判断为正常',
+      chip: '待核对',
+      chipTone: 'warn',
     })
   }
 
@@ -398,29 +486,40 @@ export default function PatientDetailPage() {
     { key: 'edit', label: '编辑档案', onClick: openEdit },
     { key: 'device', label: '绑定装置', onClick: () => { void openBindDev() } },
     headlinePlan ? { key: 'revise', label: '修订时点', onClick: openRevision } : null,
-    primary?.key !== 'follow' ? { key: 'follow', label: '去随访', onClick: () => navigate('/followups') } : null,
+    primary?.key !== 'follow' ? { key: 'follow', label: '去随访', onClick: () => navigate(`/followups?patientId=${id}`) } : null,
     { key: 'records', label: '查看登记', onClick: () => setRecordsOpen(true) },
   ].filter((item) => item !== null)
 
   // 刻度数据交给共享组件：行=时点，列=近 7 日
-  const scaleDays = days.map((day) => ({
-    key: day.format('YYYY-MM-DD'),
-    date: String(day.date()),
-    weekday: WEEK_ZH[day.day()],
-  }))
+  const scaleDays = days.map((day) => {
+    const date = civilDate(day)
+    return {
+      key: day,
+      date: String(date.getDate()),
+      weekday: WEEK_ZH[date.getDay()],
+    }
+  })
   const scaleSlots = times.map((time): ScaleSlot => ({
     key: time,
     label: time,
     cells: days.map((day) => {
-      const key = `${day.format('YYYY-MM-DD')}|${time}`
-      const slot = slotByCell.get(key)
-      const future = slot ? new Date(slot.scheduled_at).getTime() > asOf : false
-      const kind: ScaleCellKind = !slot ? 'none' : future ? 'pending' : slot.has_active_record ? 'ok' : 'miss'
-      const label = !slot
-        ? `${day.format('M月D日')} ${time} 无此时点`
-        : future
-          ? `${day.format('M月D日')} ${time} 未到时点`
-          : `${day.format('M月D日')} ${time} ${kind === 'ok' ? '已登记' : '未发现登记'}`
+      const key = `${day}|${time}`
+      const group = slotByCell.get(key) ?? []
+      const due = group.filter((slot) => new Date(slot.scheduled_at).getTime() <= asOf)
+      const future = group.length - due.length
+      const registered = due.filter((slot) => slot.has_active_record).length
+      const kind: ScaleCellKind = group.length === 0
+        ? 'none'
+        : due.length === 0
+          ? 'pending'
+          : registered === due.length
+            ? 'ok'
+            : registered === 0
+              ? 'miss'
+              : 'partial'
+      const label = group.length === 0
+        ? `${day} ${time} 无此时点`
+        : `${day} ${time} 共 ${group.length} 个时点，已到期 ${due.length}，已登记 ${registered}${future ? `，未到 ${future}` : ''}`
       return { kind, label }
     }),
   }))
@@ -431,7 +530,7 @@ export default function PatientDetailPage() {
         eyebrow={
           <>
             {WEEK_EN[now.day()]} · {MONTH_EN[now.month()]} {now.date()} ·{' '}
-            <span className={coverageStats ? 'ok' : undefined}>{coverageStats ? '系统正常' : '统计未更新'}</span>
+            <span className={coverageStats && !statsAnomaly ? 'ok' : undefined}>{coverageStats && !statsAnomaly ? '系统正常' : '统计未更新'}</span>
           </>
         }
         title={
@@ -461,11 +560,13 @@ export default function PatientDetailPage() {
             label: '近 7 日覆盖',
             value: formatRate(coverageStats),
             warn: Boolean(missingCount),
-            meta: coverageStats
-              ? coverageStats.N > 0
-                ? `${coverageStats.M} / ${coverageStats.N} 时点 · 非依从性`
-                : '近 7 日无到期时点'
-              : '统计暂不可用',
+            meta: !coverageStats
+              ? '统计暂不可用'
+              : statsAnomaly
+                ? '数据异常'
+                : coverageStats.N > 0
+                  ? `${coverageStats.M} / ${coverageStats.N} 时点 · 非依从性`
+                  : '近 7 日无到期时点',
           },
           {
             key: 'missing',
@@ -485,7 +586,7 @@ export default function PatientDetailPage() {
             key: 'followup',
             label: '待随访',
             value: openTaskCount == null ? '—' : openTaskCount,
-            meta: openTaskCount ? '计划内' : '暂无',
+            meta: tasksError ? '暂不可用' : openTaskCount ? '计划内' : '暂无',
           },
         ]}
       />
@@ -495,8 +596,10 @@ export default function PatientDetailPage() {
           <AttentionPanel items={shownAttention} count={shownAttention.length} />
         }
       >
-        <Card title="近 7 日时点" hint="覆盖 ≠ 依从性" id="coverage-scale">
-          {times.length === 0 ? (
+        <Card title="近 7 日时点" hint={`${rangeStart} — ${rangeEnd} · 覆盖 ≠ 依从性`} id="coverage-scale">
+          {slotsError ? (
+            <p className="cc-empty-line">时点加载失败</p>
+          ) : times.length === 0 ? (
             <p className="cc-empty-line">近 7 日没有可显示的时点。</p>
           ) : (
             <TimeScale days={scaleDays} slots={scaleSlots} ariaLabel="近七日时点登记覆盖" />
@@ -505,6 +608,7 @@ export default function PatientDetailPage() {
       </TwoColumn>
 
       <MedicationBackfillModal
+        appearance="medix"
         open={backfillOpen}
         patientId={patient.id}
         patientName={patient.display_name}
@@ -518,19 +622,18 @@ export default function PatientDetailPage() {
         onClose={() => setRecordsOpen(false)}
         size={420}
       >
-        {eventTotal > events.length && (
-          <p className="cc-empty-line" style={{ marginBottom: 12 }}>仅显示最近 {events.length} 条，更早的记录仍保留。</p>
-        )}
-        {events.length === 0 ? (
+        {eventsError ? <p className="cc-empty-line">加载失败</p> : null}
+        {!eventsError && events.length === 0 ? (
           <p className="cc-empty-line">暂无用药登记。</p>
-        ) : (
+        ) : null}
+        {events.length > 0 ? (
           <ul className="cc-record-list">
             {events.map((event) => (
               <li key={event.id}>
                 <div className="cc-record-main">
                   <strong>{new Date(event.occurred_at).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</strong>
                   <span>
-                    {event.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}
+                    {eventSourceLabel(event.source)}
                     {event.note ? ` · ${event.note}` : ''}
                   </span>
                 </div>
@@ -540,8 +643,27 @@ export default function PatientDetailPage() {
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
+        {!eventsError && events.length < eventTotal ? (
+          <Button onClick={() => {
+            const next = eventPage + 1
+            void apiFetch<{ items: Event[]; total: number }>(`/api/patients/${id}/medication-events?page=${next}&page_size=20`)
+              .then((result) => {
+                setEvents((prev) => [...prev, ...result.items])
+                setEventPage(next)
+                setEventTotal(result.total)
+              })
+              .catch((error) => message.error((error as Error).message))
+          }}
+          >加载更多</Button>
+        ) : null}
       </Drawer>
+      <TemporaryCredentialResult
+        open={credential !== null}
+        account={credential?.account ?? ''}
+        temporaryPassword={credential?.temporaryPassword ?? ''}
+        onDone={() => setCredential(null)}
+      />
 
       <Modal title="编辑患者信息" open={editOpen} onCancel={() => setEditOpen(false)} onOk={() => editForm.submit()} confirmLoading={busy} destroyOnHidden>
         <Form form={editForm} layout="vertical" onFinish={submitEdit}>
@@ -590,6 +712,18 @@ export default function PatientDetailPage() {
           修订会生成新的生效记录：旧记录停在新开始日，历史统计不改写。
         </p>
         <Form form={revForm} layout="vertical" onFinish={submitRevision}>
+          {activePlans.length > 1 ? (
+            <Form.Item label="选择计划">
+              <Select
+                value={revOpen?.id}
+                options={activePlans.map((plan) => ({ value: plan.id, label: `${plan.drug_label} · v${plan.version}` }))}
+                onChange={(planId) => {
+                  const plan = activePlans.find((item) => item.id === planId)
+                  if (plan) setRevOpen(plan)
+                }}
+              />
+            </Form.Item>
+          ) : null}
           <Form.Item name="starts_at" label="生效日期" rules={[{ required: true, message: '请选择生效日期' }]}>
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
