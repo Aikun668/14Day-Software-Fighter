@@ -1,0 +1,53 @@
+{
+  "status": "documentation-self-reviewed-frozen",
+  "date": "2026-11-09",
+  "scope": "00 common framework; 01 login; 02 workbench; 03 patients",
+  "authority": "User requested detailed handoff, self-review and freeze. Scope explicitly confirmed. Code implementation not executed.",
+  "policy": "Do not overwrite; revisions in handoff-0123-v2 or later; implementation progress logged outside this directory.",
+  "files": [
+    {
+      "file": "00-SYSTEM.md",
+      "sha256": "8BDCD3B5AD3F78EDC1A8C7F3686D73A7F870EDB687C6703288FEFBEE55814E70"
+    },
+    {
+      "file": "01-LOGIN.md",
+      "sha256": "EF4C52D1030E0404E9E36B6924B8196BCFEE27CAEC0358C1ACD4F8D191455DC4"
+    },
+    {
+      "file": "02-WORKBENCH.md",
+      "sha256": "7ADD1C4323905C6B90C07B2E67738144BABD042D651BDC9411338DA41EB7FE39"
+    },
+    {
+      "file": "03-PATIENTS.md",
+      "sha256": "D6DFB26C800C955A2AE7A72B2BAECBE0A2935E9A4922C9F40901E6422F31E954"
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "sha256": "52621789F10A93269675B60E1EBA7653BD5185ADF9039AF5770F16BB0D69A848"
+    },
+    {
+      "file": "HANDOFF.md",
+      "sha256": "44A4CAB01F8EDE5A6BC1F76363A42ECBAE7148859B7795B6F0F04550FCCE4C7C"
+    },
+    {
+      "file": "IMPLEMENTATION.md",
+      "sha256": "373C35215C821529B45301A6F76A45C15484AD67B80A630184E0837D57CE9F2D"
+    },
+    {
+      "file": "REVIEW.md",
+      "sha256": "5753890A22332EA639A969B80FEEEA28CA5FD705EC0B87D32D669DB11638709D"
+    },
+    {
+      "file": "RULES.md",
+      "sha256": "30FDDF83C435A53AE149E8F206479548D35AFD720ABBFBA1E33AB7267740AD7C"
+    },
+    {
+      "file": "SOURCE-BASELINE.json",
+      "sha256": "FDC83676EF4CDCB834AFB8032F859C670E5454CB657921CA235F32111D3CA524"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "686939B504FB298B8603F2AEEB4CCDC67FE7D20AAC4A10085149BA7F731E19D8"
+    }
+  ]
+}

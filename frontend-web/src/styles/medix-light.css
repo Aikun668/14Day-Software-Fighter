@@ -1,0 +1,623 @@
+/* Medix Light。规则只挂在 .ml-shell / .ml-page / .ml-auth 上。
+   不改 html font-size（根保持 16px），不写裸的 .ant-*。 */
+
+.ml-shell,
+.ml-page,
+.ml-auth {
+  --ml-bg: #F6F6F6;
+  --ml-surface: #FFFFFF;
+  --ml-head: #FAFAFA;
+  --ml-ink: #424650;
+  --ml-muted: #697180;
+  --ml-line: #EEF0F3;
+  --ml-border: #D7DAE2;
+  --ml-brand: #8146FF;
+  --ml-brand-soft: #F4F0FF;
+  --ml-blue: #4C91ED;
+  --ml-teal: #43B7A0;
+  --ml-apricot: #E8B77E;
+  --ml-success-bg: #EDF9F1;
+  --ml-success-ink: #287442;
+  --ml-warn-bg: #FFF3E9;
+  --ml-warn-ink: #92532C;
+  --ml-fs-body: 0.9375rem;
+  --ml-fs-title: 1.25rem;
+  --ml-fs-caption: 0.8125rem;
+  --ml-fs-section: 1.0625rem;
+}
+
+.ml-frame {
+  min-height: 100vh;
+  background: var(--ml-bg);
+  color: var(--ml-ink);
+}
+
+.ml-shell-layout {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--ml-bg);
+  color: var(--ml-ink);
+}
+
+.ml-sider {
+  width: 15rem;
+  flex: 0 0 15rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: var(--ml-surface);
+  border-right: 1px solid var(--ml-line);
+  z-index: 20;
+}
+
+.ml-brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 5rem;
+  padding: 0 1.25rem;
+  flex: 0 0 auto;
+}
+
+.ml-brand-mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 auto;
+  display: block;
+}
+
+.ml-brand-name {
+  color: var(--ml-brand);
+  font-size: var(--ml-fs-title);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.ml-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.25rem 0 0.75rem;
+}
+
+.ml-shell .ml-nav .ant-menu {
+  background: transparent;
+  border-inline-end: none;
+}
+
+.ml-shell .ml-nav .ant-menu-item {
+  width: auto;
+  margin-inline: 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.ml-shell .ml-nav .ant-menu-item::after,
+.ml-shell .ml-nav .ant-menu-item-selected::after {
+  display: none;
+  border: 0;
+}
+
+.ml-sider-art {
+  flex: 0 0 auto;
+  padding: 0.5rem 1.5rem 1.5rem;
+}
+
+.ml-sider-art img {
+  width: 9rem;
+  height: 6rem;
+  object-fit: contain;
+  object-position: left bottom;
+  display: block;
+}
+
+.ml-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--ml-bg);
+}
+
+.ml-topbar {
+  height: 5rem;
+  flex: 0 0 5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.75rem;
+  background: var(--ml-surface);
+  border-bottom: 1px solid var(--ml-line);
+  position: sticky;
+  top: 0;
+  z-index: 15;
+}
+
+.ml-nav-toggle {
+  display: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ml-border);
+  border-radius: 0.375rem;
+  background: var(--ml-surface);
+  color: var(--ml-ink);
+  padding: 0;
+  cursor: pointer;
+}
+
+.ml-topbar-search {
+  flex: 1 1 16rem;
+  max-width: 20rem;
+  min-width: 0;
+}
+
+.ml-shell .ml-search {
+  width: 100%;
+}
+
+.ml-shell .ml-search .ant-select-content {
+  min-height: 2.5rem;
+  border-radius: 0.375rem;
+  align-items: center;
+}
+
+.ml-account {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.ml-account-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: var(--ml-brand-soft);
+}
+
+.ml-account-name {
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  line-height: 1.5;
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ml-logout {
+  border: 0;
+  background: transparent;
+  color: var(--ml-muted);
+  font: inherit;
+  font-size: var(--ml-fs-body);
+  line-height: 1.5;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.ml-logout:hover {
+  color: var(--ml-ink);
+  background: var(--ml-bg);
+}
+
+.ml-content {
+  flex: 1 0 auto;
+  min-width: 0;
+  padding: 1.75rem;
+}
+
+.ml-shell .ml-page,
+.ml-page {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.ml-shell-layout.is-collapsed .ml-sider {
+  width: 4rem;
+  flex-basis: 4rem;
+}
+
+.ml-shell-layout.is-collapsed .ml-brand {
+  justify-content: center;
+  padding: 0;
+}
+
+.ml-shell-layout.is-collapsed .ml-brand-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ml-shell-layout.is-collapsed .ml-sider-art {
+  display: none;
+}
+
+.ml-shell-layout.is-collapsed .ml-nav .ant-menu-item {
+  margin-inline: 0.5rem;
+  padding-inline: calc(50% - 0.5rem);
+}
+
+.ml-shell-layout.is-narrow .ml-sider {
+  display: none;
+}
+
+.ml-shell-layout.is-narrow .ml-nav-toggle {
+  display: inline-flex;
+}
+
+.ml-shell-layout.is-narrow .ml-content,
+.ml-shell-layout.is-narrow .ml-topbar {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.ml-shell .ml-drawer-title {
+  color: var(--ml-brand);
+  font-size: var(--ml-fs-title);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ml-shell .ml-search-hit {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  font-size: var(--ml-fs-body);
+  line-height: 1.5;
+}
+
+.ml-shell .ml-search-name {
+  color: var(--ml-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ml-shell .ml-search-meta {
+  color: var(--ml-muted);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+/* 共享视觉件。02/03 再接入，本波只把契约放进作用域。 */
+
+.ml-shell .ml-avatar,
+.ml-page .ml-avatar {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--ml-brand-soft);
+  flex: 0 0 auto;
+}
+
+.ml-shell .ml-avatar-sm,
+.ml-page .ml-avatar-sm {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.ml-shell .ml-avatar img,
+.ml-page .ml-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ml-shell .ml-surface,
+.ml-page .ml-surface {
+  background: var(--ml-surface);
+  border: 1px solid var(--ml-line);
+  border-radius: 0.5rem;
+  box-shadow: none;
+}
+
+.ml-shell .ml-surface-head,
+.ml-page .ml-surface-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--ml-line);
+}
+
+.ml-shell .ml-surface-title,
+.ml-page .ml-surface-title {
+  margin: 0;
+  font-size: var(--ml-fs-section);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ml-ink);
+}
+
+.ml-shell .ml-surface-actions,
+.ml-page .ml-surface-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.ml-shell .ml-surface-body,
+.ml-page .ml-surface-body {
+  min-width: 0;
+}
+
+.ml-shell .ml-status,
+.ml-page .ml-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: var(--ml-fs-caption);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.ml-shell .ml-status-bound,
+.ml-page .ml-status-bound {
+  background: var(--ml-success-bg);
+  color: var(--ml-success-ink);
+}
+
+.ml-shell .ml-status-unbound,
+.ml-page .ml-status-unbound {
+  background: var(--ml-warn-bg);
+  color: var(--ml-warn-ink);
+}
+
+.ml-shell .ml-row-action-wrap,
+.ml-page .ml-row-action-wrap {
+  display: inline-flex;
+}
+
+.ml-shell .ml-row-action,
+.ml-page .ml-row-action {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--ml-border);
+  border-radius: 0.375rem;
+  background: var(--ml-surface);
+  color: var(--ml-muted);
+  cursor: pointer;
+}
+
+.ml-shell .ml-row-action:hover:not(:disabled),
+.ml-page .ml-row-action:hover:not(:disabled) {
+  color: var(--ml-ink);
+  background: var(--ml-bg);
+}
+
+.ml-shell .ml-row-action:disabled,
+.ml-page .ml-row-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ml-shell .ml-identity,
+.ml-page .ml-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ml-shell .ml-identity-name,
+.ml-page .ml-identity-name {
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ml-shell .ml-heading,
+.ml-page .ml-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+}
+
+.ml-shell .ml-heading-main,
+.ml-page .ml-heading-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.ml-shell .ml-heading h1,
+.ml-page .ml-heading h1 {
+  margin: 0;
+  font-size: var(--ml-fs-title);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ml-ink);
+}
+
+.ml-shell .ml-heading-date,
+.ml-page .ml-heading-date {
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+  line-height: 1.5;
+}
+
+.ml-shell .ml-heading-actions,
+.ml-page .ml-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.ml-shell .ml-logout:focus-visible,
+.ml-shell .ml-nav-toggle:focus-visible,
+.ml-shell .ml-row-action:focus-visible,
+.ml-page .ml-row-action:focus-visible,
+.ml-shell .ant-menu-item:focus-visible,
+.ml-auth .ml-auth-submit.ant-btn:focus-visible {
+  outline: 2px solid var(--ml-brand);
+  outline-offset: 2px;
+}
+
+/* 登录 */
+
+.ml-auth {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+  background: var(--ml-bg);
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-body);
+  line-height: 1.5;
+}
+
+.ml-auth-card {
+  width: 31.5rem;
+  max-width: calc(100% - 2rem);
+  margin: auto;
+  padding: 2.25rem;
+  background: var(--ml-surface);
+  border: 1px solid var(--ml-line);
+  border-radius: 0.5rem;
+  box-shadow: none;
+}
+
+.ml-auth-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin-bottom: 2rem;
+}
+
+.ml-auth-mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+  display: block;
+}
+
+.ml-auth-name {
+  color: var(--ml-brand);
+  font-size: var(--ml-fs-title);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ml-auth-product {
+  margin: 0.25rem 0 0;
+  color: var(--ml-muted);
+  font-size: var(--ml-fs-caption);
+  line-height: 1.5;
+}
+
+.ml-auth-heading {
+  margin: 0 0 1.25rem;
+  color: var(--ml-ink);
+  font-size: var(--ml-fs-section);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.ml-auth .ant-form-item-label > label {
+  font-size: var(--ml-fs-caption);
+  color: var(--ml-ink);
+  height: auto;
+}
+
+.ml-auth .ant-input,
+.ml-auth .ant-input-affix-wrapper {
+  border-radius: 0.375rem;
+  font-size: var(--ml-fs-body);
+}
+
+.ml-auth .ant-input,
+.ml-auth .ant-input-affix-wrapper {
+  min-height: 2.5rem;
+}
+
+.ml-auth-error {
+  margin: 0 0 1rem;
+  color: var(--ml-warn-ink);
+  font-size: var(--ml-fs-caption);
+  line-height: 1.5;
+}
+
+.ml-auth-submit.ant-btn {
+  height: 2.5rem;
+  border-radius: 0.375rem;
+  font-size: var(--ml-fs-body);
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.ml-auth-art {
+  position: fixed;
+  left: 1.5rem;
+  bottom: 1.25rem;
+  width: 7.5rem;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (pointer: coarse) {
+  .ml-shell .ml-row-action,
+  .ml-page .ml-row-action {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+@media (max-width: 900px), (max-height: 760px) {
+  .ml-auth-art {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .ml-shell .ml-account-name {
+    max-width: 5.5rem;
+  }
+}

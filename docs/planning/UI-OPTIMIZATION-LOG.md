@@ -779,3 +779,19 @@
 **证据**：02l-workbench-scale-down.png；DOM 实测 cellH=40、headToGrid=55、gridToBottom=24。
 
 **教训**：等高卡有富余高度时，先问「内容该下移还是该放大」——用户要的是排版呼吸感，不是组件变形。
+
+### 2026-11-09 · Medix Light 任务 00+01（外壳与登录）
+
+**问题**：登录页和医护外壳仍是 Clinic Comfort（大圆角、诊所蓝、侧栏底重复账号、顶栏横跨全宽）。handoff-0123 要求用局部 medix 主题先换共用外壳和登录页，工作台/患者列表内容下一波再改。
+
+**原因**：全局 `theme.ts` 不能一刀切，否则 `/admin` 和 `/patients/:id` 会被一起染紫。
+
+**改动**：
+- 新增 `medix-theme.ts` / `medix-light.css`，规则只在 `.ml-shell`、`.ml-page`、`.ml-auth`。根字号仍是 16px。
+- `WebLayout` 增加 `medix` 变体。只给 `/workbench` 和 `/patients` 使用。登录页单独包一层主题边界。
+- 登录页改成浅灰底、504px 白卡片、薄边、品牌紫按钮；登录请求、令牌内存存储和跳转优先级保持原样。
+- 插画和头像是本地自绘占位，没有真人脸。
+
+**证据**：`docs/evidence/medix-0123/`。build 通过，lint 仍是基线 12 warning / 0 error。`/admin` 主按钮保持 `#5B7CFF`，患者列表弹窗主按钮为 `#8146FF`。后端 8010 未启动，成功跳转和 401 用请求拦截验证，并在报告里标明 mock。
+
+**未改**：工作台与患者列表的业务布局、改密页、04–15、患者 App、API。

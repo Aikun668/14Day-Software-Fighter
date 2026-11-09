@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/AuthContext'
 import { apiFetch } from '../api/client'
 import BrandMark from './BrandMark'
 import { IconFollowups, IconPatients, IconPlans, IconStats, IconWorkbench } from './navIcons'
+import MedixAppShell from './medix/MedixAppShell'
 
 const { Header, Sider, Content } = Layout
 
@@ -22,6 +23,7 @@ interface PatientHit {
 //   'comfort'  Clinic Comfort 变体（顶栏 64px、面包屑侧栏品牌）。
 //             外壳锁在一屏：侧栏钉住，菜单过长时只滚菜单，用户和退出停在视口栏底。
 //             主栏自己滚动；里面的卡仍按内容高。
+//   'medix'    Medix Light 外壳（侧栏 15rem 满高，顶栏只跨主区）。只挂指定路由。
 // 新页面要上 Clinic Comfort，显式传 variant="comfort" 即可，不再加路径判断。
 export default function WebLayout({
   children,
@@ -29,8 +31,23 @@ export default function WebLayout({
   crumb,
 }: {
   children: ReactNode
-  variant?: 'standard' | 'comfort'
+  variant?: 'standard' | 'comfort' | 'medix'
   /** comfort 变体顶栏左侧的返回面包屑，如 ['患者', '详情'] */
+  crumb?: { parent: string; parentTo: string; current: string }
+}) {
+  if (variant === 'medix') {
+    return <MedixAppShell>{children}</MedixAppShell>
+  }
+  return <LegacyWebLayout variant={variant} crumb={crumb}>{children}</LegacyWebLayout>
+}
+
+function LegacyWebLayout({
+  children,
+  variant = 'standard',
+  crumb,
+}: {
+  children: ReactNode
+  variant?: 'standard' | 'comfort'
   crumb?: { parent: string; parentTo: string; current: string }
 }) {
   const navigate = useNavigate()
