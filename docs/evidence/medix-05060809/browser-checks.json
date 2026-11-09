@@ -1,0 +1,261 @@
+{
+  "checks": [
+    {
+      "name": "登录后离开登录页",
+      "ok": true,
+      "detail": "http://127.0.0.1:5180/workbench"
+    },
+    {
+      "name": "用药计划使用 medix 外壳",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "未来结束仍是生效中",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已结束不是已关闭",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "未来开始是待生效",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "结束日显示前一日",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "按需历史不显示残留时点",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "重名患者带编号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390 用药计划无整页横向溢出",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "慢请求不覆盖后选患者",
+      "ok": true,
+      "detail": "用药计划\n杨先生\n杨先生\n演示数据\n新建计划\n装置型号\n请选择装置型号\n药物名称\n计划类型\n固定\n按需\n开始日期\n结束日期（选填）\n每日时点\n创建计划\n历史计划\n杨的计划\n生效中\n2026-11-01 起\n09:00"
+    },
+    {
+      "name": "统计默认窗口发到排他次日",
+      "ok": true,
+      "detail": "GET /api/stats/overview?from=2026-11-03&to=2026-11-10"
+    },
+    {
+      "name": "团队覆盖率是加权 20%",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "患者行保留各自覆盖率",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N=0 显示破折号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "主屏不是矩阵",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "患者报告页签还在",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "报告保留来源、缺失和重复登记",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "来源事件可以大于 M",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "93 日拒绝并阻止请求",
+      "ok": true,
+      "detail": "text"
+    },
+    {
+      "name": "待核查总数用 total 51",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "随访记录不是空",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "第 51 条任务能请求第二页",
+      "ok": true,
+      "detail": "GET /api/tasks?status=OPEN&page=2&page_size=50"
+    },
+    {
+      "name": "切换任务不残留反馈",
+      "ok": true,
+      "detail": "\"\""
+    },
+    {
+      "name": "没有关联任务时不能关闭任务",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390 随访页无整页横向溢出",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "空白说明不提交",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "空白说明有字段错误",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "快速处理只有一条随访写入",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "快速处理 close_task 为 true",
+      "ok": true,
+      "detail": "{\"patient_id\":\"p-li\",\"task_id\":\"task-1\",\"followed_at\":\"2026-11-10T00:46:13+08:00\",\"feedback\":\"已电话联系\",\"close_task\":true,\"create_retraining_reminder\":false}"
+    },
+    {
+      "name": "未知类型不写连续 3 次",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "工作台仍是 medix",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "患者详情没有套上 medix 外壳",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "管理端没有套上 medix 外壳",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "failed": 0,
+  "requests": [
+    "POST /api/auth/login",
+    "GET /api/tasks?status=OPEN&page_size=20",
+    "GET /api/patients?page_size=100",
+    "GET /api/stats/overview?from=2026-11-02&to=2026-11-09",
+    "GET /api/stats/matrix?from=2026-11-09&to=2026-11-10",
+    "GET /api/stats/matrix?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients?page_size=100",
+    "GET /api/tasks?status=OPEN&page_size=20",
+    "GET /api/patients?page_size=100",
+    "GET /api/stats/overview?from=2026-11-02&to=2026-11-09",
+    "GET /api/stats/matrix?from=2026-11-09&to=2026-11-10",
+    "GET /api/stats/matrix?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients?page_size=100",
+    "GET /api/patients?page=1&page_size=100",
+    "GET /api/device-models?page=1&page_size=100",
+    "GET /api/patients?page=1&page_size=100",
+    "GET /api/device-models?page=1&page_size=100",
+    "GET /api/patients/p-li/medication-plans?include_history=true&page=1&page_size=100",
+    "GET /api/patients/p-yang/medication-plans?include_history=true&page=1&page_size=100",
+    "GET /api/patients?page=1&page_size=100",
+    "GET /api/stats/overview?from=2026-11-03&to=2026-11-10",
+    "GET /api/stats/matrix?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients?page=1&page_size=100",
+    "GET /api/stats/overview?from=2026-11-03&to=2026-11-10",
+    "GET /api/stats/matrix?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients/p-yang/stats?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients/p-yang/stats/trend?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients/p-yang/followups?page=1&page_size=100",
+    "GET /api/patients?page=1&page_size=100",
+    "GET /api/tasks?status=OPEN&page=1&page_size=50",
+    "GET /api/followups?page=1&page_size=50",
+    "GET /api/patients?page=1&page_size=100",
+    "GET /api/tasks?status=OPEN&page=1&page_size=50",
+    "GET /api/followups?page=1&page_size=50",
+    "GET /api/tasks?status=OPEN&page=2&page_size=50",
+    "GET /api/patients/p-li/followups?page=1&page_size=50",
+    "GET /api/tasks?status=OPEN&patient_id=p-li&page=1&page_size=100",
+    "GET /api/patients/p-yang/followups?page=1&page_size=50",
+    "GET /api/tasks?status=OPEN&patient_id=p-yang&page=1&page_size=100",
+    "POST /api/followups",
+    "GET /api/tasks?status=OPEN&page=1&page_size=50",
+    "GET /api/patients/p-yang/followups?page=1&page_size=50",
+    "GET /api/tasks?status=OPEN&page_size=20",
+    "GET /api/patients?page_size=100",
+    "GET /api/stats/overview?from=2026-11-02&to=2026-11-09",
+    "GET /api/stats/matrix?from=2026-11-09&to=2026-11-10",
+    "GET /api/stats/matrix?from=2026-11-03&to=2026-11-10",
+    "GET /api/tasks?status=OPEN&page_size=20",
+    "GET /api/patients?page_size=100",
+    "GET /api/stats/overview?from=2026-11-02&to=2026-11-09",
+    "GET /api/stats/matrix?from=2026-11-09&to=2026-11-10",
+    "GET /api/stats/matrix?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients/p-li",
+    "GET /api/patients/p-li/medication-plans?include_history=true&page_size=100",
+    "GET /api/patients/p-li/medication-events?page_size=50",
+    "GET /api/patients/p-li/stats?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients/p-li/daily-slots?from=2026-11-03&to=2026-11-10",
+    "GET /api/tasks?patient_id=p-li&page_size=50",
+    "GET /api/tasks?status=OPEN&page_size=1",
+    "GET /api/patients?page_size=100",
+    "GET /api/patients/p-li",
+    "GET /api/patients/p-li/medication-plans?include_history=true&page_size=100",
+    "GET /api/patients/p-li/medication-events?page_size=50",
+    "GET /api/patients/p-li/stats?from=2026-11-03&to=2026-11-10",
+    "GET /api/patients/p-li/daily-slots?from=2026-11-03&to=2026-11-10",
+    "GET /api/tasks?patient_id=p-li&page_size=50",
+    "GET /api/tasks?status=OPEN&page_size=1",
+    "GET /api/patients?page_size=100",
+    "GET /api/admin/device-models?page_size=100",
+    "GET /api/admin/device-guides?page_size=100",
+    "GET /api/admin/users?page_size=100",
+    "GET /api/admin/audit-logs?page_size=50",
+    "GET /api/admin/knowledge-documents?page_size=100",
+    "GET /api/tasks?status=OPEN&page_size=1",
+    "GET /api/admin/device-models?page_size=100",
+    "GET /api/admin/device-guides?page_size=100",
+    "GET /api/admin/users?page_size=100",
+    "GET /api/admin/audit-logs?page_size=50",
+    "GET /api/admin/knowledge-documents?page_size=100"
+  ],
+  "posts": [
+    {
+      "url": "/api/auth/login",
+      "body": "{\"account\":\"clinician_a\",\"password\":\"[redacted]\"}"
+    },
+    {
+      "url": "/api/followups",
+      "body": "{\"patient_id\":\"p-li\",\"task_id\":\"task-1\",\"followed_at\":\"2026-11-10T00:46:13+08:00\",\"feedback\":\"已电话联系\",\"close_task\":true,\"create_retraining_reminder\":false}"
+    }
+  ]
+}
