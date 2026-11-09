@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Alert, Button, Checkbox, Input, Modal, message } from 'antd'
 import dayjs from 'dayjs'
 import { apiFetch } from '../api/client'
+import PatientAvatar from './medix/PatientAvatar'
 
 interface Props {
   open: boolean
@@ -9,6 +10,8 @@ interface Props {
   onClose: () => void
   /** 关闭成功后回调（父页面刷新） */
   onSuccess: () => void
+  /** 只在 Medix 工作台启用。随访页继续用原来的弹窗。 */
+  appearance?: 'medix'
 }
 
 /**
@@ -18,7 +21,7 @@ interface Props {
  * 因此这里提交一条带 task_id 的随访记录并置 close_task=true，
  * 处理人、时间、关联任务都在随访记录与审计里可追溯（PRD FUP-01）。
  */
-export default function TaskCloseModal({ open, task, onClose, onSuccess }: Props) {
+export default function TaskCloseModal({ open, task, onClose, onSuccess, appearance }: Props) {
   const [note, setNote] = useState('')
   const [retrain, setRetrain] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -61,10 +64,12 @@ export default function TaskCloseModal({ open, task, onClose, onSuccess }: Props
     }
   }
 
+  const medix = appearance === 'medix'
   return (
     <Modal
-      title={`处理任务 · ${task?.patientName ?? ''}`}
+      title={medix ? '处理任务' : `处理任务 · ${task?.patientName ?? ''}`}
       open={open}
+      width={medix ? 480 : undefined}
       onCancel={close}
       footer={[
         <Button key="cancel" onClick={close}>取消</Button>,
@@ -72,29 +77,57 @@ export default function TaskCloseModal({ open, task, onClose, onSuccess }: Props
       ]}
       destroyOnHidden
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <p className="muted" style={{ margin: 0 }}>
-          连续 3 个已到期时点未发现登记。关闭前请记录本次处理内容，便于追溯。
-        </p>
-        <div>
-          <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>处理说明（必填）</label>
-          <Input.TextArea
-            rows={3}
-            value={note}
-            maxLength={200}
-            showCount
-            onChange={(e) => {
-              setNote(e.target.value)
-              setError(null)
-            }}
-            placeholder="如：已电话联系，患者说明本周外出忘记携带装置，已提醒规律用药"
-          />
+      {medix ? (
+        <div className="ml-dialog-body">
+          <div className="ml-modal-who">
+            <PatientAvatar name={task?.patientName || ''} patientId={task?.patientId || ''} />
+            <div className="ml-modal-name">{task?.patientName}</div>
+          </div>
+          <div>
+            <label className="ml-field-label" htmlFor="ml-task-note">处理说明（必填）</label>
+            <Input.TextArea
+              id="ml-task-note"
+              rows={4}
+              value={note}
+              maxLength={200}
+              showCount
+              onChange={(e) => {
+                setNote(e.target.value)
+                setError(null)
+              }}
+              placeholder="记录本次处理内容"
+            />
+          </div>
+          <Checkbox checked={retrain} onChange={(e) => setRetrain(e.target.checked)}>
+            安排操作复训提醒
+          </Checkbox>
+          {error && <Alert type="error" showIcon message="处理失败" description={error} />}
         </div>
-        <Checkbox checked={retrain} onChange={(e) => setRetrain(e.target.checked)}>
-          同时安排一次操作复训提醒
-        </Checkbox>
-        {error && <Alert type="error" showIcon message="处理失败" description={error} />}
-      </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <p className="muted" style={{ margin: 0 }}>
+            连续 3 个已到期时点未发现登记。关闭前请记录本次处理内容，便于追溯。
+          </p>
+          <div>
+            <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>处理说明（必填）</label>
+            <Input.TextArea
+              rows={3}
+              value={note}
+              maxLength={200}
+              showCount
+              onChange={(e) => {
+                setNote(e.target.value)
+                setError(null)
+              }}
+              placeholder="如：已电话联系，患者说明本周外出忘记携带装置，已提醒规律用药"
+            />
+          </div>
+          <Checkbox checked={retrain} onChange={(e) => setRetrain(e.target.checked)}>
+            同时安排一次操作复训提醒
+          </Checkbox>
+          {error && <Alert type="error" showIcon message="处理失败" description={error} />}
+        </div>
+      )}
     </Modal>
   )
 }

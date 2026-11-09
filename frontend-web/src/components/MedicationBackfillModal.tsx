@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Alert, DatePicker, Input, Modal, Radio, Select, message } from 'antd'
 import dayjs, { type Dayjs } from 'dayjs'
 import { apiFetch } from '../api/client'
+import PatientAvatar from './medix/PatientAvatar'
 
 interface Plan {
   id: string
@@ -28,6 +29,8 @@ interface Props {
   onClose: () => void
   /** 补登成功后回调（父页面据此刷新） */
   onSuccess: () => void
+  /** 只在 Medix 工作台启用。患者详情继续用原来的弹窗。 */
+  appearance?: 'medix'
 }
 
 const localDay = (d: Date) => {
@@ -47,7 +50,7 @@ const localDay = (d: Date) => {
  * 说明：这里用受控 state 而非 antd Form —— Modal + destroyOnHidden 下
  * Form 字段注册时机不稳定，曾导致已填值被判为空。
  */
-export default function MedicationBackfillModal({ open, patientId, patientName, onClose, onSuccess }: Props) {
+export default function MedicationBackfillModal({ open, patientId, patientName, onClose, onSuccess, appearance }: Props) {
   const [plans, setPlans] = useState<Plan[]>([])
   const [slots, setSlots] = useState<Slot[]>([])
   const [mode, setMode] = useState<Mode>('slot')
@@ -110,6 +113,7 @@ export default function MedicationBackfillModal({ open, patientId, patientName, 
         return {
           id: s.id,
           day: d.format('MM-DD'),
+          medixDay: `${d.month() + 1}月${d.date()}日`,
           weekday: d.format('ddd'),
           time: d.format('HH:mm'),
           registered: s.has_active_record,
@@ -168,18 +172,84 @@ export default function MedicationBackfillModal({ open, patientId, patientName, 
   }
 
   const noPlan = !loading && plans.length === 0
+  const medix = appearance === 'medix'
   const fieldError = (msg?: string) =>
-    msg ? <span style={{ color: 'var(--bad)', fontSize: 12 }}>{msg}</span> : null
+    msg ? <span className={medix ? 'ml-field-error' : undefined} style={medix ? undefined : { color: 'var(--bad)', fontSize: 12 }}>{msg}</span> : null
+
+  const modeSwitch = regularPlans.length > 0 && prnPlans.length > 0 ? (
+    <div>
+      <div className={medix ? 'ml-field-label' : 'field-label'} style={medix ? undefined : { marginBottom: 8 }}>登记方式</div>
+      <Radio.Group value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
+        <Radio value="slot">按时点登记</Radio>
+        <Radio value="prn">按需登记</Radio>
+      </Radio.Group>
+    </div>
+  ) : null
+
+  const slotPicker = (
+    <div>
+      <label className={medix ? 'ml-field-label' : 'field-label'} style={medix ? undefined : { display: 'block', marginBottom: 8 }}>
+        {medix ? '选择计划时点' : '未发现登记的时点（近 7 日至明天）'}
+      </label>
+      {loading ? (
+        <p className={medix ? 'ml-hint' : 'muted'} style={medix ? undefined : { margin: 0 }}>加载中…</p>
+      ) : slotRows.length === 0 ? (
+        <p className={medix ? 'ml-hint' : 'muted'} style={medix ? undefined : { margin: 0 }}>该区间内没有固定时点</p>
+      ) : medix ? (
+        <ul className="ml-slot-list">
+          {slotRows.map((slot) => (
+            <li key={slot.id}>
+              <button
+                type="button"
+                className={`ml-slot${slotId === slot.id ? ' is-selected' : ''}`}
+                disabled={slot.registered}
+                onClick={() => onPickSlot(slot.id)}
+                aria-pressed={slotId === slot.id}
+              >
+                <span className="ml-radio" aria-hidden="true" />
+                <span className="ml-slot-time">{slot.medixDay} {slot.time}</span>
+                <span className="ml-slot-state">{slot.registered ? '已登记' : '待登记'}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul className="slot-pick-list">
+          {slotRows.map((s) => (
+            <li key={s.id}>
+              <button
+                type="button"
+                className={`slot-pick${slotId === s.id ? ' is-selected' : ''}`}
+                disabled={s.registered}
+                onClick={() => onPickSlot(s.id)}
+                aria-pressed={slotId === s.id}
+              >
+                <span className="slot-date">{s.day} {s.weekday}</span>
+                <span className="slot-time num">{s.time}</span>
+                <span className={`slot-chip${s.registered ? ' is-done' : ''}`}>
+                  {s.registered ? '已登记' : '待登记'}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {fieldError(errors.slot)}
+      <div className={medix ? 'ml-hint' : 'muted'} style={medix ? undefined : { marginTop: 4 }}>已登记的时点不可重复选择</div>
+    </div>
+  )
 
   return (
     <Modal
-      title={`补登用药 · ${patientName}`}
+      title={medix ? '补登用药' : `补登用药 · ${patientName}`}
       open={open}
+      width={medix ? 480 : undefined}
       onCancel={onClose}
       onOk={submit}
       okText="确认补登"
       cancelText="取消"
       confirmLoading={submitting}
+      okButtonProps={medix && noPlan ? { disabled: true } : undefined}
       destroyOnHidden
     >
       {noPlan ? (
@@ -189,6 +259,60 @@ export default function MedicationBackfillModal({ open, patientId, patientName, 
           message="该患者尚无用药计划"
           description="请先在患者详情中创建用药计划，再补登用药记录。"
         />
+      ) : medix ? (
+        <div className="ml-dialog-body">
+          <div className="ml-modal-who">
+            <PatientAvatar name={patientName} patientId={patientId || ''} />
+            <div className="ml-modal-name">{patientName}</div>
+          </div>
+          {modeSwitch}
+          {mode === 'slot' ? slotPicker : (
+            <div>
+              <label className="ml-field-label">按需计划</label>
+              <Select
+                style={{ width: '100%' }}
+                value={prnPlanId || undefined}
+                placeholder="选择按需计划"
+                options={prnPlans.map((p) => ({ value: p.id, label: `${p.drug_label || '按需计划'} · v${p.version}` }))}
+                onChange={(v) => {
+                  setPrnPlanId(v)
+                  setErrors((e) => ({ ...e, prn: undefined }))
+                }}
+                status={errors.prn ? 'error' : undefined}
+              />
+              {fieldError(errors.prn)}
+            </div>
+          )}
+          <div>
+            <label className="ml-field-label" htmlFor="ml-backfill-time">实际用药时间（必填）</label>
+            <DatePicker
+              id="ml-backfill-time"
+              showTime
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD HH:mm"
+              value={occurredAt}
+              onChange={(d) => {
+                setOccurredAt(d)
+                setErrors((e) => ({ ...e, time: undefined }))
+              }}
+              status={errors.time ? 'error' : undefined}
+            />
+            {fieldError(errors.time)}
+          </div>
+          <div>
+            <label className="ml-field-label" htmlFor="ml-backfill-note">备注（选填）</label>
+            <Input.TextArea
+              id="ml-backfill-note"
+              rows={2}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="补充说明"
+            />
+          </div>
+          {submitError && (
+            <Alert type="error" showIcon message="补登失败" description={submitError} />
+          )}
+        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {regularPlans.length > 0 && prnPlans.length > 0 && (

@@ -1,0 +1,44 @@
+{
+  "four": [
+    "full",
+    "partial",
+    "miss",
+    "none"
+  ],
+  "partialSummary": {
+    "N": 2,
+    "M": 1,
+    "missing": 1,
+    "rate": 50
+  },
+  "noneSummary": {
+    "ok": true,
+    "value": {
+      "N": 0,
+      "M": 0,
+      "missing": 0,
+      "rate": null
+    }
+  },
+  "emptyRows": [
+    {
+      "day": "2026-11-03",
+      "N": 0,
+      "M": 0,
+      "status": "none"
+    }
+  ],
+  "brokenRows": {
+    "ok": false
+  },
+  "nullMatrix": {
+    "ok": false
+  },
+  "threw": "统计矩阵不可用",
+  "status": {
+    "full": "full",
+    "partial": "partial",
+    "miss": "miss",
+    "none": "none"
+  }
+}
