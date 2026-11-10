@@ -1,288 +1,96 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Alert, DatePicker, Input, Modal, Radio, Select, message } from 'antd'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, Button, DatePicker, Input, Modal, Radio, Select, message } from 'antd'
 import dayjs, { type Dayjs } from 'dayjs'
-import { apiFetch } from '../api/client'
+import { ApiError, apiFetch } from '../api/client'
+import { PatientAvatar } from './medix/Medix'
+import { LoadError } from './medix/ClinicalUI'
+import { addDays, fetchAll, shanghaiDay, shanghaiParts, shortTime, type MedicationPlan } from './medix/clinical'
+import { useClinicalQuery } from './medix/useClinicalQuery'
+import '../styles/medix-dialogs.css'
 
-interface Plan {
-  id: string
-  plan_type: string
-  drug_label: string | null
-  version: number
-}
-
-interface Slot {
-  id: string
-  plan_id: string
-  patient_id: string
-  scheduled_at: string
-  state: string
-  has_active_record: boolean
-}
-
-type Mode = 'slot' | 'prn'
-
+interface Slot { id: string; plan_id: string; patient_id: string; scheduled_at: string; state: string; has_active_record: boolean }
 interface Props {
-  open: boolean
-  patientId: string | null
-  patientName: string
-  onClose: () => void
-  /** 补登成功后回调（父页面据此刷新） */
-  onSuccess: () => void
+  open: boolean; patientId: string | null; patientName: string; patientCode?: string; avatarUrl?: string | null; demoPatient?: boolean
+  onClose: () => void; onSuccess: () => void | Promise<void>
 }
-
-const localDay = (d: Date) => {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+const pickerTime = (iso: string) => { const p = shanghaiParts(iso); return dayjs(`${p.day}T${p.time}`) }
+const timestamp = (d: Dayjs) => `${d.format('YYYY-MM-DDTHH:mm:ss')}+08:00`
+const eligible = (slot: Slot) => slot.state === 'ACTIVE' && !slot.has_active_record && Date.parse(slot.scheduled_at) <= Date.now()
+export default function MedicationBackfillModal(props: Props) {
+  return props.open && props.patientId ? <BackfillDialog key={props.patientId} {...props} patientId={props.patientId} /> : null
 }
-
-/**
- * 补登用药弹窗：医护现场把患者漏登记的时点补录进来。
- *
- * 数据流：打开时按患者拉取「近 7 天 ~ 明天」的固定时点与计划；
- * 固定计划走时点选择（plan_id 取自时点自身，兼容历史版本计划）；
- * 按需计划（PRN）走时间选择。提交后由父页面刷新。
- *
- * 说明：这里用受控 state 而非 antd Form —— Modal + destroyOnHidden 下
- * Form 字段注册时机不稳定，曾导致已填值被判为空。
- */
-export default function MedicationBackfillModal({ open, patientId, patientName, onClose, onSuccess }: Props) {
-  const [plans, setPlans] = useState<Plan[]>([])
-  const [slots, setSlots] = useState<Slot[]>([])
-  const [mode, setMode] = useState<Mode>('slot')
-  const [slotId, setSlotId] = useState<string>('')
-  const [prnPlanId, setPrnPlanId] = useState<string>('')
-  const [occurredAt, setOccurredAt] = useState<Dayjs | null>(null)
-  const [note, setNote] = useState('')
-  const [errors, setErrors] = useState<{ slot?: string; prn?: string; time?: string }>({})
-  const [loading, setLoading] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-
-  const regularPlans = useMemo(() => plans.filter((p) => p.plan_type === 'REGULAR'), [plans])
-  const prnPlans = useMemo(() => plans.filter((p) => p.plan_type === 'PRN'), [plans])
-
-  useEffect(() => {
-    if (!open || !patientId) return
-    let alive = true
-    setLoading(true)
-    setErrors({})
-    setSubmitError(null)
-    setSlotId('')
-    setPrnPlanId('')
-    setOccurredAt(null)
-    setNote('')
-    const end = new Date()
-    const from = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 7)
-    const to = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
-    Promise.all([
-      apiFetch<{ items: Plan[] }>(`/api/patients/${patientId}/medication-plans?page_size=20`),
-      apiFetch<{ items: Slot[] }>(
-        `/api/patients/${patientId}/daily-slots?from=${localDay(from)}&to=${localDay(to)}`,
-      ).catch(() => ({ items: [] as Slot[] })),
-    ])
-      .then(([pl, sl]) => {
-        if (!alive) return
-        setPlans(pl.items)
-        setSlots(sl.items)
-        const hasRegular = pl.items.some((p) => p.plan_type === 'REGULAR')
-        const hasPrn = pl.items.some((p) => p.plan_type === 'PRN')
-        setMode(hasRegular ? 'slot' : hasPrn ? 'prn' : 'slot')
-        if (!hasRegular && hasPrn) setPrnPlanId(pl.items.find((p) => p.plan_type === 'PRN')!.id)
-      })
-      .catch((e) => {
-        if (alive) message.error((e as Error).message)
-      })
-      .finally(() => {
-        if (alive) setLoading(false)
-      })
-    return () => {
-      alive = false
-    }
-  }, [open, patientId])
-
-  // 时点直接平铺成可点列表（数量少，一眼看清哪些漏登记；避免下拉 + 搜索的额外操作）
-  const slotRows = useMemo(
-    () =>
-      slots.map((s) => {
-        const d = dayjs(s.scheduled_at)
-        return {
-          id: s.id,
-          day: d.format('MM-DD'),
-          weekday: d.format('ddd'),
-          time: d.format('HH:mm'),
-          registered: s.has_active_record,
-        }
-      }),
-    [slots],
-  )
-
-  const onPickSlot = (id: string) => {
-    setSlotId(id)
-    setErrors((e) => ({ ...e, slot: undefined }))
-    const slot = slots.find((s) => s.id === id)
-    if (slot) {
-      setOccurredAt(dayjs(slot.scheduled_at))
-      setErrors((e) => ({ ...e, time: undefined }))
-    }
+function BackfillDialog({ patientId, patientName, patientCode, avatarUrl, demoPatient, onClose, onSuccess }: Props & { patientId: string }) {
+  const [mode, setMode] = useState<'slot' | 'prn' | null>(null), [slotId, setSlotId] = useState(''), [prnId, setPrnId] = useState('')
+  const [occurredAt, setOccurredAt] = useState<Dayjs | null>(null), [note, setNote] = useState('')
+  const [error, setError] = useState(''), [busy, setBusy] = useState(false), [blocked, setBlocked] = useState(false), [unknown, setUnknown] = useState(false)
+  const [invalidField, setInvalidField] = useState<'slot' | 'prn' | 'time' | null>(null)
+  const invalid = (field: 'slot' | 'prn' | 'time', text: string) => {
+    setInvalidField(field); setError(text)
+    requestAnimationFrame(() => { const el = field === 'slot' ? document.querySelector<HTMLElement>('.ml-slot-options input:checked, .ml-slot-options input:not(:disabled)') : document.getElementById(field === 'prn' ? 'backfill-prn' : 'backfill-time'); el?.scrollIntoView({ block: 'nearest' }); el?.focus() })
   }
-
-  const submit = async () => {
-    const next: typeof errors = {}
-    const slot = mode === 'slot' ? slots.find((s) => s.id === slotId) : undefined
-    if (mode === 'slot' && !slot) next.slot = '请选择一个时点'
-    if (mode === 'prn' && !prnPlanId) next.prn = '请选择按需计划'
-    if (!occurredAt) next.time = '请选择用药时间'
-    if (Object.keys(next).length > 0) {
-      setErrors(next)
-      return
-    }
-    const planId = mode === 'slot' ? slot!.plan_id : prnPlanId
-    setSubmitting(true)
-    setSubmitError(null)
+  const lock = useRef(false), opener = useRef(document.activeElement as HTMLElement | null)
+  const [today] = useState(shanghaiDay)
+  const plansLoader = useCallback((signal: AbortSignal) => fetchAll<MedicationPlan>(`/api/patients/${patientId}/medication-plans?include_history=true`, signal), [patientId])
+  const slotsLoader = useCallback((signal: AbortSignal) => apiFetch<{ items: Slot[] }>(`/api/patients/${patientId}/daily-slots?from=${addDays(today, -6)}&to=${addDays(today, 1)}`, { signal }), [patientId, today])
+  const plansQuery = useClinicalQuery(patientId, plansLoader), slotsQuery = useClinicalQuery(patientId, slotsLoader)
+  const plans = plansQuery.data ?? [], slots = slotsQuery.data?.items ?? []
+  const prnPlans = plans.filter(p => p.plan_type === 'PRN')
+  const hasFixed = slots.length > 0 || plans.some(p => p.plan_type === 'REGULAR')
+  const currentMode = mode ?? (hasFixed || !prnPlans.length ? 'slot' : 'prn')
+  const loading = plansQuery.loading || slotsQuery.loading, readError = !!plansQuery.error || !!slotsQuery.error
+  const disabled = busy || blocked
+  useEffect(() => { const el = opener.current; return () => { requestAnimationFrame(() => el?.isConnected && el.focus()) } }, [])
+  const finish = async (duplicate = false) => {
+    message.success(duplicate ? '已保存，该时点已有登记' : '已补登用药记录'); onClose()
+    try { await onSuccess() } catch { message.warning('记录已保存，列表刷新失败，请重试读取') }
+  }
+  const verify = async () => {
+    setBusy(true)
     try {
-      const r = await apiFetch<{ event: { id: string }; is_duplicate: boolean }>('/api/medication-events', {
-        method: 'POST',
-        body: JSON.stringify({
-          patient_id: patientId,
-          plan_id: planId,
-          slot_id: mode === 'slot' ? slot!.id : null,
-          occurred_at: occurredAt!.format('YYYY-MM-DDTHH:mm:ssZ'),
-          note: note || null,
-        }),
-      })
-      // 先关弹窗、再提示：提示组件异常不应阻塞关闭
-      onClose()
-      onSuccess()
-      if (r.is_duplicate) {
-        message.warning('该时点已有有效登记，已按重复登记记录')
-      } else {
-        message.success('已补登用药记录')
-      }
-    } catch (e) {
-      setSubmitError((e as Error).message)
-    } finally {
-      setSubmitting(false)
-    }
+      const records = await fetchAll<{ status: string; slot_id: string | null; plan_id: string; occurred_at: string }>(`/api/patients/${patientId}/medication-events`)
+      if (records.some(r => r.status === 'ACTIVE' && (currentMode === 'slot' ? r.slot_id === slotId : r.plan_id === prnId && Date.parse(r.occurred_at) === Date.parse(timestamp(occurredAt!))))) { setError('找到该时点或计划的登记，请返回页面核对结果'); try { await onSuccess() } catch { /* Parent exposes its read error. */ } }
+      else setError('未找到本次记录，请返回页面核对后再补登')
+    } catch { setError('核对失败，请重试读取') } finally { setBusy(false) }
   }
-
-  const noPlan = !loading && plans.length === 0
-  const fieldError = (msg?: string) =>
-    msg ? <span style={{ color: 'var(--bad)', fontSize: 12 }}>{msg}</span> : null
-
-  return (
-    <Modal
-      title={`补登用药 · ${patientName}`}
-      open={open}
-      onCancel={onClose}
-      onOk={submit}
-      okText="确认补登"
-      cancelText="取消"
-      confirmLoading={submitting}
-      destroyOnHidden
-    >
-      {noPlan ? (
-        <Alert
-          type="warning"
-          showIcon
-          message="该患者尚无用药计划"
-          description="请先在患者详情中创建用药计划，再补登用药记录。"
-        />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {regularPlans.length > 0 && prnPlans.length > 0 && (
-            <div>
-              <div className="field-label" style={{ marginBottom: 8 }}>登记方式</div>
-              <Radio.Group value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
-                <Radio value="slot">按时点登记</Radio>
-                <Radio value="prn">按需登记</Radio>
-              </Radio.Group>
-            </div>
-          )}
-
-          {mode === 'slot' ? (
-            <div>
-              <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>
-                未发现登记的时点（近 7 日至明天）
-              </label>
-              {loading ? (
-                <p className="muted" style={{ margin: 0 }}>加载中…</p>
-              ) : slotRows.length === 0 ? (
-                <p className="muted" style={{ margin: 0 }}>该区间内没有固定时点</p>
-              ) : (
-                <ul className="slot-pick-list">
-                  {slotRows.map((s) => (
-                    <li key={s.id}>
-                      <button
-                        type="button"
-                        className={`slot-pick${slotId === s.id ? ' is-selected' : ''}`}
-                        disabled={s.registered}
-                        onClick={() => onPickSlot(s.id)}
-                        aria-pressed={slotId === s.id}
-                      >
-                        <span className="slot-date">{s.day} {s.weekday}</span>
-                        <span className="slot-time num">{s.time}</span>
-                        <span className={`slot-chip${s.registered ? ' is-done' : ''}`}>
-                          {s.registered ? '已登记' : '待登记'}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {fieldError(errors.slot)}
-              <div className="muted" style={{ marginTop: 4 }}>已登记的时点不可重复选择</div>
-            </div>
-          ) : (
-            <div>
-              <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>按需计划</label>
-              <Select
-                style={{ width: '100%' }}
-                value={prnPlanId || undefined}
-                placeholder="选择按需计划"
-                options={prnPlans.map((p) => ({ value: p.id, label: `${p.drug_label || '按需计划'} · v${p.version}` }))}
-                onChange={(v) => {
-                  setPrnPlanId(v)
-                  setErrors((e) => ({ ...e, prn: undefined }))
-                }}
-                status={errors.prn ? 'error' : undefined}
-              />
-              {fieldError(errors.prn)}
-            </div>
-          )}
-
-          <div>
-            <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>实际用药时间</label>
-            <DatePicker
-              showTime
-              style={{ width: '100%' }}
-              format="YYYY-MM-DD HH:mm"
-              value={occurredAt}
-              onChange={(d) => {
-                setOccurredAt(d)
-                setErrors((e) => ({ ...e, time: undefined }))
-              }}
-              status={errors.time ? 'error' : undefined}
-            />
-            {fieldError(errors.time)}
-          </div>
-
-          <div>
-            <label className="field-label" style={{ display: 'block', marginBottom: 8 }}>备注（可选）</label>
-            <Input.TextArea
-              rows={2}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="如：患者自述外出忘记携带装置"
-            />
-          </div>
-
-          {submitError && (
-            <Alert type="error" showIcon message="补登失败" description={submitError} />
-          )}
-        </div>
-      )}
-    </Modal>
-  )
+  const submit = async () => {
+    if (lock.current || blocked || loading || readError) return
+    const slot = slots.find(s => s.id === slotId)
+    if (currentMode === 'slot' && (!slot || !eligible(slot))) { invalid('slot', '请选择已到期且未登记的时点'); return }
+    if (slot && (slot.patient_id !== patientId || !plans.some(p => p.id === slot.plan_id && p.plan_type === 'REGULAR'))) { invalid('slot', '时点与患者或计划不匹配，请刷新后重新选择'); return }
+    if (!occurredAt || !occurredAt.isValid()) { invalid('time', '请选择实际用药时间'); return }
+    const occurred = timestamp(occurredAt), ms = Date.parse(occurred)
+    if (ms > Date.now()) { invalid('time', '实际用药时间不能晚于当前时间'); return }
+    const plan = plans.find(p => p.id === (currentMode === 'slot' ? slot!.plan_id : prnId))
+    if (currentMode === 'prn' && (!plan || plan.plan_type !== 'PRN' || ms < Date.parse(plan.starts_at) || (plan.ends_at && ms >= Date.parse(plan.ends_at)))) { invalid('prn', '请选择在该用药时间生效的按需计划'); return }
+    lock.current = true; setBusy(true); setError('')
+    let result: { is_duplicate: boolean }
+    try {
+      result = await apiFetch('/api/medication-events', { method: 'POST', body: JSON.stringify({ patient_id: patientId, plan_id: currentMode === 'slot' ? slot!.plan_id : prnId, slot_id: currentMode === 'slot' ? slot!.id : null, occurred_at: occurred, note: note.trim() || null }) })
+    } catch (e) {
+      if (!(e instanceof ApiError) || e.status >= 500) { setBlocked(true); setUnknown(true); setError('结果未确认，请刷新核对') }
+      else { setError(e.message); if ([403, 404].includes(e.status)) setBlocked(true); if (e.status === 409) slotsQuery.retry() }
+      lock.current = false; setBusy(false); return
+    }
+    await finish(result.is_duplicate); lock.current = false; setBusy(false)
+  }
+  return <Modal open centered width="35rem" title="补登用药" rootClassName="ml-theme ml-action-dialog" onCancel={() => !lock.current && onClose()} closable={!busy} maskClosable={!busy} keyboard={!busy} footer={<><Button disabled={busy} onClick={onClose}>取消</Button><Button type="primary" loading={busy} disabled={blocked || loading || readError || (!plans.length && !slots.length)} onClick={submit}>确认补登</Button></>}>
+    <div className="ml-dialog-body" aria-busy={busy || loading}>
+      <div className="ml-dialog-person"><PatientAvatar code={patientCode} src={avatarUrl} demoPatient={demoPatient} /><strong>{patientName}</strong></div>
+      {plansQuery.error && <LoadError error={`计划加载失败：${plansQuery.error}`} retry={plansQuery.retry} />}
+      {slotsQuery.error && <LoadError error={`时点加载失败：${slotsQuery.error}`} retry={slotsQuery.retry} />}
+      {loading ? <p className="ml-empty">加载中…</p> : !readError && !plans.length && !slots.length ? <p className="ml-empty">该患者尚无用药计划</p> : !readError && <>
+        {hasFixed && prnPlans.length > 0 && <Radio.Group aria-label="登记方式" value={currentMode} disabled={disabled} onChange={e => { setMode(e.target.value); setSlotId(''); setPrnId(''); setOccurredAt(null); setError(''); setInvalidField(null) }}><Radio value="slot">按时点登记</Radio><Radio value="prn">按需登记</Radio></Radio.Group>}
+        {currentMode === 'slot' ? <div className="ml-dialog-field"><label id="backfill-slots-label">选择计划时点</label>
+          {!slots.length ? <p className="ml-empty">近7日内没有固定时点</p> : <Radio.Group className={`ml-slot-options${invalidField === 'slot' ? ' is-invalid' : ''}`} aria-labelledby="backfill-slots-label" value={slotId} disabled={disabled} onChange={e => { if (disabled) return; setSlotId(e.target.value); const s = slots.find(x => x.id === e.target.value)!; setOccurredAt(pickerTime(s.scheduled_at)); setError(''); setInvalidField(null) }}>
+            {slots.map(s => <Radio key={s.id} value={s.id} disabled={disabled || !eligible(s)}><span>{shortTime(s.scheduled_at)}{slots.some(x => x.id !== s.id && x.scheduled_at === s.scheduled_at) ? ` · ${plans.find(p => p.id === s.plan_id)?.drug_label || '计划不可用'}` : ''}</span>{!eligible(s) && <small>{s.has_active_record ? '已登记' : s.state !== 'ACTIVE' ? '已取消' : '未到时点'}</small>}</Radio>)}
+          </Radio.Group>}
+          {!!slots.length && !slots.some(eligible) && <p className="ml-empty">暂无可补登时点</p>}
+        </div> : <div className="ml-dialog-field"><label htmlFor="backfill-prn">按需计划</label><Select id="backfill-prn" status={invalidField === 'prn' ? 'error' : undefined} value={prnId || undefined} disabled={disabled} placeholder="选择按需计划" options={prnPlans.map(p => ({ value: p.id, label: `${p.drug_label || '按需计划'} · v${p.version}` }))} onChange={v => { setPrnId(v); setError(''); setInvalidField(null) }} /></div>}
+        <div className="ml-dialog-field"><label htmlFor="backfill-time">实际用药时间</label><DatePicker id="backfill-time" status={invalidField === 'time' ? 'error' : undefined} showTime format="YYYY-MM-DD HH:mm" disabled={disabled} value={occurredAt} onChange={d => { setOccurredAt(d); setError(''); setInvalidField(null) }} /></div>
+        <div className="ml-dialog-field"><label htmlFor="backfill-note">备注</label><Input.TextArea id="backfill-note" rows={3} disabled={disabled} value={note} onChange={e => setNote(e.target.value)} placeholder="补充说明" /></div>
+      </>}
+      {error && <div aria-live="polite"><Alert type="error" title={error} action={unknown ? <Button disabled={busy} onClick={verify}>刷新核对</Button> : undefined} /></div>}
+    </div>
+  </Modal>
 }
+

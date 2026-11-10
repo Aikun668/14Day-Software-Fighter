@@ -1,0 +1,82 @@
+[
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\App.css",
+    "sha256": "6E25A776D3E8102DA5BACB3CB99F4A5FC662A2E01E6143140671A556D28C3D5C"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\App.tsx",
+    "sha256": "9EE0AB21CF622C2D027E7836111984F35C6AF16A78F4CF1BE1F23876A9B57321"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\index.css",
+    "sha256": "87BDFE1457943CC53631076B85DCE88F3321A7A07803EE23DB902DCB0B90B2E3"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\main.tsx",
+    "sha256": "6E9E5807FCBD48B75A96DB5CBEF36C996262196BE42E6D4760DC86BABBE61AD2"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\api\\client.ts",
+    "sha256": "8F8338AF85992BA6F21AA8096C9315E3C528B9B1ADBA3F79285EE3EA53E53709"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\assets\\hero.png",
+    "sha256": "881FFBCAAFC212E49ADDAD08846A5B82761355FA20624253AF3477BA33262C5C"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\assets\\react.svg",
+    "sha256": "35EF61ED53B323AE94A16A8EC659B3D0AF3880698791133F23B084085AB1C2E5"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\assets\\vite.svg",
+    "sha256": "5BE21ACD42EB7B896E517F4E0F0F11EB5C5D9E54FBBCEBE9453F033008FCCA6F"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\components\\AppLayout.tsx",
+    "sha256": "0F0FDB6917F1C4692CB4AFFCDCB973683B47699FE14F641E010DF547B868E6B0"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\components\\GuideStepImage.tsx",
+    "sha256": "67080FD732B73D7ADBA677E1A0CE015B01F0E8B93E1BFFE5A35F563E404CEDBB"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\components\\icons.tsx",
+    "sha256": "BF6C9E45D9E02B817C1700DEB542C9310D0BCD788AB877EA0DAB0A5A935BE8F2"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\features\\auth\\AuthContext.tsx",
+    "sha256": "3A0F1D7B2CA3285EE0C14BB55A23AFFABF0A5570AC3018400D049C0E3EBF6B05"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\features\\auth\\RequireAuth.tsx",
+    "sha256": "A3C4495FEAE67D5D422DFC81F04CE9AB719C91F8C434983324555944E6444690"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\pages\\auth\\ChangePasswordPage.tsx",
+    "sha256": "76827F0D40B705C68F65E062CA68B87AB3F83470E954ACB909F9B771AA215790"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\pages\\auth\\LoginPage.tsx",
+    "sha256": "642F9E617CCE3515797B53B763314DE50794F67909213C3E9107E09FD1CE1062"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\pages\\patient\\AssistantPage.tsx",
+    "sha256": "388F12724FE3005817C873A002FCF7C085D3BB66375AE9E3B7092D3F02A115DC"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\pages\\patient\\GuidePage.tsx",
+    "sha256": "D2C04CCB7533DF72FB79175EBA3B98669EFA108FF143CB35B62AB81D3BFA13ED"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\pages\\patient\\MedicationPage.tsx",
+    "sha256": "4F9801A6428AF7A5FB57AA20526F94F4D7F7F2E0AB3C40136A1469D4A9DCEFE0"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\pages\\patient\\TodayPage.tsx",
+    "sha256": "B8B624E3AA4B1FB080DC59F444464AC2185C55240C33F8CE238203D03C882D70"
+  },
+  {
+    "path": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\patient-app\\src\\pages\\patient\\TrainingPage.tsx",
+    "sha256": "899761BDC617070559A7B23F4AC7DA22374EE5A991BE6DFAF8A1841AC3E7C24F"
+  }
+]

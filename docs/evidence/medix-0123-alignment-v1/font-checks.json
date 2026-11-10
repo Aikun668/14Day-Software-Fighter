@@ -1,0 +1,42 @@
+{
+  "h1": {
+    "fonts": [
+      {
+        "familyName": "Noto Sans SC Medium",
+        "postScriptName": "NotoSansSC-Medium",
+        "isCustomFont": true,
+        "glyphCount": 5
+      }
+    ]
+  },
+  ".ml-product-name": {
+    "fonts": [
+      {
+        "familyName": "Noto Sans SC",
+        "postScriptName": "NotoSansSC-Regular",
+        "isCustomFont": true,
+        "glyphCount": 16
+      }
+    ]
+  },
+  "label": {
+    "fonts": [
+      {
+        "familyName": "Noto Sans SC",
+        "postScriptName": "NotoSansSC-Regular",
+        "isCustomFont": true,
+        "glyphCount": 3
+      }
+    ]
+  },
+  "loaded_fonts": [
+    {
+      "file": "noto-sans-sc-medium-core.woff2",
+      "bytes": 1478672
+    },
+    {
+      "file": "noto-sans-sc-regular-core.woff2",
+      "bytes": 1455568
+    }
+  ]
+}

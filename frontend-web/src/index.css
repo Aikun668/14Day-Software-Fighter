@@ -56,7 +56,6 @@ body,
   font-family: Inter, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
   /* html 必须保持 16px：它是 rem 的根，设小会让所有 rem token 一起缩水。
      正文尺寸落在 body 层。 */
-  font-size: 1rem;
   line-height: 1.5;
   text-align: left;
   -webkit-font-smoothing: antialiased;
@@ -66,6 +65,8 @@ body,
 body {
   font-size: var(--fs-body);
 }
+
+#root { font-size: 1rem; }
 
 ::selection {
   background: #E8EEFF;

@@ -1,0 +1,190 @@
+{
+  "checked_at": "2026-11-10T16:24:16.407697+00:00",
+  "kind": "image-generation mockup package, not product runtime verification",
+  "images": [
+    {
+      "file": "01-login.png",
+      "width": 852,
+      "height": 1846,
+      "sha256": "7929265838c3afee6d1fa958fd71017f53dc3ab31558472ce7f09e8628c9f124"
+    },
+    {
+      "file": "02-change-password.png",
+      "width": 852,
+      "height": 1846,
+      "sha256": "42dee3836279fd064a313e6bc606f054bae40f6023faf07bce34a07168be2118"
+    },
+    {
+      "file": "03-today.png",
+      "width": 852,
+      "height": 1846,
+      "sha256": "94049ebdd03dd47d7ae21d0a096d903adec049c5bbe2eb4d725262c7648a327a"
+    },
+    {
+      "file": "04-guide.png",
+      "width": 852,
+      "height": 1846,
+      "sha256": "eb895615360f51e3a5fd75540ce567180d8a51e59ca40009287f12d14f11165c"
+    },
+    {
+      "file": "05-training.png",
+      "width": 852,
+      "height": 1846,
+      "sha256": "d996739ce1e08595c1cd5c1665e5c5238633d86edcbbd640e6b0e5df11da3c89"
+    }
+  ],
+  "final_images": 5,
+  "source_files_checked": 20,
+  "product_source_unchanged": true,
+  "missing_gallery_links": [],
+  "browser_page_errors": [],
+  "gallery_viewports": [
+    {
+      "width": 1440,
+      "scrollWidth": 1440,
+      "images": [
+        {
+          "name": "01-login.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154392696010516
+        },
+        {
+          "name": "02-change-password.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154392696010516
+        },
+        {
+          "name": "03-today.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154392696010516
+        },
+        {
+          "name": "04-guide.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154392696010516
+        },
+        {
+          "name": "05-training.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154392696010516
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "images": [
+        {
+          "name": "01-login.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154481960573623
+        },
+        {
+          "name": "02-change-password.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154481960573623
+        },
+        {
+          "name": "03-today.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154481960573623
+        },
+        {
+          "name": "04-guide.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154481960573623
+        },
+        {
+          "name": "05-training.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.46154481960573623
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "images": [
+        {
+          "name": "01-login.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615415780411223
+        },
+        {
+          "name": "02-change-password.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615415780411223
+        },
+        {
+          "name": "03-today.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615415780411223
+        },
+        {
+          "name": "04-guide.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615415780411223
+        },
+        {
+          "name": "05-training.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615415780411223
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "images": [
+        {
+          "name": "01-login.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615462201825609
+        },
+        {
+          "name": "02-change-password.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615462201825609
+        },
+        {
+          "name": "03-today.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615462201825609
+        },
+        {
+          "name": "04-guide.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615462201825609
+        },
+        {
+          "name": "05-training.png",
+          "naturalWidth": 852,
+          "naturalHeight": 1846,
+          "displayRatio": 0.4615462201825609
+        }
+      ]
+    }
+  ],
+  "original_image_link": "passed",
+  "native_app_interactions_tested": false,
+  "user_visual_approval": "pending"
+}

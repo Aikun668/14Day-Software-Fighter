@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route } from 'react-router-dom'
+import AdminNavigation from './pages/admin/AdminNavigation'
 import LoginPage from './pages/auth/LoginPage'
 import ChangePasswordPage from './pages/auth/ChangePasswordPage'
 import WorkbenchPage from './pages/clinician/WorkbenchPage'
@@ -7,44 +8,28 @@ import PatientDetailPage from './pages/clinician/PatientDetailPage'
 import PlanEditPage from './pages/clinician/PlanEditPage'
 import StatsPage from './pages/clinician/StatsPage'
 import FollowupPage from './pages/clinician/FollowupPage'
-import AdminPage from './pages/admin/AdminPage'
-import WebLayout from './components/WebLayout'
+import AdminRoute from './pages/admin/AdminRoute'
+import MedixLayout from './components/medix/MedixLayout'
 import { AuthProvider } from './features/auth/AuthContext'
 import { RequireAuth } from './features/auth/RequireAuth'
-
-// Clinic Comfort 外壳：侧栏钉在视口里，主栏自己滚。卡片仍按内容高。
-// 新页面要上 Clinic Comfort，就用它，而不是往 WebLayout 里加路径判断。
-function ComfortShell({
-  children,
-  crumb,
-}: {
-  children: React.ReactNode
-  crumb?: { parent: string; parentTo: string; current: string }
-}) {
-  return (
-    <RequireAuth>
-      <WebLayout variant="comfort" crumb={crumb}>{children}</WebLayout>
-    </RequireAuth>
-  )
-}
 
 // J013 路由骨架 + 鉴权守卫
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
+        <AdminNavigation>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
-          <Route path="/workbench" element={<ComfortShell><WorkbenchPage /></ComfortShell>} />
-          <Route path="/patients" element={<ComfortShell><PatientListPage /></ComfortShell>} />
-          <Route path="/patients/:id" element={<ComfortShell crumb={{ parent: '患者', parentTo: '/patients', current: '详情' }}><PatientDetailPage /></ComfortShell>} />
-          <Route path="/plans" element={<ComfortShell><PlanEditPage /></ComfortShell>} />
-          <Route path="/stats" element={<ComfortShell><StatsPage /></ComfortShell>} />
-          <Route path="/followups" element={<ComfortShell><FollowupPage /></ComfortShell>} />
-          <Route path="/admin" element={<ComfortShell><AdminPage /></ComfortShell>} />
+          <Route path="/workbench" element={<RequireAuth><MedixLayout><WorkbenchPage /></MedixLayout></RequireAuth>} />
+          <Route path="/patients" element={<RequireAuth><MedixLayout><PatientListPage /></MedixLayout></RequireAuth>} />
+          <Route path="/patients/:id" element={<RequireAuth><MedixLayout><PatientDetailPage /></MedixLayout></RequireAuth>} />
+          <Route path="/plans" element={<RequireAuth><MedixLayout><PlanEditPage /></MedixLayout></RequireAuth>} />
+          <Route path="/stats" element={<RequireAuth><MedixLayout><StatsPage /></MedixLayout></RequireAuth>} />
+          <Route path="/followups" element={<RequireAuth><MedixLayout><FollowupPage /></MedixLayout></RequireAuth>} />
+          <Route path="/admin" element={<RequireAuth><AdminRoute /></RequireAuth>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+        </AdminNavigation>
       </BrowserRouter>
     </AuthProvider>
   )

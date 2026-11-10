@@ -1,0 +1,63 @@
+{
+  "mode": "real-backend-read-only",
+  "writes": "authentication login/logout only",
+  "12_errors": [],
+  "13_errors": [],
+  "14_errors": [],
+  "15_errors": [],
+  "api_statuses": [
+    [
+      "client.ts",
+      200
+    ],
+    [
+      "auth/login",
+      200
+    ],
+    [
+      "admin/device-models?page=1&page_size=20",
+      200
+    ],
+    [
+      "admin/device-models?page=1&page_size=100",
+      200
+    ],
+    [
+      "admin/device-guides?page=1&page_size=20",
+      200
+    ],
+    [
+      "admin/device-guides?page=1&page_size=20",
+      200
+    ],
+    [
+      "admin/users?page=1&page_size=20",
+      200
+    ],
+    [
+      "admin/device-models?page=1&page_size=100",
+      200
+    ],
+    [
+      "admin/knowledge-documents?page=1&page_size=20",
+      200
+    ],
+    [
+      "admin/knowledge-documents/f4fdd1a7-8594-43c1-bacf-e747d7db8c48",
+      200
+    ],
+    [
+      "admin/audit-logs?page=1&page_size=100",
+      200
+    ],
+    [
+      "admin/audit-logs?page=1&page_size=100",
+      200
+    ],
+    [
+      "auth/logout",
+      204
+    ]
+  ],
+  "pageerrors": []
+}

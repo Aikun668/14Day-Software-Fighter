@@ -1,0 +1,110 @@
+{
+  "status": "documentation-self-reviewed-frozen",
+  "date": "2026-11-09",
+  "scope": "04 supplemental contract; 10-15 final specifications; 00-15 complete handoff and document acceptance",
+  "authority": "User asked to finish all remaining specifications, perform overall review and deliver. No runtime implementation claimed.",
+  "visual_approval_note": "13 and 14 are retained references without separate individual approval records; document freeze does not assert image approval.",
+  "policy": "New version for revisions; never overwrite prior packages. Read-only plus SHA256; manifest excludes itself.",
+  "files": [
+    {
+      "file": "04-PATIENT-DETAIL.md",
+      "sha256": "6E07C94EB66211ABE884445EFD6050BB76B07E4B98DBF1D4F4BC6597FF59FE4E"
+    },
+    {
+      "file": "10-BACKFILL.md",
+      "sha256": "1E32F7F5E983251CA6CB24FFB168ADA334D48592300D204CF72E285F30D54FD4"
+    },
+    {
+      "file": "11-DEVICES.md",
+      "sha256": "569B81DB2B907551E9915EA941F588C6925ED37D782948EF368DD9177FB6BE92"
+    },
+    {
+      "file": "12-GUIDES.md",
+      "sha256": "9E5AA226F3F80CCF0F7C3C1C41440FEE4BA43B65B8BB353D040454E93E5FF503"
+    },
+    {
+      "file": "13-ACCOUNTS.md",
+      "sha256": "00C1EE83A0FFF2B8F39337FDCE6F2E3BF4E03AEB1825CEE136D11214052E2639"
+    },
+    {
+      "file": "14-KNOWLEDGE.md",
+      "sha256": "2A11530C3C2B3431067C74A86F4DCA81AD42221F4A0E8D78E6BDB6B49935C32E"
+    },
+    {
+      "file": "15-AUDIT.md",
+      "sha256": "A754164F60BB53E6586386E636F4B0F2984C1587B2607D2231874B7D9428A6A2"
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "sha256": "224B022155EDA20482E8EC5DEEB00255D6FE1CF7457A865E13C5ACE2B05AD07D"
+    },
+    {
+      "file": "ADMIN-SYSTEM.md",
+      "sha256": "F30FB4C65E6DE90B8DAD7DB270D3733A40DE80DF09C0F6CDEFA489CE1DE751E3"
+    },
+    {
+      "file": "HANDOFF.md",
+      "sha256": "C1CB88638E609E42EBACFA43305AC0B1E6584EC12061D8E1BCBA1524640CF56A"
+    },
+    {
+      "file": "IMPLEMENTATION.md",
+      "sha256": "CF15B9DB59BB3EAD13417F216E39E015E4BBB4C6B86AE300E5628ACB9DF4CCF9"
+    },
+    {
+      "file": "PAGE-REGISTRY.md",
+      "sha256": "9BE9C8E437E197527668C688298DA77A632F6A12EF5112ED36769B36716428B3"
+    },
+    {
+      "file": "REFERENCE-MANIFEST.json",
+      "sha256": "403D35989633EF924A8D596C8EFB106FB699F24B943D5F668183A8B700AB9DB8"
+    },
+    {
+      "file": "references/04-patient-detail.png",
+      "sha256": "655901ADA8336C4279A8E08E1A1B48C82869A4712F5120FB38A070C9FCB086A2"
+    },
+    {
+      "file": "references/10-medication-backfill-modal.png",
+      "sha256": "CDCE832BF55A84702E11123AEDABD43C303CB99096032BA89FF08953CAF21788"
+    },
+    {
+      "file": "references/11-admin-devices.png",
+      "sha256": "2A3FCA1C2B2F9D90C9AD12495BA650EC8F09DFE12952D80A32DE9C9FF4D907A6"
+    },
+    {
+      "file": "references/12-admin-guides.png",
+      "sha256": "E55FB6E8431B45288C91D21751345F5EB539F77A44D238F6AEFE0F707C24418D"
+    },
+    {
+      "file": "references/13-admin-accounts.png",
+      "sha256": "E0AE7A61EA1AB560CF87178C222F1DC5B9D0B12281F9D37E5340DA9292E3D0A4"
+    },
+    {
+      "file": "references/14-admin-knowledge.png",
+      "sha256": "1E5ACE690FEB849EEB0701D8DD89572774B055A29E4BA8A9F298EE200C2BC155"
+    },
+    {
+      "file": "references/15-audit-overview.png",
+      "sha256": "25A56CFC602959E1F4663FF5FD10DA0E7AFA43C6709F08670C38FC1E7E426170"
+    },
+    {
+      "file": "REVIEW.md",
+      "sha256": "DBF3BFB09283D76DA091156F846E4B341060F5AB1D7D2688A4A33EF5E21D1A3D"
+    },
+    {
+      "file": "RULES.md",
+      "sha256": "69E45290E07C8F8816777F128CF6F45AD2D30BA13631FDE4AF28B15011F82DD6"
+    },
+    {
+      "file": "SOURCE-BASELINE.json",
+      "sha256": "135B20BE35CD09EFE5E56D5236CC834CD8B68AFA6E94C2AA6895AD5ADD06DF38"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "0843AFA651EEB480A9DB041760A96F7DD3D781E9FFC2F41406E3E9C8DE740346"
+    },
+    {
+      "file": "verify.py",
+      "sha256": "A9459F0AF91E157D96ED6670B4095C518BBF15B9E50010D34924D79010F1E7C9"
+    }
+  ]
+}

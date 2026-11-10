@@ -1,0 +1,98 @@
+{
+  "created_at": "2026-11-10T16:26:46.222308+00:00",
+  "scope": "APP option 2 first half: five image-generation mockups",
+  "tool": "built-in image_gen",
+  "independent_static_review": "passed; P0=0 P1=0 P2=0",
+  "user_visual_approval": "pending",
+  "frozen": false,
+  "product_code_changed": false,
+  "final_images": [
+    {
+      "file": "01-login.png",
+      "sha256": "7929265838c3afee6d1fa958fd71017f53dc3ab31558472ce7f09e8628c9f124",
+      "version": "R2",
+      "source": "exec-ae29fddc-0f20-4303-ab33-d4bf8613bf77.png",
+      "prompt": "prompt-01-r2.txt"
+    },
+    {
+      "file": "02-change-password.png",
+      "sha256": "42dee3836279fd064a313e6bc606f054bae40f6023faf07bce34a07168be2118",
+      "version": "R2",
+      "source": "exec-f4aa1a43-cb97-433a-921e-c9e68e348daf.png",
+      "prompt": "prompt-02-r2.txt"
+    },
+    {
+      "file": "03-today.png",
+      "sha256": "94049ebdd03dd47d7ae21d0a096d903adec049c5bbe2eb4d725262c7648a327a",
+      "version": "R3",
+      "source": "exec-38c49f49-9bbc-4fb2-a3d6-e59550306ac0.png",
+      "prompt": "prompt-03-r3.txt"
+    },
+    {
+      "file": "04-guide.png",
+      "sha256": "eb895615360f51e3a5fd75540ce567180d8a51e59ca40009287f12d14f11165c",
+      "version": "R6",
+      "source": "exec-fd8284a9-a427-4f5c-841d-4041456a7681.png",
+      "prompt": "prompt-04-r6.txt"
+    },
+    {
+      "file": "05-training.png",
+      "sha256": "d996739ce1e08595c1cd5c1665e5c5238633d86edcbbd640e6b0e5df11da3c89",
+      "version": "R4",
+      "source": "exec-f4a3d520-541d-49f5-a558-f4f9992c9be2.png",
+      "prompt": "prompt-05-r4.txt"
+    }
+  ],
+  "remaining": [
+    "06 medication",
+    "07 assistant",
+    "08 training history",
+    "09 revoke sheet",
+    "10 assistant result"
+  ],
+  "files": {
+    "01-login.png": "7929265838c3afee6d1fa958fd71017f53dc3ab31558472ce7f09e8628c9f124",
+    "02-change-password.png": "42dee3836279fd064a313e6bc606f054bae40f6023faf07bce34a07168be2118",
+    "03-today.png": "94049ebdd03dd47d7ae21d0a096d903adec049c5bbe2eb4d725262c7648a327a",
+    "04-guide.png": "eb895615360f51e3a5fd75540ce567180d8a51e59ca40009287f12d14f11165c",
+    "05-training.png": "d996739ce1e08595c1cd5c1665e5c5238633d86edcbbd640e6b0e5df11da3c89",
+    "checks/gallery-desktop.png": "ed660bf87b1d9479205fdfd7d51eeb33fb228d1b316b3849c107d825f0335da6",
+    "checks/gallery-mobile.png": "99fabc5405351140364c4421007d767fa75c0124d24181cba40278157ab5c2bc",
+    "GENERATED-SOURCES.json": "ce095400f1bfdb8866a28b7fdf4376381be47350d800e9fff3fd0d666574e4d8",
+    "INDEPENDENT-REVIEW.md": "1d6c0902ac21dbe15969d8bbd9d030f74ff0e0138991e2907c1a5074890d3bbf",
+    "index.html": "8271f52e5bce3e54360c88a09a47c28e9934a0e02043cf6bd96e36aec161bf24",
+    "preview-checks.json": "ec2df812f4473fcd67203fcc75c64d58c198afe8bcc81fd6689420d4b1e23e11",
+    "prompt-01-r2.txt": "d292df9a26ac6c108d868a882c027a513edbd08ddc0c19d6203918d1a1074d59",
+    "prompt-01.txt": "b70ea381449886f0587c99a8d9c31f8219ed7c8a3742365a26ae9a9375db07e5",
+    "prompt-02-r2.txt": "9c3a44b23a5f4e3b148fb5ac80830c8293ecfb1e66bde97e151740ac08bdfeca",
+    "prompt-02.txt": "8d81c5cd76d78ea225e9600ecdf67f9c698ddb4906e32c6a8847a96dad6bc347",
+    "prompt-03-r2.txt": "8341101941a63a06b78bc5dcd0d10efb1414dbd3746131c0001d50bb7bfa1165",
+    "prompt-03-r3.txt": "4663af25b7844857fea41db855c0df9f685a23afa2bc48caf16576177059a49e",
+    "prompt-03.txt": "d292f93b9f4c69520a904492afe59573d3c80879339db5b1fc227bc6e2a376e1",
+    "prompt-04-r2.txt": "9afbc5bab1d970aafa3e4accf51fb35a700c6318437bbd2d17316ee7d0379af8",
+    "prompt-04-r3.txt": "4d5eb7c9ed66ac5a929e6ee6c4241fedd1da01bc8321cf70f38697b826d207d0",
+    "prompt-04-r4.txt": "b6a631bb1a94b2448c2d826a8a04b5cd933920cbc76477b12259935d2bfbf93f",
+    "prompt-04-r5.txt": "978daf94fb72c1199651579e7bc7861fee18637b53fa3afaac16e79eb563f34c",
+    "prompt-04-r6.txt": "36d28c9ac2d99f549a61c1cd6ac3d98a330aca25eb776c59339d67d70529a0d2",
+    "prompt-04.txt": "453e72fc2198584014fddfac9371151742e9f06f10d99fc950ecf615b8bef211",
+    "prompt-05-r2.txt": "28f9f059dfed99874c64cb4adef8eab281f79ddbae6c84651c27d5befcb2f0b4",
+    "prompt-05-r3.txt": "63a6c3762f2758550b9c183da9524c2cdac37b4ce8bd8b9b51d49b665442fafb",
+    "prompt-05-r4.txt": "1ab6a1827a608712030bbd37c2690771c567322423109b2c2c46d1c0d310429a",
+    "prompt-05.txt": "29e9729858c11534148982af0b35390adeb9738bfbb8f4440656e67d133812e7",
+    "PROMPTS.md": "9b79485c67f9b076938c7e473ff59022fca421f72432cad91c3a587b81c66ed0",
+    "REVIEW.md": "4b0942bf6187f83f85a412cc1dab88cfbca78b058ed12493897d6ae061acda53",
+    "revisions/r1/01-login.png": "5f6b5729c23643d7d04a7f269736894fcde19f6ea3af78b74bf3eefa7bbc47f3",
+    "revisions/r1/02-change-password.png": "e0c497e3ed746f85d573b9392fbafb269b17c542f753f9a863dec20ccccf67e3",
+    "revisions/r1/03-today.png": "41fec703f85568b81dc91250d1b293fb25a347064435a57654209b4fd2326d70",
+    "revisions/r1/04-guide.png": "cfd2e8ad3bfbc9374dfb42e5a2acbb39e62db130b14eca8ff9d5e48dcab5b682",
+    "revisions/r1/05-training.png": "82745ff0d1ee42c40b93c3018750a337ff8f0e17ec92a89be62afd6788bb6c38",
+    "revisions/r2/01-login.png": "7929265838c3afee6d1fa958fd71017f53dc3ab31558472ce7f09e8628c9f124",
+    "revisions/r2/02-change-password.png": "42dee3836279fd064a313e6bc606f054bae40f6023faf07bce34a07168be2118",
+    "revisions/r2/03-today.png": "9c2878428feb38be4cd3204cbcf926ce08f6547eeefbe9d12e7c60ce774f89c0",
+    "revisions/r2/04-guide.png": "526eb3030a5658f6bebea9916f08d00c7edad82d26d229ea22dab2b5edcc7798",
+    "revisions/r2/05-training.png": "3e650efd819e9888f3e575dec4f73186b4fbf5af9973b540546a953d0e326a7c",
+    "RULES.md": "a40ab0ea45ea83ac157d8d9fd98971a0d8e8c82966809a502819699e83d8aed1",
+    "source-before.json": "14173ff2cf9ec5619ee8f9d65d6547e0f33c47b927949922272ac7b8733b1767",
+    "verify-preview.py": "d367e5f1383d44e77678bb3a7a9e54e5eaa036b520c12e2ec3b55e0b60f7c136"
+  }
+}

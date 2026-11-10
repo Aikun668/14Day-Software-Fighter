@@ -1,0 +1,18 @@
+Create a realistic production-quality Chinese patient mobile app UI, grounded in the attached approved Medix Light web design. This is one of five coordinated pages in an existing app, not a new brand. Recompose for a phone; do not shrink a desktop screen. Target logical viewport 390 x 844, exact tall portrait ratio 195:422, render at high resolution. Output APP CONTENT ONLY, edge-to-edge rectangular canvas. No phone frame, mockup backdrop, OS status bar, clock, battery, home indicator, browser chrome, title captions outside the app, or multiple screens.
+
+Visual system: quiet neutral light-gray #F6F6F8 background, pure white working surfaces, bright violet #8146FF for primary action and current navigation only, readable charcoal #424650 text, secondary #697180, pale dividers #EEF0F3. Use #3185ED blue for charts and #43B7A0 teal for completed states, apricot #E8B77E very sparingly for attention. Do not tint the whole page violet. No dark theme, glass, gradients, heavy shadow, nested cards, excessive pills, or decorative color dots. Match the restrained lively feeling of the approved web reference. Clean Noto Sans SC / modern Chinese sans-serif. Main body 16 logical px; secondary 14; headings 22; control height >=48; content side margins24. Fine simple consistent line icons. Purposeful whitespace and confident hierarchy; no tiny filler explanations. Cards only where actually useful, with radius10-12 and no thick borders.
+
+Current date anchor 2026-11-10. All visible data are illustrative design fixture values. This is a design image, not evidence of a running implementation. Every visible Chinese glyph must be clear, correct and legible. Do not include any documentation or disclaimers inside the UI. Use only the exact page-specific copy specified below, not English filler or invented features.
+
+PAGE: 首次改密. Reference image 1 is the just-generated patient mobile login; this screen must visibly belong to that exact same app. Reference image 2 is the approved desktop design for reinforcing the brand. Keep the logo, font, flat light neutral background, margins, input design and violet button exactly consistent with image 1. Do NOT copy its login fields or large doctor.
+
+At logical 390x844, brand mark plus “吸入治疗管理” at x24 y40, same 22px treatment as login. Under it, a quiet gray back chevron with text “返回登录”, a44px-high target near y104. The header is spacious but not wasteful.
+Main heading “设置新密码” at x24 y194, 24px charcoal. Then a simple flat three-field form:
+- label “原密码” / white input placeholder “请输入原密码”
+- label “新密码” / white input placeholder “至少8位”
+- label “确认新密码” / white input placeholder “再次输入新密码”
+All labels16px, placeholders16px, each inputheight52px with a gray eye control at right, enough44px touch area.
+Form width342. Each label+input group separated by24px. Fields at about y262, y366 and y470.
+Primary violet full width button at y574 height52, text exactly “修改并重新登录”, 17px white. This action returns to the login screen, never imply automatic home entry.
+No big enclosed card, no doctor illustration on this page, no third-party auth, no password rules paragraph, no security slogan, no disclaimer, no bottom tabs, no version number, no extra explanatory subtitle. Do not repeat placeholder wording under any field.
+Comfortable whitespace beneath button. No clipped elements or overlapping controls; correct readable Chinese, identical scale to the supplied mobile login.

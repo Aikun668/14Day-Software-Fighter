@@ -1,0 +1,21 @@
+{
+  "passed": [
+    "15 >100 pagination with tied timestamps; head/tail verification; every event retained",
+    "15 Shanghai inclusive dates unaffected by Los Angeles browser timezone",
+    "15 only a whole older page can stop reading; mixed boundary page does not truncate",
+    "15 request/row ceiling returns incomplete result instead of fabricated full total",
+    "15 middle page failure retains labelled partial records and suppresses charts",
+    "15 concurrent total drift retried once, then refuses full statistics",
+    "15 duplicates deduplicated and completeness rejected",
+    "15 wrong descending order rejects completeness",
+    "15 malformed timestamp is explicit anomaly, never zero activity",
+    "15 valid empty interval is complete zero, distinct from failed loading",
+    "15 short/empty page inconsistent with total is not accepted as complete",
+    "15 unknown action retained; detail recursively redacts secrets and renders HTML as text",
+    "15 leaving in-flight read aborts and cannot render audit response on another page",
+    "13 pending write blocks full-route exit, Esc and duplicate POST",
+    "13 saved result survives failed list refresh with no second create",
+    "13 no fixture photo outside demo session; 390x600 dialog fits viewport"
+  ],
+  "pageerrors": []
+}

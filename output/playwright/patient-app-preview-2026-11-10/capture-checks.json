@@ -1,0 +1,331 @@
+{
+  "scope": "patient-app current code browser capture, not Android device capture",
+  "viewport": [
+    390,
+    844
+  ],
+  "timezone": "Asia/Shanghai",
+  "native_ui": "not captured",
+  "screens": [
+    {
+      "id": "01-login",
+      "title": "登录",
+      "route": "/login",
+      "mode": "live-read-only",
+      "note": "当前APP登录首屏",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 844
+    },
+    {
+      "id": "02-change-password",
+      "title": "首次改密",
+      "route": "/change-password",
+      "mode": "live-read-only",
+      "note": "仅预览空表单，没有修改密码",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 844
+    },
+    {
+      "id": "03-today",
+      "title": "今日",
+      "route": "/today",
+      "mode": "live-read-only",
+      "note": "真实后端当前患者与当天数据",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 873
+    },
+    {
+      "id": "04-guide",
+      "title": "型号指导",
+      "route": "/guide",
+      "mode": "live-read-only",
+      "note": "实际已绑定型号与后端指导步骤",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 2335
+    },
+    {
+      "id": "05-training",
+      "title": "操作自检",
+      "route": "/training",
+      "mode": "live-read-only",
+      "note": "逐步自检表单，没有提交",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 2379
+    },
+    {
+      "id": "06-medication",
+      "title": "用药记录",
+      "route": "/medication",
+      "mode": "live-read-only",
+      "note": "真实当日时点与历史记录，没有登记或撤销",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 3732
+    },
+    {
+      "id": "07-assistant",
+      "title": "AI指导助手",
+      "route": "/assistant",
+      "mode": "live-read-only",
+      "note": "空白提问状态；未调用外部模型",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 844
+    },
+    {
+      "id": "08-training-history",
+      "title": "自检历史",
+      "route": "/training",
+      "mode": "live-read-only",
+      "note": "同一页面的历史状态",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 844
+    },
+    {
+      "id": "09-revoke-sheet",
+      "title": "撤销确认",
+      "route": "/medication",
+      "mode": "live-read-only",
+      "note": "只打开确认层，未确认撤销",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 3732
+    },
+    {
+      "id": "10-assistant-result",
+      "title": "助手反馈",
+      "route": "/assistant",
+      "mode": "fixture-response",
+      "note": "响应使用隔离示例，展示现有“资料不足”样式，未调用模型",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390,
+      "document_height": 844
+    }
+  ],
+  "api_responses": [
+    {
+      "path": "/src/api/client.ts",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/login",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/stats",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/reminders",
+      "status": 200
+    },
+    {
+      "path": "/api/me/reminders",
+      "status": 200
+    },
+    {
+      "path": "/api/me/stats",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/stats",
+      "status": 200
+    },
+    {
+      "path": "/api/me/reminders",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/stats",
+      "status": 200
+    },
+    {
+      "path": "/api/me/reminders",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide",
+      "status": 200
+    },
+    {
+      "path": "/api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide",
+      "status": 200
+    },
+    {
+      "path": "/api/device-models/d2295ed4-7d76-459f-8090-4cb77af6b614/guide",
+      "status": 200
+    },
+    {
+      "path": "/api/me/training-sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/me/training-sessions",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/medication-events",
+      "status": 200
+    },
+    {
+      "path": "/api/me/medication-events",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/ai/ask",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/stats",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/reminders",
+      "status": 200
+    },
+    {
+      "path": "/api/me/patient",
+      "status": 200
+    },
+    {
+      "path": "/api/me/daily-slots",
+      "status": 200
+    },
+    {
+      "path": "/api/me/stats",
+      "status": 200
+    },
+    {
+      "path": "/api/me/reminders",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/logout",
+      "status": 204
+    }
+  ],
+  "real_writes": [
+    {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout"
+    }
+  ],
+  "pageerrors": [],
+  "product_source_unchanged": true
+}

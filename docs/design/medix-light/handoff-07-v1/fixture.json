@@ -1,0 +1,234 @@
+{
+  "kind": "synthetic-demo-only-not-production",
+  "patient": {
+    "id": "demo-patient-07",
+    "display_name": "李先生"
+  },
+  "window": {
+    "from": "2026-11-02",
+    "to": "2026-11-09",
+    "display_end": "2026-11-08",
+    "timezone": "Asia/Shanghai"
+  },
+  "slots": [
+    {
+      "id": "demo-slot-01",
+      "scheduled_at": "2026-11-02T08:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-02",
+      "scheduled_at": "2026-11-02T20:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-03",
+      "scheduled_at": "2026-11-03T08:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-04",
+      "scheduled_at": "2026-11-03T20:00:00+08:00",
+      "has_active_record": false
+    },
+    {
+      "id": "demo-slot-05",
+      "scheduled_at": "2026-11-04T08:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-06",
+      "scheduled_at": "2026-11-04T20:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-07",
+      "scheduled_at": "2026-11-05T08:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-08",
+      "scheduled_at": "2026-11-05T20:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-09",
+      "scheduled_at": "2026-11-06T08:00:00+08:00",
+      "has_active_record": false
+    },
+    {
+      "id": "demo-slot-10",
+      "scheduled_at": "2026-11-06T20:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-11",
+      "scheduled_at": "2026-11-07T08:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-12",
+      "scheduled_at": "2026-11-07T20:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-13",
+      "scheduled_at": "2026-11-08T08:00:00+08:00",
+      "has_active_record": true
+    },
+    {
+      "id": "demo-slot-14",
+      "scheduled_at": "2026-11-08T20:00:00+08:00",
+      "has_active_record": true
+    }
+  ],
+  "events": [
+    {
+      "id": "demo-event-01",
+      "slot_id": "demo-slot-01",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-02",
+      "slot_id": "demo-slot-02",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-03",
+      "slot_id": "demo-slot-03",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-04",
+      "slot_id": "demo-slot-05",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-05",
+      "slot_id": "demo-slot-06",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-06",
+      "slot_id": "demo-slot-07",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-07",
+      "slot_id": "demo-slot-08",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-08",
+      "slot_id": "demo-slot-10",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-09",
+      "slot_id": "demo-slot-11",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-10",
+      "slot_id": "demo-slot-12",
+      "source": "CLINICIAN_OBSERVED",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-11",
+      "slot_id": "demo-slot-13",
+      "source": "CLINICIAN_OBSERVED",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-12",
+      "slot_id": "demo-slot-14",
+      "source": "CLINICIAN_OBSERVED",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "demo-event-13",
+      "slot_id": "demo-slot-05",
+      "source": "PATIENT_REPORT",
+      "status": "ACTIVE"
+    }
+  ],
+  "points": [
+    {
+      "day": "2026-11-02",
+      "N": 2,
+      "M": 2,
+      "coverage_rate": 100.0
+    },
+    {
+      "day": "2026-11-03",
+      "N": 2,
+      "M": 1,
+      "coverage_rate": 50.0
+    },
+    {
+      "day": "2026-11-04",
+      "N": 2,
+      "M": 2,
+      "coverage_rate": 100.0
+    },
+    {
+      "day": "2026-11-05",
+      "N": 2,
+      "M": 2,
+      "coverage_rate": 100.0
+    },
+    {
+      "day": "2026-11-06",
+      "N": 2,
+      "M": 1,
+      "coverage_rate": 50.0
+    },
+    {
+      "day": "2026-11-07",
+      "N": 2,
+      "M": 2,
+      "coverage_rate": 100.0
+    },
+    {
+      "day": "2026-11-08",
+      "N": 2,
+      "M": 2,
+      "coverage_rate": 100.0
+    }
+  ],
+  "expected": {
+    "N": 14,
+    "M": 12,
+    "coverage_rate": 85.7,
+    "missing_count": 2,
+    "source_breakdown": {
+      "PATIENT_REPORT": 10,
+      "CLINICIAN_OBSERVED": 3
+    },
+    "duplicate_slots": [
+      {
+        "slot_id": "demo-slot-05",
+        "scheduled_at": "2026-11-04T08:00:00+08:00",
+        "active_event_count": 2
+      }
+    ]
+  },
+  "followups": [
+    {
+      "followed_at": "2026-11-07T10:30:00+08:00",
+      "feedback": "需核对登记",
+      "action_taken": "电话随访",
+      "next_plan": "继续随访"
+    }
+  ]
+}

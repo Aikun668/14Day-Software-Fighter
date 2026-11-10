@@ -1,0 +1,13 @@
+{
+  "docs/evidence/medix-light-full-ui/01-login.png": true,
+  "docs/evidence/medix-light-full-ui/02-workbench.png": true,
+  "docs/evidence/medix-light-full-ui/03-patients.png": true,
+  "docs/evidence/medix-light-full-ui/04-patient-detail.png": true,
+  "docs/evidence/medix-light-full-ui/05-plans.png": true,
+  "docs/evidence/medix-light-full-ui/06-stats.png": true,
+  "docs/evidence/medix-light-full-ui/07-patient-report.png": true,
+  "docs/evidence/medix-light-full-ui/08-followups.png": true,
+  "docs/evidence/medix-light-full-ui/09-task-close-modal.png": true,
+  "docs/evidence/medix-light-full-ui/10-medication-backfill-modal.png": true,
+  "docs/evidence/medix-light-full-ui/11-admin.png": true
+}

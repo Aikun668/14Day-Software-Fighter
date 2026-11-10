@@ -1,0 +1,52 @@
+{
+  "status": "approved-targets-exact-copies",
+  "date": "2026-11-09",
+  "files": [
+    {
+      "file": "references/05-plans.png",
+      "source": "docs/design/medix-light/approved-batch-02/05-plans.png",
+      "sha256": "A554A03F2E642B694ED4750B332516CEE8584FBEA46DCD96EA97B33407B2DB01"
+    },
+    {
+      "file": "references/06-stats-charts.png",
+      "source": "docs/design/medix-light/approved-charts-v2/06-stats-charts.png",
+      "sha256": "F6E25DE3631191B332D9B71648534E30DFE22E98A22415D7924E0AD8231E4E27"
+    },
+    {
+      "file": "references/08-followups.png",
+      "source": "docs/design/medix-light/approved-batch-02/08-followups.png",
+      "sha256": "4B86DD6E8E2AB3ADFE327BA91D83BCCD7BD8F6C2BBED57D778CB283D7FDDDCB5"
+    },
+    {
+      "file": "references/09-task-close-modal.png",
+      "source": "docs/design/medix-light/approved-batch-03/09-task-close-modal.png",
+      "sha256": "68DA1EC498EED20275F9EE8FDBE75FA8DEF5D4C91D2438E80708D800971321FB"
+    }
+  ],
+  "dependencies": [
+    {
+      "file": "docs/design/medix-light/approved-batch-02/selection.json",
+      "sha256": "9C6735C298F1B502E79563BE3E3F7E8562A9B2701B2B4F2B16C74243E666003D"
+    },
+    {
+      "file": "docs/design/medix-light/approved-charts-v2/FREEZE.json",
+      "sha256": "4F67F538BA9D1922FCD28E5CCF7F6F7F60D5F5D86B36307D12A4B907401EEED3"
+    },
+    {
+      "file": "docs/design/medix-light/approved-batch-03/FREEZE.json",
+      "sha256": "1BCD98A49ABD76294467E62383F70AE199A0472F46182131ACA95688FAAD2D69"
+    },
+    {
+      "file": "docs/design/medix-light/handoff-0123-v1/00-SYSTEM.md",
+      "sha256": "8BDCD3B5AD3F78EDC1A8C7F3686D73A7F870EDB687C6703288FEFBEE55814E70"
+    },
+    {
+      "file": "docs/design/medix-light/handoff-0123-v1/RULES.md",
+      "sha256": "30FDDF83C435A53AE149E8F206479548D35AFD720ABBFBA1E33AB7267740AD7C"
+    },
+    {
+      "file": "docs/design/medix-light/handoff-0123-v1/FREEZE.json",
+      "sha256": "939411DEDCA8B882C63948D20B53BD13A29A4846C26586829205740952C82D68"
+    }
+  ]
+}

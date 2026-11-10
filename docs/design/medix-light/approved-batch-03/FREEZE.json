@@ -1,0 +1,27 @@
+{
+  "status": "user-approved-frozen",
+  "approved_on": "2026-11-09",
+  "policy": "Do not overwrite. Future revisions must use a new versioned directory. review.json preserves historical pre-approval provenance; this manifest is authoritative.",
+  "files": [
+    {
+      "file": "09-task-close-modal.png",
+      "sha256": "68DA1EC498EED20275F9EE8FDBE75FA8DEF5D4C91D2438E80708D800971321FB"
+    },
+    {
+      "file": "10-medication-backfill-modal.png",
+      "sha256": "CDCE832BF55A84702E11123AEDABD43C303CB99096032BA89FF08953CAF21788"
+    },
+    {
+      "file": "11-admin-devices.png",
+      "sha256": "2A3FCA1C2B2F9D90C9AD12495BA650EC8F09DFE12952D80A32DE9C9FF4D907A6"
+    },
+    {
+      "file": "12-admin-guides.png",
+      "sha256": "E55FB6E8431B45288C91D21751345F5EB539F77A44D238F6AEFE0F707C24418D"
+    },
+    {
+      "file": "review.json",
+      "sha256": "9B4121555AFC3E699E81F71F564F3B55FAE41BC292B486FDC398C5C07877C293"
+    }
+  ]
+}

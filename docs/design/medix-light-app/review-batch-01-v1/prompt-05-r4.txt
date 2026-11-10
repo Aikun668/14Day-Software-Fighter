@@ -1,0 +1,19 @@
+Create a realistic production-quality Chinese patient mobile app UI, grounded in the attached approved Medix Light web design. This is one of five coordinated pages in an existing app, not a new brand. Recompose for a phone; do not shrink a desktop screen. Target logical viewport 390 x 844, exact tall portrait ratio 195:422, render at high resolution. Output APP CONTENT ONLY, edge-to-edge rectangular canvas. No phone frame, mockup backdrop, OS status bar, clock, battery, home indicator, browser chrome, title captions outside the app, or multiple screens.
+
+Visual system: quiet neutral light-gray #F6F6F8 background, pure white working surfaces, bright violet #8146FF for primary action and current navigation only, readable charcoal #424650 text, secondary #697180, pale dividers #EEF0F3. Use #3185ED blue for charts and #43B7A0 teal for completed states, apricot #E8B77E very sparingly for attention. Do not tint the whole page violet. No dark theme, glass, gradients, heavy shadow, nested cards, excessive pills, or decorative color dots. Match the restrained lively feeling of the approved web reference. Clean Noto Sans SC / modern Chinese sans-serif. Main body 16 logical px; secondary 14; headings 22; control height >=48; content side margins24. Fine simple consistent line icons. Purposeful whitespace and confident hierarchy; no tiny filler explanations. Cards only where actually useful, with radius10-12 and no thick borders.
+
+Current date anchor 2026-11-10. All visible data are illustrative design fixture values. This is a design image, not evidence of a running implementation. Every visible Chinese glyph must be clear, correct and legible. Do not include any documentation or disclaimers inside the UI. Use only the exact page-specific copy specified below, not English filler or invented features.
+IMPORTANT CANVAS: very tall modern phone viewport 390 wide by844 high, equivalent to1080x2340. Aspect9:19.5. The attached image is the exact same tall shape and has the desired content; reproduce its proportions. Do NOT use 9:16, do NOT use934x1684, and do NOT shorten the page. Full portrait APP content only.
+
+Recreate the attached 操作自检 screen faithfully, with only the lower buttons' OUTER edges aligned to the white panel above them. This means slightly narrowing the bottom buttons, not changing any text or flow. Preserve its dark teal completed state and white checkmark. Preserve SAME white/silver inhaler, blue detached cap, blue left arrow, all Chinese, progress1/6, white/lightgray surfaces and type.
+The desired vertical positions in390x844 coordinates:
+header0–90 with back icon, 操作自检, 历史;
+pMDI at126 and1/6 right, thin6-segment progress at166;
+white content panel x22..368, top198, bottom706;
+检查吸嘴 at230, instruction 取下吸嘴盖，检查有无异物。 at282;
+inhaler object in y320–486;
+conditional line 发现异物，先停用并联系医护 at520;
+three radio rows around y584,630,676: 完成 selected dark teal, 有困难, 未完成;
+footer buttons 上一步 disabled and 下一步 violet fromy735 toy791, left22 right368, aligned to WHITE PANEL sides. Keep centralgap12.
+Empty base bottom y791–844; do not crop that blank area. No bottomtabs, systemstatusbars, clocks, homeindicator, deviceframe, explanations or additional content.
+This tall height is intentional and MUST be maintained: keep every vertical anchor, do not compact the design to fill a shorter image.

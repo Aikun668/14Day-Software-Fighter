@@ -1,0 +1,26 @@
+Create a realistic production-quality Chinese patient mobile app UI, grounded in the attached approved Medix Light web design. This is one of five coordinated pages in an existing app, not a new brand. Recompose for a phone; do not shrink a desktop screen. Target logical viewport 390 x 844, exact tall portrait ratio 195:422, render at high resolution. Output APP CONTENT ONLY, edge-to-edge rectangular canvas. No phone frame, mockup backdrop, OS status bar, clock, battery, home indicator, browser chrome, title captions outside the app, or multiple screens.
+
+Visual system: quiet neutral light-gray #F6F6F8 background, pure white working surfaces, bright violet #8146FF for primary action and current navigation only, readable charcoal #424650 text, secondary #697180, pale dividers #EEF0F3. Use #3185ED blue for charts and #43B7A0 teal for completed states, apricot #E8B77E very sparingly for attention. Do not tint the whole page violet. No dark theme, glass, gradients, heavy shadow, nested cards, excessive pills, or decorative color dots. Match the restrained lively feeling of the approved web reference. Clean Noto Sans SC / modern Chinese sans-serif. Main body 16 logical px; secondary 14; headings 22; control height >=48; content side margins24. Fine simple consistent line icons. Purposeful whitespace and confident hierarchy; no tiny filler explanations. Cards only where actually useful, with radius10-12 and no thick borders.
+
+Current date anchor 2026-11-10. All visible data are illustrative design fixture values. This is a design image, not evidence of a running implementation. Every visible Chinese glyph must be clear, correct and legible. Do not include any documentation or disclaimers inside the UI. Use only the exact page-specific copy specified below, not English filler or invented features.
+IMPORTANT CANVAS: very tall modern phone viewport390wide by844high, equivalent1080x2340. Aspect9:19.5. Do NOT use9:16 or934x1684. Do NOT shorten the page. The two references are the correct tall proportion. Output full portrait app contents only.
+
+Recreate the attached 型号指导 screen faithfully, making its white content panel and footerbuttons share matching outer left/right margins of22logicalpx. Reference1 contains the guide content and artwork. Reference2 is the matching self-check sibling screen: match its panel width, fonts, one-step rhythm and exact inhaler. Do not import its three choice rows into guidance.
+Preserve Chinese copy exactly:
+header “型号指导” / “AI 助手”;
+device “pMDI”, counter “1 / 6”, six thin segments only firstviolet;
+title “检查吸嘴”;
+instruction “取下吸嘴盖，检查有无异物。”;
+conditional hint “发现异物，先停用并联系医护”;
+footerbuttons “上一步” disabled neutral / “下一步” solidviolet;
+bottomnav “今日” “指导” “记录”, only指导purple.
+Precise vertical layout at390x844:
+whiteheader0–90;
+device at126, progress at166;
+white maincontent panel x22..368,y198..655;
+mainheading230, instruction282;
+same silver canister white inhaler body, blue mouthpiece/leftdetachedcap/leftarrow, clearly visible around y330..545, onplainwhite;
+conditionalhinty620 insidepanel, with one thin divider;
+two footerbuttons x22..190 and202..368,y691..747,height56;
+white bottomnavy776..844. Leave29pxbetween footerbuttons andnav, no overlap. No phonehomeindicator.
+Use generous natural whitespace, preserve the long/tall modern phone format. Do not squeeze the design into a shorter screen, rescale fonts, shorten controls, add paragraphs, patientnumbers, badges, nestedcards or medicalbranding. Every word and button fits fully.

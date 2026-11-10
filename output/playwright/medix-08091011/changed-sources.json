@@ -1,0 +1,34 @@
+{
+  "frontend-web/src/App.tsx": {
+    "before": "62df947c0df6fc7a0153c63f1d43946ed846de3112c6b98e52b2ecfd64f085d8",
+    "after": "aa13fcf1cfb260027a95ce2c109f95003d3e33008160f0d32362541e78e6266f"
+  },
+  "frontend-web/src/components/MedicationBackfillModal.tsx": {
+    "before": "aa423b55ea0ad1af77654a4843cb9dd39f816f6b84617985f12350393c4d77c2",
+    "after": "08bc83b48f2ddf15474da3dcbe554d59ddfa6e6c9e0844c403f3823879e787d2"
+  },
+  "frontend-web/src/components/TaskCloseModal.tsx": {
+    "before": "ca70a41fbdc4cdc874846a3bdddfb15dbe462e6b287219c18da33233f53b6aa1",
+    "after": "0106234ef8c5f0a434a2c0526cfa04c44daf8721e13bcc44c360d505274135a9"
+  },
+  "frontend-web/src/components/medix/MedixLayout.tsx": {
+    "before": "c2960c532347b5f8e8a2ed566d5047ac46d11da105e1ac760ab48ebff24e5b68",
+    "after": "d33dec07228567f6e9fedb011038af7d21d8b8eb4368670fbdc8caee393a14ec"
+  },
+  "frontend-web/src/pages/admin/AdminPage.tsx": {
+    "before": "d67bb5ea51268312090d28f0f5c71a2731b68be8d05777a822a21aa500298f7d",
+    "after": "c3dd429baf2eb833c9c02431bd270b09d23c79e20f41d7c05d92a8fb510c25c6"
+  },
+  "frontend-web/src/pages/clinician/FollowupPage.tsx": {
+    "before": "e35d2cba8be3c748ace6bd4ff317a722c562ae1ef56b853582339069074009d9",
+    "after": "828bcc091d17e96f92e26a4ad3a4ede46d8eff82a9356c92669f04fb8c1885a1"
+  },
+  "frontend-web/src/pages/clinician/PatientDetailPage.tsx": {
+    "before": "b5c103dc33dbe77adf7038c4221552e2629f55fe3fcee99a084e4395953b1958",
+    "after": "4558f2ea7e502317897e7d08421439b1b70beb52d25742b9f6e23cc5a4db28ce"
+  },
+  "frontend-web/src/pages/clinician/WorkbenchPage.tsx": {
+    "before": "8899a98aaf81be222c41485892748cc80053cf217e3eba82b68f5775599a0dba",
+    "after": "d054ed6ff331f30159838f2c37255121eb4136ced16ffcfea0d19fb67b4a09f8"
+  }
+}

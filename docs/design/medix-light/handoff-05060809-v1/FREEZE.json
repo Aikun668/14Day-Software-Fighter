@@ -1,0 +1,86 @@
+{
+  "status": "documentation-self-reviewed-frozen",
+  "date": "2026-11-09",
+  "scope": [
+    "05 plans",
+    "06 stats and patient report",
+    "08 followups",
+    "09 task close modal"
+  ],
+  "authority": "User requested the next four specifications while another agent implements 00-04; inherited instruction to self-review and freeze. No code implementation in this delivery.",
+  "policy": "Read-only plus SHA256 detection; revise in a new version, do not overwrite. FREEZE.json does not hash itself.",
+  "files": [
+    {
+      "file": "05-PLANS.md",
+      "sha256": "3689EE9744BB134FC32D15093C3133030C38072A69136E986A4A69DF19C2519F"
+    },
+    {
+      "file": "06-STATS.md",
+      "sha256": "7FC049042C5AEF13B9B6FB3927AC096E55D1ECC224F5245DABCBCF92B56202CA"
+    },
+    {
+      "file": "08-FOLLOWUPS.md",
+      "sha256": "38A81C828FBD8452FA2700F55BCE8C54B471B5F634F1AB55C41C228235FEDC15"
+    },
+    {
+      "file": "09-TASK-CLOSE.md",
+      "sha256": "A59AB7891E212A0B627B1763498F3E32103E5862D167B2E00CEFBBF1E0E08A42"
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "sha256": "BF48812667A36422440564BCA3E534C87E3430A2401844800E6B8773894101CF"
+    },
+    {
+      "file": "HANDOFF.md",
+      "sha256": "3E1E6F109FB671ACE64716990B20AB9EF144EBC908F0884CA9D73F223C807107"
+    },
+    {
+      "file": "IMPLEMENTATION.md",
+      "sha256": "FD2315A35754F56FFE5F0F850FCE2F73EC14ECE87DB86D2E9F85F6F845DBE1D2"
+    },
+    {
+      "file": "INTEGRATION.md",
+      "sha256": "4E43F0813DE937523D19582896D390F7B04C9F326DA5584C74554E42F9948037"
+    },
+    {
+      "file": "REFERENCE-MANIFEST.json",
+      "sha256": "0401F25F771879A93D4945DF447479FC8C24BCEAE3DC3F52C7E30DEDCB4A19F3"
+    },
+    {
+      "file": "references/05-plans.png",
+      "sha256": "A554A03F2E642B694ED4750B332516CEE8584FBEA46DCD96EA97B33407B2DB01"
+    },
+    {
+      "file": "references/06-stats-charts.png",
+      "sha256": "F6E25DE3631191B332D9B71648534E30DFE22E98A22415D7924E0AD8231E4E27"
+    },
+    {
+      "file": "references/08-followups.png",
+      "sha256": "4B86DD6E8E2AB3ADFE327BA91D83BCCD7BD8F6C2BBED57D778CB283D7FDDDCB5"
+    },
+    {
+      "file": "references/09-task-close-modal.png",
+      "sha256": "68DA1EC498EED20275F9EE8FDBE75FA8DEF5D4C91D2438E80708D800971321FB"
+    },
+    {
+      "file": "REVIEW.md",
+      "sha256": "72C1654F7B2579B7D8006D77CB08BF806B94D6E056AB8EBD11F7B095A2BD6853"
+    },
+    {
+      "file": "RULES.md",
+      "sha256": "BD7EA186F67AE3253997B18F251D2E725B9108DF64905608B12F87B5F58E01BE"
+    },
+    {
+      "file": "SOURCE-BASELINE.json",
+      "sha256": "AC8618595826EE27040AD45AA7F33775BFE481AC68C48AEF67D76BDBC74CDEBD"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "BF74212E60ED9908DE1E4ABF4DE0933B6A3D5495A041FBE877F7E982FB402C1F"
+    },
+    {
+      "file": "verify.py",
+      "sha256": "3C106A832FA9DB26B6C5130A08F0E9DF7D03C46179CDE7894015CA8F4AFD5B72"
+    }
+  ]
+}

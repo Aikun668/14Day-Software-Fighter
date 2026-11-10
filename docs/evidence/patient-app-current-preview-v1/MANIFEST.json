@@ -1,0 +1,32 @@
+{
+  "scope": "read-only current app visual preview",
+  "files": {
+    "01-login-full.png": "4cc4726fda5af2a03e560be2e083fb2cf96a01c50ddc78343fe318428e5ac2a0",
+    "01-login.png": "4cc4726fda5af2a03e560be2e083fb2cf96a01c50ddc78343fe318428e5ac2a0",
+    "02-change-password-full.png": "43fb30bf0d41c2075b78d9a327645f8ceeee3bfc3cd1bbddb5ad0301bf00f1e2",
+    "02-change-password.png": "43fb30bf0d41c2075b78d9a327645f8ceeee3bfc3cd1bbddb5ad0301bf00f1e2",
+    "03-today-full.png": "7ad73cc5e2468a4b9fa19d9c6656132f271d7830bdf2036a369384d4ece1a49f",
+    "03-today.png": "3ffbe5a72499ea10e711f2ab2b4cb7842a98f52fde169ab964acc15587ea7c3d",
+    "04-guide-full.png": "1ef3a5f2ee2ceb3af4422608eb6592bc5913e2a76f89f2c4978f857b9e34945f",
+    "04-guide.png": "2996d5f2e13e3b4498adfa994b08e0add1acae0f830ac146b227c7e040c47093",
+    "05-training-full.png": "e72fb0eb944e5bd21818b8a94766c79ef631defbc0a80870a2b434aa5f6857fe",
+    "05-training.png": "a06fc136765529974d3cc79f402c89a739dc36e19ba8544cb622b63b6fb79696",
+    "06-medication-full.png": "0c5675096843883a9961984171067dfa7725dd5750220410db401379035d023f",
+    "06-medication.png": "d20f1f617f6347f33202d6ca90c3d7bdc5622661b339e0eab2365abdc1b662b7",
+    "07-assistant-full.png": "6a2bff4b1e66898ea0b775559ba6b1826ee96c3a2d9181053e5d840d67220020",
+    "07-assistant.png": "6a2bff4b1e66898ea0b775559ba6b1826ee96c3a2d9181053e5d840d67220020",
+    "08-training-history-full.png": "4b2343d937ad68457e18c7811b00205d5d6c32427bcbb9b6b5ebf240be057d74",
+    "08-training-history.png": "4b2343d937ad68457e18c7811b00205d5d6c32427bcbb9b6b5ebf240be057d74",
+    "09-revoke-sheet-full.png": "79bbac98d849972301632715c5c1af129e6ad2699441a39b0c455c1fd3c83a93",
+    "09-revoke-sheet.png": "19319ef27d5e11e7844c2acd22c856346065684e6eadd8d7afc458018d61c779",
+    "10-assistant-result-full.png": "75dc9346f1755edeecd949e40c2d03b30a6aa9814cf6d027ae62f019a9cbd3a4",
+    "10-assistant-result.png": "75dc9346f1755edeecd949e40c2d03b30a6aa9814cf6d027ae62f019a9cbd3a4",
+    "capture-checks.json": "e27a808b30b8785bbc5e49b3e03ad3b9620ea025bb646e173c98c53bc2d0f36f",
+    "gallery-preview.png": "48cfba220d9ad82a4d097ffa093991e65c1eba777a73df80519e1103aed96df2",
+    "index.html": "00aff6838adc91f5d4ba010205674e260227f258221a276c1a152f15f86a903b",
+    "overview.png": "e42faa068a78da388a8048378a817376ca20f91f70e0c8a8fa546ac39914fe6c",
+    "preview-checks.json": "413c98c6c096da528c46d719472d561ef50adb2c00c979cd05fb6c7005c2f6cf",
+    "source-hashes.json": "6ac3314a409c5f90cccda7ef1c48599e18d8f427391ff239339575ad0921ff8d",
+    "states.png": "6df75903cfa3a904179822aa2ef54a85de2ee06e3d4079e1c9ec1dda10989c5b"
+  }
+}

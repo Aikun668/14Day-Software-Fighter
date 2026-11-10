@@ -1,0 +1,22 @@
+{
+  "status": "awaiting-user-review",
+  "method": "built-in image_gen",
+  "data": "Illustrative only; no live data modified",
+  "visualChecks": [
+    "Blue trend, teal registered, apricot missing with matching legend",
+    "All four audit secondary lines removed",
+    "All four redundant audit category badges removed",
+    "Current-date extra label removed",
+    "42 operations and 75% registration proportions preserved",
+    "Frozen targets unchanged"
+  ],
+  "sourceAccess": "js.design URL unavailable through web tool; user-provided screenshot attached to both generations",
+  "research": [
+    "https://www.datawrapper.de/blog/which-color-scale-to-use-in-data-vis",
+    "https://www.datawrapper.de/blog/colors-for-data-vis-style-guides"
+  ],
+  "prompts": {
+    "statistics": "Edit image1 Chinese statistics UI; image2 is Medix reference for restrained lively multiple accent colors. Preserve image1 exact shell, layout, every number/label/portrait, chart scale and positions. Goal remove oppressive all-purple monochrome. Keep brand and selected navigation purple ONLY as primary brand accents. Change daily coverage line to crisp medium blue #4C91ED with very faint blue area fill (not purple); same seven points60,70,65,80,75,85,90 on0–100% axis. Donut: 75% registered sector TEAL #43B7A0, 25% missing sector muted APRICOT #E8B77E; legend squares match, values210/70 and75% unchanged. Patient progress bars all same teal #43B7A0 at86%,71%,100%, gray tracks; do not rainbow-code patients. Summary75% dark neutral with tiny tasteful teal trend glyph if any, no extra prose. Neutral white/gray surfaces unchanged. 查看 links quiet gray, not purple. This gives blue trend, teal completion, apricot missing, purple navigation, balanced akin supplied Medix. No new cards, decorative color dots, explanatory subtitles or tiny text. All visible data and existing 示例数据 label preserved. Full landscape1440x900 composition, not cropping. Ensure no extra sentences or description.",
+    "audit": "Edit first attached Chinese audit UI, second image Medix visual reference. Preserve overall layout, sidebar brand/nav, topbar, charts numbers and flat white/light-gray surface style. Strongly simplify redundant text and improve color balance. REQUIRED DELETIONS: delete top-right 当前:2026-11-09 entirely; delete ALL FOUR secondary text lines under event titles: admin·clinician_b, admin·pMDI操作指导v1.1, admin·DPI使用要点知识库v1.0, admin·示例装置. No replacements, no subtitles. Delete all right-side event category badges 账号/内容/内容/型号; retain chevrons. Each event row EXACTLY time, semantic icon, ONE title, right chevron. Titles停用账号/审核指导/发布知识/新增型号, times16:42/15:18/14:06/09:32. Vertically center title within row. Dates11月8日 and11月7日 are plain modest gray date headings without fullwidth lavender background. Keep event list compact with hairline dividers and generous whitespace, avoid expanding new panels. Top charts palette: seven daily-operation bars light blue #9FC6F6, last bar medium blue #4C91ED; exact counts4,6,3,8,5,7,9, total42, axis0/5/10 and11/02..08 unchanged. Category bars: 账号管理18 blue#4C91ED, 内容审核12 muted violet#9A78DB, 内容发布8 teal#43B7A0, 型号维护4 apricot#E8B77E; width scale0–20 unchanged. Event icon colors MATCH those corresponding categories (user blue,review violet,publish teal,device apricot), each icon delicate outline on barely tinted small square. Brand/nav stays violet. Keep 示例数据 one label, date range, 全部类型 dropdown, 查看全部42条. No explanatory prose anywhere, no admin strings inside event feed, no resource IDs. Neutral gray body typography and readable no-tiny-text sizes. Full landscape1440x900 mockup. This is UI preview only."
+  }
+}

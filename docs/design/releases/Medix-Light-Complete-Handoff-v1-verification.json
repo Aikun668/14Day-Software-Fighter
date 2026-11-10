@@ -1,0 +1,43 @@
+{
+  "status": "pass",
+  "date": "2026-11-09",
+  "archive": "Medix-Light-Complete-Handoff-v1.zip",
+  "sha256": "5AD38A46EBC22105A7BF2E6216D19A7B06EEC8E658FE5CCE81AF5A1426273A66",
+  "bytes": 37406352,
+  "payload_files": 92,
+  "archive_entries": 93,
+  "crc": "pass",
+  "byte_comparison": "all payload entries match source",
+  "extracted_validation": {
+    "status": "pass",
+    "readonly_checked": false,
+    "markdown_files": 34,
+    "relative_links": 117,
+    "page_ids": [
+      "00",
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15"
+    ],
+    "reference_images": 7,
+    "dependency_files": 6,
+    "freeze_manifests": 6,
+    "frozen_entries_checked": 65,
+    "source_drift": [],
+    "errors": []
+  },
+  "extraction_evidence": "C:\\Users\\杨玉璋\\AppData\\Local\\Temp\\medix-delivery-verify-xm9wloyy",
+  "implementation": "not executed; documentation delivery only"
+}

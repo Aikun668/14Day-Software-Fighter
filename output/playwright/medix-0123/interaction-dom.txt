@@ -1,0 +1,150 @@
+- complementary:
+  - text: 吸入治疗管理
+  - navigation "主导航":
+    - link "工作台":
+      - /url: /workbench
+      - img "appstore"
+      - text: 工作台
+    - link "患者管理":
+      - /url: /patients
+      - img "idcard"
+      - text: 患者管理
+    - link "用药计划":
+      - /url: /plans
+      - img "calendar"
+      - text: 用药计划
+    - link "统计与核查":
+      - /url: /stats
+      - img "bar-chart"
+      - text: 统计与核查
+    - link "随访中心":
+      - /url: /followups
+      - img "message"
+      - text: 随访中心
+- banner:
+  - img "search"
+  - combobox "全局搜索患者"
+  - text: clinician_a
+  - img "down"
+  - button "退出"
+- main:
+  - heading "患者管理" [level=1]
+  - img "search"
+  - textbox "搜索姓名或编号"
+  - text: 诊断标签
+  - combobox "按诊断标签筛选"
+  - img "down"
+  - text: 账号状态
+  - combobox "按账号绑定状态筛选"
+  - img "down"
+  - button "新建患者"
+  - region "患者列表":
+    - table:
+      - rowgroup:
+        - row "患者 诊断 账号状态 操作":
+          - columnheader "患者"
+          - columnheader "诊断"
+          - columnheader "账号状态"
+          - columnheader "操作"
+      - rowgroup:
+        - row "李先生 慢性阻塞性肺疾病 未绑定 查看李先生详情 为李先生现场评估":
+          - cell "李先生":
+            - button "李先生"
+          - cell "慢性阻塞性肺疾病"
+          - cell "未绑定"
+          - cell "查看李先生详情 为李先生现场评估":
+            - button "查看李先生详情":
+              - img "user"
+            - button "为李先生现场评估":
+              - img "profile"
+        - row "周先生 慢性阻塞性肺疾病 未绑定 查看周先生详情 为周先生现场评估":
+          - cell "周先生":
+            - button "周先生"
+          - cell "慢性阻塞性肺疾病"
+          - cell "未绑定"
+          - cell "查看周先生详情 为周先生现场评估":
+            - button "查看周先生详情":
+              - img "user"
+            - button "为周先生现场评估":
+              - img "profile"
+        - row "陈先生 慢性阻塞性肺疾病 已绑定 查看陈先生详情 为陈先生现场评估":
+          - cell "陈先生":
+            - button "陈先生"
+          - cell "慢性阻塞性肺疾病"
+          - cell "已绑定"
+          - cell "查看陈先生详情 为陈先生现场评估":
+            - button "查看陈先生详情":
+              - img "user"
+            - button "为陈先生现场评估":
+              - img "profile"
+        - row "吴女士 支气管哮喘 未绑定 查看吴女士详情 为吴女士现场评估":
+          - cell "吴女士":
+            - button "吴女士"
+          - cell "支气管哮喘"
+          - cell "未绑定"
+          - cell "查看吴女士详情 为吴女士现场评估":
+            - button "查看吴女士详情":
+              - img "user"
+            - button "为吴女士现场评估":
+              - img "profile"
+        - row "孙女士 支气管哮喘 未绑定 查看孙女士详情 为孙女士现场评估":
+          - cell "孙女士":
+            - button "孙女士"
+          - cell "支气管哮喘"
+          - cell "未绑定"
+          - cell "查看孙女士详情 为孙女士现场评估":
+            - button "查看孙女士详情":
+              - img "user"
+            - button "为孙女士现场评估":
+              - img "profile"
+        - row "林女士 支气管哮喘 已绑定 查看林女士详情 为林女士现场评估":
+          - cell "林女士":
+            - button "林女士"
+          - cell "支气管哮喘"
+          - cell "已绑定"
+          - cell "查看林女士详情 为林女士现场评估":
+            - button "查看林女士详情":
+              - img "user"
+            - button "为林女士现场评估":
+              - img "profile"
+        - row "赵女士 支气管哮喘 未绑定 查看赵女士详情 为赵女士现场评估":
+          - cell "赵女士":
+            - button "赵女士"
+          - cell "支气管哮喘"
+          - cell "未绑定"
+          - cell "查看赵女士详情 为赵女士现场评估":
+            - button "查看赵女士详情":
+              - img "user"
+            - button "为赵女士现场评估":
+              - img "profile"
+        - row "郑先生 慢性阻塞性肺疾病 未绑定 查看郑先生详情 为郑先生现场评估":
+          - cell "郑先生":
+            - button "郑先生"
+          - cell "慢性阻塞性肺疾病"
+          - cell "未绑定"
+          - cell "查看郑先生详情 为郑先生现场评估":
+            - button "查看郑先生详情":
+              - img "user"
+            - button "为郑先生现场评估":
+              - img "profile"
+        - row "王女士 支气管哮喘 未绑定 查看王女士详情 为王女士现场评估":
+          - cell "王女士":
+            - button "王女士"
+          - cell "支气管哮喘"
+          - cell "未绑定"
+          - cell "查看王女士详情 为王女士现场评估":
+            - button "查看王女士详情":
+              - img "user"
+            - button "为王女士现场评估":
+              - img "profile"
+        - row "杨先生 慢性阻塞性肺疾病 未绑定 查看杨先生详情 为杨先生现场评估":
+          - cell "杨先生":
+            - button "杨先生"
+          - cell "慢性阻塞性肺疾病"
+          - cell "未绑定"
+          - cell "查看杨先生详情 为杨先生现场评估":
+            - button "查看杨先生详情":
+              - img "user"
+            - button "为杨先生现场评估":
+              - img "profile"
+    - text: 共 10 位

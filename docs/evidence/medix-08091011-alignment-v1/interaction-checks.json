@@ -1,0 +1,23 @@
+{
+  "passed": [
+    "09 center, multiline, mask, required/counter, Esc focus return",
+    "09 single followup POST; pending controls locked; retraining payload",
+    "09 clean reopen/task switch, 409 retains note and prevents another write",
+    "09 unknown task type uses neutral copy",
+    "09 uncertain result stays unconfirmed despite old matching note",
+    "08 dirty patient switch cancel/reset, ownership guard, Shanghai payload",
+    "08 new form is empty; dirty full form and quick modal are mutually exclusive",
+    "08 record errors are distinct and do not blank tasks",
+    "08 cached five-row expansion crosses server page 50 with real total",
+    "08 mobile action buttons are visible; 20-char clipped content expands",
+    "10 historical plan query, 7 Shanghai dates, actual-time payload and trimmed note",
+    "10 registered/future/cancelled disabled; historical slot owns plan; duplicate response",
+    "10 failed slots are not empty, retry loads data",
+    "10 PRN historical pagination >100, effective interval validation, null slot",
+    "11 nonadmin gated before admin read",
+    "11 server pagination reaches last model, independent API",
+    "11 create trims/validates; failure retains input; last-page refresh shows real new entry",
+    "11 all four remaining admin entries navigate to their existing tabs"
+  ],
+  "pageerrors": []
+}

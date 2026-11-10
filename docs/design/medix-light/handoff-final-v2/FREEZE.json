@@ -1,0 +1,124 @@
+{
+  "status": "documentation-self-reviewed-frozen",
+  "version": "v2",
+  "date": "2026-11-09",
+  "scope": "Complete handoff revised to include independent 07 image/specification/acceptance; existing other pages inherited",
+  "authority": "User requested 07 generation and complete delivery update; user approved final 07 image: 通过，按这版归档",
+  "page07_visual_approval": "approved",
+  "runtime_acceptance": "not-executed",
+  "policy": "Preserve all v1 originals. Revise in a new version. Hash list excludes itself.",
+  "files": [
+    {
+      "file": "04-PATIENT-DETAIL.md",
+      "sha256": "E58E119DA14CCE8EEBFA9C4E0846919F44EADCD972C182788B30F0B20DEB4EBF"
+    },
+    {
+      "file": "10-BACKFILL.md",
+      "sha256": "50088D1B8CF5568CA035145CBAEA53994B88E6047BBA144FF97CF23418A859AE"
+    },
+    {
+      "file": "11-DEVICES.md",
+      "sha256": "CED2104EC4DEC90B05696BF3152B368E85B4E0FA6505634CB2434885593B18CE"
+    },
+    {
+      "file": "12-GUIDES.md",
+      "sha256": "023AAF179B7E5A679A23CF6027C0AD59E1E5D3FB3F427DDFF0CC88A7668B64FE"
+    },
+    {
+      "file": "13-ACCOUNTS.md",
+      "sha256": "2BD2E76C2999012E4BD95D0790C724AF2D04CCE75F8A15360CD9C41180C03B56"
+    },
+    {
+      "file": "14-KNOWLEDGE.md",
+      "sha256": "C5343B94DD63265B7160067B4CD9716C0AB157634488C509BB20C02D946F1DD0"
+    },
+    {
+      "file": "15-AUDIT.md",
+      "sha256": "D6E30450417485A4B84C82FDE58817D5E337AC979CA588C4A7D213C8C6A84BCB"
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "sha256": "7BE73F0D9F640186BBA2A1192D139E19D147F51A97451E4724DE43A466705EB8"
+    },
+    {
+      "file": "ADMIN-SYSTEM.md",
+      "sha256": "76F529BBF19A09D8306750E79A456C5AAD2854C6CBD77F438F45494375E686CC"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "sha256": "0841C5E512224FBCB1C15EC794B0BB18BFD91275EC5CD038EEDCBC7EFBC2F41B"
+    },
+    {
+      "file": "HANDOFF.md",
+      "sha256": "A060205D79A46C1819A2949F0BAD018A5DEE93DB79DA592BF85582E99FD8ABA7"
+    },
+    {
+      "file": "IMPLEMENTATION.md",
+      "sha256": "44C888BAF5B1055021997880C5DF60A7A936F08BEB4F71FEF1A536F7AA5496B5"
+    },
+    {
+      "file": "PAGE-REGISTRY.md",
+      "sha256": "AAD3EAC4C39BC42C8C0DEA9923E0324F3636281E7B5489EBCBC65CDD1368D407"
+    },
+    {
+      "file": "REFERENCE-MANIFEST.json",
+      "sha256": "1A3C38B5B9D288CF98FD2733B54F7410710CCB969D46F14E36F7A731C678F632"
+    },
+    {
+      "file": "references/04-patient-detail.png",
+      "sha256": "655901ADA8336C4279A8E08E1A1B48C82869A4712F5120FB38A070C9FCB086A2"
+    },
+    {
+      "file": "references/07-patient-report.png",
+      "sha256": "355296CC590A0D5F7DA7A1696970B107DC66C3AF32FFB996ABCF9610E8A8475E"
+    },
+    {
+      "file": "references/10-medication-backfill-modal.png",
+      "sha256": "CDCE832BF55A84702E11123AEDABD43C303CB99096032BA89FF08953CAF21788"
+    },
+    {
+      "file": "references/11-admin-devices.png",
+      "sha256": "2A3FCA1C2B2F9D90C9AD12495BA650EC8F09DFE12952D80A32DE9C9FF4D907A6"
+    },
+    {
+      "file": "references/12-admin-guides.png",
+      "sha256": "E55FB6E8431B45288C91D21751345F5EB539F77A44D238F6AEFE0F707C24418D"
+    },
+    {
+      "file": "references/13-admin-accounts.png",
+      "sha256": "E0AE7A61EA1AB560CF87178C222F1DC5B9D0B12281F9D37E5340DA9292E3D0A4"
+    },
+    {
+      "file": "references/14-admin-knowledge.png",
+      "sha256": "1E5ACE690FEB849EEB0701D8DD89572774B055A29E4BA8A9F298EE200C2BC155"
+    },
+    {
+      "file": "references/15-audit-overview.png",
+      "sha256": "25A56CFC602959E1F4663FF5FD10DA0E7AFA43C6709F08670C38FC1E7E426170"
+    },
+    {
+      "file": "REVIEW.md",
+      "sha256": "585B1C34C1CD80A0F70F603D7F0B57C8722B89DC62FBECB851230EC10CAC15CA"
+    },
+    {
+      "file": "RULES.md",
+      "sha256": "49DDBB09DCB7E73789362DE7B9E281AFB0CA12394304A15C1367DFA48005686A"
+    },
+    {
+      "file": "SOURCE-BASELINE.json",
+      "sha256": "D0EB20995F86B8918A2D434FC6F7010AFFA2B236F98509629B8DB22EB260DC7B"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "466CBE61E210A7D7194A35A1DE752C80420338FCD57D1DDE4DE00C46BB5860D9"
+    },
+    {
+      "file": "verify.py",
+      "sha256": "1D10A791613A2C6A51AEE3F0CFA934C53283D0A26EF47F9FBD4244DFFCF0F501"
+    },
+    {
+      "file": "VISUAL-INVENTORY.json",
+      "sha256": "7171167FD250F05A696F3562E9D8A6A741B7C44E61509E97B617BF83E8C737CE"
+    }
+  ]
+}

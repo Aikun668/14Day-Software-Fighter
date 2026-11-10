@@ -1,0 +1,62 @@
+{
+  "head": "f26bedfe5abf0e3537f5e13063259e815aad08de",
+  "note": "Read-only source audit baseline. Reinspect changed files before implementation; no runtime validation claimed.",
+  "files": [
+    {
+      "path": "frontend-web/src/App.tsx",
+      "sha256": "73E41F7360F94F3B6729F522C4D851E2DE2B28293733EB7EBAB1F917996D0477"
+    },
+    {
+      "path": "frontend-web/src/main.tsx",
+      "sha256": "1FB9B6420B984440CEE910590AAC5CB6B0CAC2AC03640EB8B377861424D78EB6"
+    },
+    {
+      "path": "frontend-web/src/styles/theme.ts",
+      "sha256": "DBFFB0B9C8A07D34C3187ED0068121E41EA4389304C92BF74281FEBF5BE85CBC"
+    },
+    {
+      "path": "frontend-web/src/components/WebLayout.tsx",
+      "sha256": "9C8FB2E69E0D358BD0CEA4A96B709B5E11FF24988A5C11FFA60A3388039B9390"
+    },
+    {
+      "path": "frontend-web/src/pages/auth/LoginPage.tsx",
+      "sha256": "A30CFEC921E324BCF34A3BADF6135C69E844993F47268EFEC5E47233C9036E40"
+    },
+    {
+      "path": "frontend-web/src/pages/clinician/WorkbenchPage.tsx",
+      "sha256": "A32A58A956BB617BB4EEE0BB2FDA4A99EE6D977114437486AD08429DC28127FB"
+    },
+    {
+      "path": "frontend-web/src/pages/clinician/PatientListPage.tsx",
+      "sha256": "B3ABE5A376EDC3320272CA361D21B8A27363155813693C35185ACABC74BECECF"
+    },
+    {
+      "path": "frontend-web/src/features/auth/AuthContext.tsx",
+      "sha256": "F2A2A8CCA26B58FF6A62131A3B7FC7AAD6CE36D163067935EF154EB799A92B58"
+    },
+    {
+      "path": "frontend-web/src/features/auth/RequireAuth.tsx",
+      "sha256": "79A86C77F11183BD74AB437ED36135D3209C2BF79E621AAA5E27FAEBBF57FD96"
+    },
+    {
+      "path": "frontend-web/src/api/client.ts",
+      "sha256": "3E7AAB7E0A760B0B8DC398FE1B17E959277203E915AECED97212F9B06F463F4D"
+    },
+    {
+      "path": "frontend-web/src/components/todayCoverage.ts",
+      "sha256": "20524240978FC69A1517ECA46636D79D8BA7D484F6905C647181A6A548DA1448"
+    },
+    {
+      "path": "backend/app/api/training.py",
+      "sha256": "9C875FF5C497A38AF9C2F0971F1948043BA4A896215A43204D45D7AB1DEAE557"
+    },
+    {
+      "path": "backend/app/schemas/training.py",
+      "sha256": "436F96E4CCBCC66D11BB2E29F7E42798B7359B59899A2C5FC08F15863D71DF74"
+    },
+    {
+      "path": "frontend-web/package.json",
+      "sha256": "C5AFFFC8F2AC443A285CF9A904A5E4AEB9AAD4F11261352B7554FED984C7C820"
+    }
+  ]
+}

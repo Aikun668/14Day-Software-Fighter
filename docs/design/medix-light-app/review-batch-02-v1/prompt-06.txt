@@ -1,0 +1,19 @@
+Create a realistic production-quality Chinese patient mobile app UI, faithfully continuing the attached USER-APPROVED Medix Light mobile design. These are adjacent pages of the same app, not alternative branding. Target logical viewport390x844, exact tall portrait ratio195:422, render at852x1846 high resolution. Output APP CONTENT ONLY, full rectangular canvas. No device bezel, phone body, OS status bar, clock, battery, home indicator, browser chrome, external captions or multiple screens. Do not shorten or widen the screen.
+
+Visual system must match the approved reference: neutral lightgray #F6F6F8 base, white content surfaces, bright violet #8146FF primary actions and selected navigation, charcoal #424650 text, secondary #697180, faint #EEF0F3 dividers. Blue #3185ED for information, deep teal #086B5E for completed TEXT, bright teal only for illustrations/large accents. Dark amber #995712 for attention TEXT. Red #B83E49 only for destructive confirmation. Never make small text pastel or low contrast. White text on solid violet.
+Modern Chinese sans-serif/Noto Sans SC. Body16logicalpx, secondary14, heading22–24. Main button height56logicalpx, absolutely >=48. Other taps >=48. Outer content gutters22logicalpx; keep footer control edges aligned with content. Radius10–12. Use flat lists divided by thin lines, not cards inside cards or rows inside tinted boxes. No big gradient/glass, heavy shadows, decorative status dots, patient IDs or tiny legal text. A light lively feel from existing illustration, functional color and purposeful space, not rainbow cards. Do not invent additional workflows or labels.
+Current date anchor2026-11-10. Mock scene21:10 local time. This is a UI design fixture, not a screenshot of implemented code. Chinese text must be precise and readable. All fields, labels and buttons fit fully. Use only necessary copy explicitly specified below.
+PAGE: 用药记录. Attached reference1 is approved 今日. Match its exact tone, font sizes, white surfaces and bottomnav. Reference2 is the current old medication page only for functional context; discard its old purple-heavy layout.
+
+Layout390x844 logical, margins22:
+HEADER y24–76: title “用药记录” left22, right muted “退出” action16. No avatar or patientID repeated.
+WEEK SELECTOR y102–208: month “2026年11月” left17, simple left/right week chevrons onright with48px targets. A seven-column week row beneath, with weekday labels “一 二 三 四 五 六 日” and day numbers “9 10 11 12 13 14 15”. Tuesday10 is the ONLY violet selected day, white text in its selection background; all others neutral. Each column about49px wide, total346px, no decorative dots beneath dates.
+DAY PLAN as ONE white surface y236–472. Header “当日计划” left17, “1/2 已登记” right14 charcoal. Two spacious rows separated by one hairline:
+- “09:00” 26px left, deep teal check and “已登记”16 right.
+- “21:00”26px left with darkamber “待登记”16 below; right a violet “登记” button width100,height56.
+No separate card around each time. Scene is21:10 so21:00 is due; this is registration, not a missed-dose medical claim.
+EVENT LOG heading “当日记录” at y510. ONE flat white list y544–694 with two rows separated by thin line:
+- left “09:05” 20px, second line “本人登记”14gray; right deepteal “有效”14 and a neutral outlined action “撤销” width72,height52.
+- left “08:58”20px, second line “本人登记”14gray; right muted “已撤销”16. NO revoke action for this row. Do not strike through the entire record or fade away legibility. Both events are for11/10, the08:58 event is a revoked mistaken duplicate of the09:00 slot, therefore today's total isstill1/2.
+BOTTOMNAV y768–844, same icons/size as approved今日: “今日”“指导”“记录”; only记录violet. Full-width white, hairline above. Comfortable space above it.
+No medication names/doses, source code IDs, 固定时点/有效/本人登记 as three competing pills, all-history waterfall, PRN disclaimer, repeated date subtitle or explanatory footer. Keep every visible recordtime and state above exactly correct.

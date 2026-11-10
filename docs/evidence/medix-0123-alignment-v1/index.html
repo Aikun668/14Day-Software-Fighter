@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>00–03 · Medix Light 对齐交付</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f6f6;color:#424650;font:16px/1.65 system-ui,'Microsoft YaHei',sans-serif}main{max-width:1488px;margin:auto;padding:32px 24px}h1{font-size:26px;margin:0 0 8px}h2{font-size:20px;margin:32px 0 12px}p{margin:8px 0;color:#697180}a{color:#6b38ce}nav{display:flex;gap:20px;flex-wrap:wrap;margin:20px 0}.pair{display:block;background:white;border-radius:8px;width:100%;height:auto}.links{display:flex;gap:20px;flex-wrap:wrap;margin:10px 0 24px}.badge{display:inline-block;background:#edf9f1;color:#287442;padding:4px 12px;border-radius:4px}.metrics{display:flex;gap:24px;flex-wrap:wrap;padding:18px 0;border-bottom:1px solid #e2e4e9}.metrics span{white-space:nowrap}.shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.shots img{width:100%;height:auto;display:block}.notes{background:white;padding:20px;border-radius:8px}details{padding:12px 0}summary{cursor:pointer}@media(max-width:720px){main{padding:20px 16px}.shots{grid-template-columns:1fr}h1{font-size:22px}}
+</style></head><body><main>
+<h1>00 公共框架 · 01 登录 · 02 工作台 · 03 患者管理</h1>
+<span class="badge">独立子 Agent 视觉复验通过</span>
+<p>左侧为冻结目标，右侧为当前代码实拍。编号列和冗余解释依后续确认删除，登记格按青绿/杏色语义呈现。</p>
+<nav><a href="../medix-light-full-ui/index.html">返回全站画廊</a><a href="ACCEPTANCE.md">验收记录</a><a href="RULES.md">本轮规则</a><a href="http://localhost:5180/login">打开运行页面</a></nav>
+<div class="metrics"><span>桌面 1440 × 900</span><span>侧栏 240 / 顶栏 80</span><span>表格内距 20 / 行高 56</span><span>正文 17 / 标题 22</span></div>
+
+<h2>01 登录</h2><a href="compare-01-login.png" target="_blank"><img class="pair" src="compare-01-login.png" alt="登录页目标与当前代码并排对照"></a>
+<div class="links"><a href="01-login.png">当前原尺寸</a><a href="focus-01-login.png">局部原比例对照</a><a href="before/01-login.png">修改前</a><a href="01-login-390.png">手机视口</a></div>
+
+<h2>02 工作台（含 00 公共框架）</h2><a href="compare-02-workbench.png" target="_blank"><img class="pair" src="compare-02-workbench.png" alt="工作台目标与当前代码并排对照"></a>
+<div class="links"><a href="02-workbench.png">当前原尺寸</a><a href="before/02-workbench.png">修改前</a><a href="02-stress.png">多人关注与多任务</a><a href="02-workbench-390.png">手机视口</a></div>
+
+<h2>03 患者管理</h2><a href="compare-03-patients.png" target="_blank"><img class="pair" src="compare-03-patients.png" alt="患者管理目标与当前代码并排对照"></a>
+<div class="links"><a href="03-patients.png">当前原尺寸</a><a href="focus-03-patients.png">局部原比例对照</a><a href="before/03-patients.png">修改前</a><a href="03-patients-390.png">手机视口</a><a href="03-twenty-rows.png">20 条完整分页</a></div>
+
+<h2>真实后端实拍</h2><p>上方对照使用隔离演示数据；以下通过实际 8010 后端登录并读取，日期和任务数量随运行数据变化。现有种子数据的10位演示患者已固定映射写实头像。</p>
+<div class="shots"><a href="02-workbench-live.png"><img src="02-workbench-live.png" alt="真实后端工作台实拍" loading="lazy"></a><a href="03-patients-live.png"><img src="03-patients-live.png" alt="真实后端患者管理实拍" loading="lazy"></a></div>
+
+<h2>验收与保留差异</h2><div class="notes">
+<p>独立复验经历原预览退回、第一轮字体与状态证据退回、第二轮通过及字体子集封包复核。未留下 P0/P1/P2 视觉问题。</p>
+<p>剩余 P3：登录按钮字重略重；品牌及部分导航图标轮廓与生成目标不完全相同。本结论不替代你的最终确认。</p>
+<div class="links"><a href="checks.json">布局与状态检查</a><a href="interaction-checks.json">交互回归</a><a href="live-checks.json">实际后端检查</a><a href="font-checks.json">实际字体与下载证据</a><a href="build.log">build</a><a href="lint.log">lint</a></div>
+<details><summary>其他状态证据</summary><div class="links"><a href="00-mobile-navigation.png">手机导航</a><a href="01-required.png">登录必填</a><a href="01-invalid.png">错误凭据</a><a href="02-no-due.png">无到期时点</a><a href="02-stats-failure.png">统计失败</a><a href="03-no-demo-portraits.png">非演示无头像</a><a href="03-service-error.png">患者服务失败</a><a href="03-create.png">新建患者</a><a href="03-evaluation.png">现场评估</a></div></details>
+</div>
+</main></body></html>

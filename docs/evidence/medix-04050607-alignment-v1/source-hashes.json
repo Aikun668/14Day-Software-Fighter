@@ -1,0 +1,15 @@
+{
+  "frontend-web/src/App.tsx": "62df947c0df6fc7a0153c63f1d43946ed846de3112c6b98e52b2ecfd64f085d8",
+  "frontend-web/src/pages/clinician/PatientDetailPage.tsx": "b5c103dc33dbe77adf7038c4221552e2629f55fe3fcee99a084e4395953b1958",
+  "frontend-web/src/pages/clinician/PlanEditPage.tsx": "fdc8055598a892027b6a5e015f6cf679bb31a1537783303c1e4bfa0aa95deefc",
+  "frontend-web/src/pages/clinician/StatsPage.tsx": "378754a6d642a712a45d7817f52e1cbc5b4211aa2f4b0ac5c90a26520f5647c2",
+  "frontend-web/src/pages/clinician/FollowupPage.tsx": "e35d2cba8be3c748ace6bd4ff317a722c562ae1ef56b853582339069074009d9",
+  "frontend-web/src/components/CoverageTrendChart.tsx": "57a260adf8ae9a23227914f4e6eda5f20768079cffed6d396ff37437ed61a982",
+  "frontend-web/src/styles/medix-clinical.css": "62d8217f7729401473ea9d6bf993472ed7a11ccec12627862a13e2806894b023",
+  "frontend-web/src/components/medix/clinical.ts": "c3dc985370a8cd53be62b4e6a9d2331623a89994519cfe59088e9c02bd1efdad",
+  "frontend-web/src/components/medix/ClinicalUI.tsx": "2d113434af36f4bf27c47259b8e8d0e9a06bb591ecc5c58a28bff7a97d922076",
+  "frontend-web/src/components/medix/Medix.tsx": "afad904a2f684085e00129111065fd159457b14c273e2019c964cc47da642296",
+  "frontend-web/src/components/medix/MedixLayout.tsx": "c2960c532347b5f8e8a2ed566d5047ac46d11da105e1ac760ab48ebff24e5b68",
+  "frontend-web/src/components/medix/stats.ts": "4d35726f5f714f6d84e72b8a9273b611a6ab52a83cb5d11cb7d6d8ffd7cd7e95",
+  "frontend-web/src/components/medix/useClinicalQuery.ts": "6155a6f44524c143ebb7d39d58d572dc9469e41d6fd7bb2d737743b3400a5a09"
+}

@@ -1,0 +1,333 @@
+{
+  "fonts_detail": {
+    ".ml-detail-identity h1": {
+      "fonts": [
+        {
+          "familyName": "Noto Sans SC Medium",
+          "postScriptName": "NotoSansSC-Medium",
+          "isCustomFont": true,
+          "glyphCount": 3
+        }
+      ]
+    },
+    ".ml-detail-identity > span": {
+      "fonts": []
+    },
+    ".ml-detail-matrix tbody th": {
+      "fonts": [
+        {
+          "familyName": "Noto Sans SC",
+          "postScriptName": "NotoSansSC-Regular",
+          "isCustomFont": true,
+          "glyphCount": 5
+        }
+      ]
+    }
+  },
+  "fonts_plans": {
+    ".ml-plan-form label": {
+      "fonts": [
+        {
+          "familyName": "Noto Sans SC",
+          "postScriptName": "NotoSansSC-Regular",
+          "isCustomFont": true,
+          "glyphCount": 5
+        }
+      ]
+    },
+    ".ml-history-meta": {
+      "fonts": [
+        {
+          "familyName": "Noto Sans SC",
+          "postScriptName": "NotoSansSC-Regular",
+          "isCustomFont": true,
+          "glyphCount": 25
+        }
+      ]
+    },
+    ".ml-time-item input": {
+      "fonts": [
+        {
+          "familyName": "Noto Sans SC",
+          "postScriptName": "NotoSansSC-Regular",
+          "isCustomFont": true,
+          "glyphCount": 5
+        }
+      ]
+    }
+  },
+  "geometry": [
+    {
+      "title": "每日登记覆盖",
+      "rect": {
+        "x": 268,
+        "y": 312,
+        "width": 1144,
+        "height": 263.5,
+        "top": 312,
+        "right": 1412,
+        "bottom": 575.5,
+        "left": 268
+      },
+      "padding": "18px 20px",
+      "head": {
+        "x": 288,
+        "y": 330,
+        "width": 1104,
+        "height": 24,
+        "top": 330,
+        "right": 1392,
+        "bottom": 354,
+        "left": 288
+      },
+      "children": [
+        {
+          "class": "ml-section-head",
+          "rect": {
+            "x": 288,
+            "y": 330,
+            "width": 1104,
+            "height": 24,
+            "top": 330,
+            "right": 1392,
+            "bottom": 354,
+            "left": 288
+          },
+          "margin": "0px 0px 8px"
+        },
+        {
+          "class": "ml-trend-block",
+          "rect": {
+            "x": 288,
+            "y": 362,
+            "width": 1104,
+            "height": 195.5,
+            "top": 362,
+            "right": 1392,
+            "bottom": 557.5,
+            "left": 288
+          },
+          "margin": "0px"
+        }
+      ]
+    },
+    {
+      "title": "未发现登记时点",
+      "rect": {
+        "x": 268,
+        "y": 591.5,
+        "width": 538.578125,
+        "height": 156,
+        "top": 591.5,
+        "right": 806.578125,
+        "bottom": 747.5,
+        "left": 268
+      },
+      "padding": "18px 20px",
+      "head": {
+        "x": 288,
+        "y": 609.5,
+        "width": 498.578125,
+        "height": 24,
+        "top": 609.5,
+        "right": 786.578125,
+        "bottom": 633.5,
+        "left": 288
+      },
+      "children": [
+        {
+          "class": "ml-section-head",
+          "rect": {
+            "x": 288,
+            "y": 609.5,
+            "width": 498.578125,
+            "height": 24,
+            "top": 609.5,
+            "right": 786.578125,
+            "bottom": 633.5,
+            "left": 288
+          },
+          "margin": "0px 0px 8px"
+        },
+        {
+          "class": "ml-missing-list",
+          "rect": {
+            "x": 288,
+            "y": 641.5,
+            "width": 498.578125,
+            "height": 88,
+            "top": 641.5,
+            "right": 786.578125,
+            "bottom": 729.5,
+            "left": 288
+          },
+          "margin": "0px"
+        }
+      ]
+    },
+    {
+      "title": "登记来源",
+      "rect": {
+        "x": 826.578125,
+        "y": 591.5,
+        "width": 585.40625,
+        "height": 156,
+        "top": 591.5,
+        "right": 1411.984375,
+        "bottom": 747.5,
+        "left": 826.578125
+      },
+      "padding": "18px 20px",
+      "head": {
+        "x": 846.578125,
+        "y": 609.5,
+        "width": 545.40625,
+        "height": 24,
+        "top": 609.5,
+        "right": 1391.984375,
+        "bottom": 633.5,
+        "left": 846.578125
+      },
+      "children": [
+        {
+          "class": "ml-section-head",
+          "rect": {
+            "x": 846.578125,
+            "y": 609.5,
+            "width": 545.40625,
+            "height": 24,
+            "top": 609.5,
+            "right": 1391.984375,
+            "bottom": 633.5,
+            "left": 846.578125
+          },
+          "margin": "0px 0px 8px"
+        },
+        {
+          "class": "ml-source-list",
+          "rect": {
+            "x": 846.578125,
+            "y": 641.5,
+            "width": 545.40625,
+            "height": 88,
+            "top": 641.5,
+            "right": 1391.984375,
+            "bottom": 729.5,
+            "left": 846.578125
+          },
+          "margin": "0px"
+        }
+      ]
+    },
+    {
+      "title": "随访摘要",
+      "rect": {
+        "x": 268,
+        "y": 763.5,
+        "width": 1144,
+        "height": 152,
+        "top": 763.5,
+        "right": 1412,
+        "bottom": 915.5,
+        "left": 268
+      },
+      "padding": "18px 20px",
+      "head": {
+        "x": 288,
+        "y": 781.5,
+        "width": 1104,
+        "height": 24,
+        "top": 781.5,
+        "right": 1392,
+        "bottom": 805.5,
+        "left": 288
+      },
+      "children": [
+        {
+          "class": "ml-section-head",
+          "rect": {
+            "x": 288,
+            "y": 781.5,
+            "width": 1104,
+            "height": 24,
+            "top": 781.5,
+            "right": 1392,
+            "bottom": 805.5,
+            "left": 288
+          },
+          "margin": "0px 0px 8px"
+        },
+        {
+          "class": "ml-table-wrap",
+          "rect": {
+            "x": 288,
+            "y": 813.5,
+            "width": 1104,
+            "height": 84,
+            "top": 813.5,
+            "right": 1392,
+            "bottom": 897.5,
+            "left": 288
+          },
+          "margin": "0px"
+        }
+      ]
+    },
+    {
+      "title": "重复登记",
+      "rect": {
+        "x": 268,
+        "y": 931.5,
+        "width": 1144,
+        "height": 152,
+        "top": 931.5,
+        "right": 1412,
+        "bottom": 1083.5,
+        "left": 268
+      },
+      "padding": "18px 20px",
+      "head": {
+        "x": 288,
+        "y": 949.5,
+        "width": 1104,
+        "height": 24,
+        "top": 949.5,
+        "right": 1392,
+        "bottom": 973.5,
+        "left": 288
+      },
+      "children": [
+        {
+          "class": "ml-section-head",
+          "rect": {
+            "x": 288,
+            "y": 949.5,
+            "width": 1104,
+            "height": 24,
+            "top": 949.5,
+            "right": 1392,
+            "bottom": 973.5,
+            "left": 288
+          },
+          "margin": "0px 0px 8px"
+        },
+        {
+          "class": "ml-table-wrap",
+          "rect": {
+            "x": 288,
+            "y": 981.5,
+            "width": 1104,
+            "height": 84,
+            "top": 981.5,
+            "right": 1392,
+            "bottom": 1065.5,
+            "left": 288
+          },
+          "margin": "0px"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "report_summary": "李先生\n登记覆盖\n85.7%\n已登记 12 / 应记录 14\n未发现登记\n2"
+}

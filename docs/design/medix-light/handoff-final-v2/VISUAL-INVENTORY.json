@@ -1,0 +1,112 @@
+{
+  "version": "v2",
+  "date": "2026-11-09",
+  "note": "Separate visual targets for every screenshot page 01-15; 00 is shared system. Approval states retained honestly.",
+  "pages": [
+    {
+      "page": "01",
+      "image": "../approved-batch-01/01-login.png",
+      "sha256": "32FD23C5B383D0663AC8615A70A2BE140D26BFDB128D2CC3E5DECCBB04D19B8E",
+      "spec": "../handoff-0123-v1/01-LOGIN.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "02",
+      "image": "../approved-batch-01/02-workbench.png",
+      "sha256": "E81FBB6FAAD86B4703A9038A903FD926C3EE11C4BDBD5CD7690908E3F0B2FFD2",
+      "spec": "../handoff-0123-v1/02-WORKBENCH.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "03",
+      "image": "../approved-batch-01/03-patients.png",
+      "sha256": "6AA3EEE24A81F3C445916BA4D2F4F5217323E50376C6BBA5FA145D9DCC993CBF",
+      "spec": "../handoff-0123-v1/03-PATIENTS.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "04",
+      "image": "references/04-patient-detail.png",
+      "sha256": "655901ADA8336C4279A8E08E1A1B48C82869A4712F5120FB38A070C9FCB086A2",
+      "spec": "04-PATIENT-DETAIL.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "05",
+      "image": "../handoff-05060809-v1/references/05-plans.png",
+      "sha256": "A554A03F2E642B694ED4750B332516CEE8584FBEA46DCD96EA97B33407B2DB01",
+      "spec": "../handoff-05060809-v1/05-PLANS.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "06",
+      "image": "../handoff-05060809-v1/references/06-stats-charts.png",
+      "sha256": "F6E25DE3631191B332D9B71648534E30DFE22E98A22415D7924E0AD8231E4E27",
+      "spec": "../handoff-05060809-v1/06-STATS.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "07",
+      "image": "references/07-patient-report.png",
+      "sha256": "355296CC590A0D5F7DA7A1696970B107DC66C3AF32FFB996ABCF9610E8A8475E",
+      "spec": "../handoff-07-v1/07-PATIENT-REPORT.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "08",
+      "image": "../handoff-05060809-v1/references/08-followups.png",
+      "sha256": "4B86DD6E8E2AB3ADFE327BA91D83BCCD7BD8F6C2BBED57D778CB283D7FDDDCB5",
+      "spec": "../handoff-05060809-v1/08-FOLLOWUPS.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "09",
+      "image": "../handoff-05060809-v1/references/09-task-close-modal.png",
+      "sha256": "68DA1EC498EED20275F9EE8FDBE75FA8DEF5D4C91D2438E80708D800971321FB",
+      "spec": "../handoff-05060809-v1/09-TASK-CLOSE.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "10",
+      "image": "references/10-medication-backfill-modal.png",
+      "sha256": "CDCE832BF55A84702E11123AEDABD43C303CB99096032BA89FF08953CAF21788",
+      "spec": "10-BACKFILL.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "11",
+      "image": "references/11-admin-devices.png",
+      "sha256": "2A3FCA1C2B2F9D90C9AD12495BA650EC8F09DFE12952D80A32DE9C9FF4D907A6",
+      "spec": "11-DEVICES.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "12",
+      "image": "references/12-admin-guides.png",
+      "sha256": "E55FB6E8431B45288C91D21751345F5EB539F77A44D238F6AEFE0F707C24418D",
+      "spec": "12-GUIDES.md",
+      "visual_approval": "user-approved"
+    },
+    {
+      "page": "13",
+      "image": "references/13-admin-accounts.png",
+      "sha256": "E0AE7A61EA1AB560CF87178C222F1DC5B9D0B12281F9D37E5340DA9292E3D0A4",
+      "spec": "13-ACCOUNTS.md",
+      "visual_approval": "retained-reference-no-individual-approval-record"
+    },
+    {
+      "page": "14",
+      "image": "references/14-admin-knowledge.png",
+      "sha256": "1E5ACE690FEB849EEB0701D8DD89572774B055A29E4BA8A9F298EE200C2BC155",
+      "spec": "14-KNOWLEDGE.md",
+      "visual_approval": "retained-reference-no-individual-approval-record"
+    },
+    {
+      "page": "15",
+      "image": "references/15-audit-overview.png",
+      "sha256": "25A56CFC602959E1F4663FF5FD10DA0E7AFA43C6709F08670C38FC1E7E426170",
+      "spec": "15-AUDIT.md",
+      "visual_approval": "user-approved"
+    }
+  ]
+}

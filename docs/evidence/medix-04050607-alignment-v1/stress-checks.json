@@ -1,0 +1,14 @@
+{
+  "detail_A_slow_B_fast": true,
+  "rounding1": true,
+  "rounding5": true,
+  "many_missing_day_bars_and_all_slots": true,
+  "followups_beyond_100": true,
+  "report_independent_errors": true,
+  "overview_row_fallback_without_directory": true,
+  "report_A_slow_B_fast": true,
+  "one_day_inclusive_range": true,
+  "92_days_allowed": true,
+  "93_days_blocked_before_request": true,
+  "uncaught_js_errors": []
+}

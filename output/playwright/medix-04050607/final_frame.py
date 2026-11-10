@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path('output/playwright/medix-04050607/capture.py');s=p.read_text(encoding='utf-8');s=s.replace("expect(page.locator('.ml-duplicate-table tbody tr')).to_have_count(1);shot(page,'07-patient-report.png',True)", "expect(page.locator('.ml-duplicate-table tbody tr')).to_have_count(1);page.set_viewport_size({'width':1440,'height':1080});shot(page,'07-patient-report.png',True)");s=s.replace("print(json.dumps(results,ensure_ascii=False))", "print('04-07 captures, fonts and geometry saved; errors:',errors)");p.write_text(s,encoding='utf-8')

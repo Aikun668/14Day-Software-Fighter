@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-09",
+  "method": "built-in image_gen; generation plus one local text removal",
+  "agent_static_review": "pass",
+  "user_visual_approval": "approved",
+  "runtime_acceptance": "not-executed",
+  "image": "references/07-patient-report.png",
+  "sha256": "355296CC590A0D5F7DA7A1696970B107DC66C3AF32FFB996ABCF9610E8A8475E",
+  "dimensions": [
+    1448,
+    1086
+  ],
+  "original_source": "C:\\Users\\杨玉璋\\.codex\\generated_images\\01a1befa-767f-79e3-97d8-9de43ad67d2e\\exec-2d15eb78-2cd5-47aa-bb25-892395ff83f8.png",
+  "style_reference": "../approved-charts-v2/06-stats-charts.png",
+  "fixture_checks": "pass: N14 M12 85.7%; missing2; events13; sources10/3; duplicate slot count2",
+  "revision": "Removed redundant M=12,N=14 text; other layout and values retained",
+  "approval_quote": "通过，按这版归档",
+  "approval_scope": "Final edited 07 image only; runtime not accepted"
+}

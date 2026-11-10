@@ -1,0 +1,37 @@
+{
+  "status": "awaiting-user-visual-approval",
+  "method": "built-in image_gen",
+  "date": "2026-11-09",
+  "implemented": false,
+  "visualReview": {
+    "screens": 3,
+    "checked": [
+      "Shared approved admin shell and palette",
+      "All five navigation destinations retained",
+      "Account role/status/password-change/actions retained",
+      "Knowledge version/chunk count/read-only published actions retained",
+      "Audit historical dates and semantic fields retained; corrupt reasons not invented",
+      "No patient IDs, decorative dots, redundant explanatory paragraphs or clipped content"
+    ]
+  },
+  "limitations": [
+    "Static visual review only; not runtime or interaction acceptance",
+    "Audit screenshot shows eight representative rows; actual records must never be removed",
+    "Deactivation consequence warning belongs in confirmation dialog, not permanently above table",
+    "Knowledge titles simplified; complete stored titles remain available in details"
+  ],
+  "files": {
+    "13-admin-accounts.png": {
+      "source": "C:/Users/杨玉璋/.codex/generated_images/01a1befa-767f-79e3-97d8-9de43ad67d2e/exec-c243a8a8-b836-47b2-8457-9134ac3af082.png",
+      "prompt": "Create a Chinese desktop UI screenshot at 1440x900, same aspect as references. FIRST image is the user-approved sole style authority; reproduce its shell exactly: violet 吸入治疗管理 brand, same white sidebar geometry, five menu labels 装置型号 / 指导版本 / 账号管理 / 知识内容 / 审计日志 and same glyphs, same doctor illustration at bottom, white topbar 内容与账号管理 with same male admin portrait admin and退出. Main neutral #F6F6F6 canvas, flat white table with modest corners, pale gray header, thin row dividers, restrained gray regular body text, medium 20px title, violet #8146FF primary action. SECOND image is old functional content only, do not borrow old style. No big hero, explanatory small paragraphs, duplicate labels, decorative colored dots, nested cards, shadows, blue primary accents. Preserve functional data and actions. Current date2026-11-09; source dates can remain historical. No browser chrome. One screen. PAGE 账号管理, active third sidebar item. Header 账号管理, small quiet 演示数据 label, violet 新建账号 top right. Single white table columns 账号 / 角色 / 状态 / 需改密 / 操作. Five rows admin|管理员|启用|否|停用 ; clinician_b|医护|启用|否|停用 ; patient_x|患者|启用|否|停用 ; patient_y|患者|启用|否|停用 ; clinician_a|医护|启用|否|停用. Account names are essential identifiers: keep verbatim, no additional IDs. Small fictional realistic portrait before each account, same admin portrait as topbar, diverse adult faces for others. Mint 启用 status chips. 停用 small muted coral text/outline buttons, not saturated red blocks. No card per row, no role colored pills. No persistent warning paragraph; deactivation consequences belong to future confirmation dialog. Generous rows and whitespace."
+    },
+    "14-admin-knowledge.png": {
+      "source": "C:/Users/杨玉璋/.codex/generated_images/01a1befa-767f-79e3-97d8-9de43ad67d2e/exec-57b2f430-ae62-4cd1-8e97-8f99693557b4.png",
+      "prompt": "Create a Chinese desktop UI screenshot at 1440x900, same aspect as references. FIRST image is the user-approved sole style authority; reproduce its shell exactly: violet 吸入治疗管理 brand, same white sidebar geometry, five menu labels 装置型号 / 指导版本 / 账号管理 / 知识内容 / 审计日志 and same glyphs, same doctor illustration at bottom, white topbar 内容与账号管理 with same male admin portrait admin and退出. Main neutral #F6F6F6 canvas, flat white table with modest corners, pale gray header, thin row dividers, restrained gray regular body text, medium 20px title, violet #8146FF primary action. SECOND image is old functional content only, do not borrow old style. No big hero, explanatory small paragraphs, duplicate labels, decorative colored dots, nested cards, shadows, blue primary accents. Preserve functional data and actions. Current date2026-11-09; source dates can remain historical. No browser chrome. One screen. PAGE 知识内容, fourth sidebar item active. Header 知识内容 with quiet 演示数据 label, violet 新建知识草稿 right. One white table columns 型号 / 标题 / 版本 / 片段数 / 状态 / 操作. Three rows: 吸入气雾剂 pMDI | pMDI 使用要点知识库 |1.0|4|已发布|查看 ; 都保 DPI | DPI 使用要点知识库 |1.0|3|已发布|查看 ; 能倍乐 Respimat | Respimat 使用要点知识库 |1.0|2|已发布|查看. Titles shortened to remove repeated model prefix and DEMO suffix only, don't remove version and chunk count. Mint 已发布 chips; 查看 small gray outlined eye icon plus text. No edit/delete/publish actions on published records. No long explanation of retrieval pipeline, no duplicate 已发布不可改 labels. Same approved sidebar/topbar exact proportions and portrait. Three roomy rows and calm whitespace below."
+    },
+    "15-admin-audit.png": {
+      "source": "C:/Users/杨玉璋/.codex/generated_images/01a1befa-767f-79e3-97d8-9de43ad67d2e/exec-77f74b22-0825-48b5-b138-e78bad5d3d58.png",
+      "prompt": "Create a Chinese desktop UI screenshot at 1440x900, same aspect as references. FIRST image is the user-approved sole style authority; reproduce its shell exactly: violet 吸入治疗管理 brand, same white sidebar geometry, five menu labels 装置型号 / 指导版本 / 账号管理 / 知识内容 / 审计日志 and same glyphs, same doctor illustration at bottom, white topbar 内容与账号管理 with same male admin portrait admin and退出. Main neutral #F6F6F6 canvas, flat white table with modest corners, pale gray header, thin row dividers, restrained gray regular body text, medium 20px title, violet #8146FF primary action. SECOND image is old functional content only, do not borrow old style. No big hero, explanatory small paragraphs, duplicate labels, decorative colored dots, nested cards, shadows, blue primary accents. Preserve functional data and actions. Current date2026-11-09; source dates can remain historical. No browser chrome. One screen. PAGE 审计日志, fifth sidebar item active. Header 审计日志 plus small 演示数据 label. No creation button since audit is read-only. Single white flat table columns 时间 / 操作 / 资源 / 详情. Eight orderly rows, preserve historical source dates: 2026/11/03 05:43:43|创建计划|用药计划|计划类型：固定 ; 2026/11/03 05:40:03|创建计划|用药计划|计划类型：固定 ; 2026/10/24 20:39:32|撤销登记|用药登记|原因：原始内容异常 ; 2026/10/24 20:22:18|用药登记|用药登记|来源：医护观察 ; 2026/10/24 20:09:15|撤销登记|用药登记|原因：原始内容异常 ; 2026/10/24 20:09:15|用药登记|用药登记|来源：医护观察 ; 2026/10/19 06:48:39|知识发布|知识文档|版本：test-2 ; 2026/10/19 06:48:39|知识审核|知识文档|版本：test-2. All gray text, no redundant chips. Translate raw enum labels only, do not invent readable reasons for source question-mark corruption; explicit 原始内容异常 conveys unknown. Each anomalous reason may have small subtle info icon, not a colored warning banner. No delete/edit actions or fake metrics. Readable body14–16px, strong alignment, no overflow."
+    }
+  }
+}

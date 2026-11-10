@@ -1,0 +1,17 @@
+{
+  "passed": [
+    "12 full steps/error notes before review; separate explicit versioned publish",
+    "12 stale full content rejects mutation and reloads before next confirmation",
+    "12 blank step validation, 409 input retained, trimmed continuous step payload",
+    "12 complete model directory >100; directory failure preserves list with explicit fallback",
+    "14 http source validation; preserved paragraph breaks and full detail review",
+    "14 uncertain publish remains blocked after read verification; no write replay",
+    "14 malformed chunks are distinct from zero and cannot be approved",
+    "13 account/password validation; masked one-time result survives Esc/back; absent from storage/toasts",
+    "13 explicitly supplied password is never trimmed",
+    "13 unknown status read-only; exact target; page contraction automatically returns to valid page",
+    "15 shared daily/category/event totals, filter consistency, keyboard read-only detail",
+    "13 deliberate self-disable clears local session and exits"
+  ],
+  "pageerrors": []
+}

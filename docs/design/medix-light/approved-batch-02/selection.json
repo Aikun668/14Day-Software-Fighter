@@ -1,0 +1,12 @@
+{
+  "status": "user-approved",
+  "approved_on": "2026-11-09",
+  "kind": "generated-visual-targets-not-implementation",
+  "files": {
+    "04-patient-detail.png": "exec-96c09d6c-5e65-4ee5-a214-96a1951be28b.png",
+    "05-plans.png": "exec-b07c4491-05e6-4f86-b909-7984268bf8b5.png",
+    "06-stats.png": "exec-c53141d7-c333-41b8-93cd-58d7368ede94.png",
+    "08-followups.png": "exec-40f1a9c3-0b24-4eff-b277-ccd7e7aa187a.png"
+  },
+  "verification": "All four copied files match source SHA256 hashes. Followups uses exact user-attached colored-label revision."
+}

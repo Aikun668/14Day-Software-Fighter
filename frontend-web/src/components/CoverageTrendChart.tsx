@@ -1,130 +1,44 @@
 import { useEffect, useRef } from 'react'
 import * as echarts from 'echarts/core'
-import { LineChart, ScatterChart } from 'echarts/charts'
+import { LineChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { EChartsOption } from 'echarts'
+import { rateText } from './medix/clinical'
 
-// 按需引入：只注册用到的图表类型与组件，控制包体
-echarts.use([LineChart, ScatterChart, GridComponent, TooltipComponent, CanvasRenderer])
-
-export interface TrendPoint {
-  day: string
-  N: number
-  M: number
-  coverage_rate: number | null
-}
-
-/** Clinic Comfort 诊所蓝。趋势线只换颜色，计算仍用服务端 coverage_rate。 */
-const LINE = '#5B7CFF'
-
-/** N=0（当天无到期时点）的日子：coverage_rate 为 null，断开连线，并以空心点标在基线上 */
-function buildOption(trend: TrendPoint[]): EChartsOption {
-  const days = trend.map((t) => t.day.slice(5))
-  const values = trend.map((t) => t.coverage_rate)
-  const emptyPoints = trend
-    .map((t, i) => (t.N === 0 ? [i, 0] : null))
-    .filter((p): p is [number, number] => p !== null)
-
-  return {
-    grid: { left: 40, right: 16, top: 24, bottom: 28 },
-    tooltip: {
-      trigger: 'item',
-      formatter: (params) => {
-        const hit = Array.isArray(params) ? params[0] : params
-        const t = hit ? trend[hit.dataIndex] : undefined
-        if (!t) return ''
-        const rate = t.coverage_rate === null ? '无到期时点' : `${t.coverage_rate}%`
-        return `${t.day}<br/>应记录 ${t.N}，已登记 ${t.M}<br/>覆盖率 ${rate}`
-      },
-    },
-    xAxis: {
-      type: 'category',
-      data: days,
-      boundaryGap: false,
-      axisLabel: { color: '#8B93A7', fontSize: 12 },
-      axisLine: { lineStyle: { color: '#E5EAF1' } },
-    },
-    yAxis: {
-      type: 'value',
-      min: 0,
-      max: 100,
-      interval: 50,
-      axisLabel: { color: '#8B93A7', fontSize: 12, formatter: '{value}%' },
-      splitLine: { lineStyle: { color: '#EEF2F7' } },
-    },
-    series: [
-      {
-        name: '覆盖率',
-        type: 'line',
-        data: values,
-        connectNulls: false,
-        symbol: 'circle',
-        symbolSize: 8,
-        itemStyle: { color: LINE },
-        lineStyle: { color: LINE, width: 2.5 },
-        label: { show: false },
-      },
-      {
-        name: '无到期时点',
-        type: 'scatter',
-        data: emptyPoints,
-        symbol: 'circle',
-        symbolSize: 7,
-        itemStyle: { color: '#fff', borderColor: '#C8CEDA', borderWidth: 1.5 },
-        tooltip: { show: false },
-      },
-    ],
-  }
-}
-
-interface Props {
-  trend: TrendPoint[]
-}
-
-/** 逐日覆盖率趋势（ECharts，按需引入）。替换原手写 SVG 折线。 */
-export default function CoverageTrendChart({ trend }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<echarts.ECharts | null>(null)
-
-  // 初始化与销毁：容器始终挂载，effect 只跑一次；StrictMode 下 cleanup 会 dispose 后重新 init
+echarts.use([LineChart, GridComponent, TooltipComponent, CanvasRenderer])
+export interface TrendPoint { day: string; N: number; M: number; coverage_rate: number | null }
+export default function CoverageTrendChart({ trend }: { trend: TrendPoint[] }) {
+  const container = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    const el = containerRef.current
+    const el = container.current
     if (!el) return
     const chart = echarts.init(el)
-    chartRef.current = chart
-    const observer = new ResizeObserver(() => chart.resize())
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      chart.dispose()
-      chartRef.current = null
+    const style = getComputedStyle(el), fontSize = parseFloat(style.fontSize)
+    const option: EChartsOption = {
+      animation: !matchMedia('(prefers-reduced-motion: reduce)').matches, animationDuration: 200,
+      textStyle: { fontFamily: style.fontFamily, fontSize, color: '#424650' },
+      grid: { left: fontSize * 3.1, right: fontSize * 1.4, top: fontSize * 2.2, bottom: fontSize * 2.5 },
+      tooltip: { trigger: 'axis', formatter: params => {
+        const hit = Array.isArray(params) ? params[0] : params
+        const point = hit ? trend[hit.dataIndex] : undefined
+        return point ? `${point.day}<br/>已登记 ${point.M} / 应记录 ${point.N}<br/>登记覆盖率 ${point.N === 0 ? '无到期时点' : rateText(point.coverage_rate)}` : ''
+      } },
+      xAxis: { type: 'category', data: trend.map(p => p.day.slice(5).replace('-', '/')), boundaryGap: true, axisTick: { show: false }, axisLine: { lineStyle: { color: '#B2B7C3' } }, axisLabel: { color: '#697180', fontSize, interval: trend.length <= 7 ? 0 : 'auto', hideOverlap: true } },
+      yAxis: { type: 'value', min: 0, max: 100, interval: 50, axisLabel: { color: '#697180', fontSize, formatter: '{value}%' }, splitLine: { lineStyle: { color: '#E7EAF0', type: 'dashed' } } },
+      series: [{ name: '登记覆盖率', type: 'line', data: trend.map(p => p.N === 0 ? null : p.coverage_rate), connectNulls: false, smooth: false, symbol: 'circle', symbolSize: fontSize * .55, itemStyle: { color: 'white', borderColor: '#4195FF', borderWidth: 2 }, lineStyle: { color: '#4195FF', width: 2 }, label: { show: trend.length <= 7 && el.clientWidth >= fontSize * 34, position: 'top', distance: 8, color: '#424650', fontSize, formatter: p => `${p.value}%` } }],
     }
-  }, [])
-
-  // 数据变化时整体替换 option（notMerge=true，避免残留旧系列）
-  useEffect(() => {
-    chartRef.current?.setOption(buildOption(trend), { notMerge: true })
+    chart.setOption(option)
+    const resize = () => { chart.resize(); chart.setOption({ series: [{ label: { show: trend.length <= 7 && el.clientWidth >= fontSize * 34 } }] }) }
+    const observer = new ResizeObserver(resize)
+    observer.observe(el)
+    let live = true
+    void document.fonts.ready.then(() => { if (live) { chart.setOption(option, true); resize() } })
+    return () => { live = false; observer.disconnect(); chart.dispose() }
   }, [trend])
-
-  const n = trend.length
-
-  return (
-    <div>
-      {/* 容器始终挂载：图表实例依赖它在首次渲染时初始化；空数据时只隐藏 */}
-      <div
-        ref={containerRef}
-        role="img"
-        aria-label="逐日覆盖率趋势（数据与下方说明一致）"
-        style={{ width: '100%', height: 220, display: n === 0 ? 'none' : undefined }}
-      />
-      {n === 0 && <p className="cc-empty-line">暂无趋势数据</p>}
-      {trend.some((t) => t.N === 0) && trend.some((t) => t.N > 0) && (
-        <p className="cc-empty-line" style={{ marginTop: 8 }}>空心点表示当天没有到期的固定时点（不参与连线）。</p>
-      )}
-      {n > 0 && trend.every((t) => t.N === 0) && (
-        <p className="cc-empty-line" style={{ marginTop: 8 }}>该区间内无固定计划时点（按需用药不计入覆盖率）。</p>
-      )}
-    </div>
-  )
+  return <div className="ml-trend-block"><div ref={container} className="ml-trend-chart" role="img" aria-label="每日登记覆盖率折线图，完整数值见数据表" />
+    {trend.length === 0 && <p className="ml-empty">暂无趋势数据</p>}
+    {trend.length > 0 && trend.every(p => p.N === 0) && <p className="ml-chart-empty">无到期时点</p>}
+    <details className="ml-chart-data"><summary>数据表</summary><div className="ml-table-wrap"><table className="ml-table"><thead><tr><th>日期</th><th>已登记</th><th>应记录</th><th>登记覆盖率</th></tr></thead><tbody>{trend.map(p => <tr key={p.day}><td>{p.day}</td><td>{p.M}</td><td>{p.N}</td><td>{p.N === 0 ? '无到期时点' : rateText(p.coverage_rate)}</td></tr>)}</tbody></table></div></details>
+  </div>
 }

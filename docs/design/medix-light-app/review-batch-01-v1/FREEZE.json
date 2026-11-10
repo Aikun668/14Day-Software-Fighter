@@ -1,0 +1,14 @@
+{
+  "approved_at": "2026-11-10T16:35:42.040646+00:00",
+  "scope": "01-05 static visual images only",
+  "user_statement": "OK啊，做得非常好啊，没毛病，就这样",
+  "status": "user-approved-frozen",
+  "files": {
+    "01-login.png": "7929265838c3afee6d1fa958fd71017f53dc3ab31558472ce7f09e8628c9f124",
+    "02-change-password.png": "42dee3836279fd064a313e6bc606f054bae40f6023faf07bce34a07168be2118",
+    "03-today.png": "94049ebdd03dd47d7ae21d0a096d903adec049c5bbe2eb4d725262c7648a327a",
+    "04-guide.png": "eb895615360f51e3a5fd75540ce567180d8a51e59ca40009287f12d14f11165c",
+    "05-training.png": "d996739ce1e08595c1cd5c1665e5c5238633d86edcbbd640e6b0e5df11da3c89"
+  },
+  "protection": "Windows read-only image attributes plus SHA-256"
+}

@@ -1,0 +1,22 @@
+{
+  "archived_on": "2026-11-09",
+  "authority": "Latest textual requirements override earlier image details; never overwrite frozen files",
+  "files": [
+    {
+      "file": "01-login.png",
+      "sha256": "32FD23C5B383D0663AC8615A70A2BE140D26BFDB128D2CC3E5DECCBB04D19B8E",
+      "source": "C:\\Users\\杨玉璋\\.codex\\generated_images\\01a1befa-767f-79e3-97d8-9de43ad67d2e\\exec-84645424-e5b8-4788-b636-c6b49476b2a0.png"
+    },
+    {
+      "file": "02-workbench.png",
+      "sha256": "E81FBB6FAAD86B4703A9038A903FD926C3EE11C4BDBD5CD7690908E3F0B2FFD2",
+      "source": "C:\\Users\\杨玉璋\\.codex\\generated_images\\01a1befa-767f-79e3-97d8-9de43ad67d2e\\exec-1f5b3be8-ef50-412e-a5a7-e774d7f8b43f.png"
+    },
+    {
+      "file": "03-patients.png",
+      "sha256": "6AA3EEE24A81F3C445916BA4D2F4F5217323E50376C6BBA5FA145D9DCC993CBF",
+      "source": "C:\\Users\\杨玉璋\\.codex\\generated_images\\01a1befa-767f-79e3-97d8-9de43ad67d2e\\exec-5c3ce63f-30f3-4808-83e2-696f531f05b8.png"
+    }
+  ],
+  "status": "user-approved-frozen"
+}

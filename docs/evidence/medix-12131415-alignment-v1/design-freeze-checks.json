@@ -1,0 +1,33 @@
+{
+  "status": "pass",
+  "readonly_checked": true,
+  "markdown_files": 56,
+  "relative_links": 201,
+  "page_ids": [
+    "00",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15"
+  ],
+  "reference_images": 8,
+  "dependency_files": 8,
+  "visual_targets": 15,
+  "page07_fixture_checks": "pass",
+  "page07_visual_approval": "approved",
+  "freeze_manifests": 8,
+  "frozen_entries_checked": 103,
+  "source_drift": [],
+  "errors": []
+}

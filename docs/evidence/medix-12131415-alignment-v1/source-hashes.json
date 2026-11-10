@@ -1,0 +1,14 @@
+{
+  "frontend-web/src/App.tsx": "f85bcb5c1b23b2bb6d55d99cd0da72e9db07512d6402c566a66e409b587c77dc",
+  "frontend-web/src/components/medix/MedixLayout.tsx": "f3bb4eb9fbfb62b4401a2a3455c3c32412971ff0b230d0712988b35f69f9f800",
+  "frontend-web/src/pages/admin/AccountsPanel.tsx": "23a9967e2f388a826f197ca392e44aeea5b6248033e07d1523e811f84ae3d003",
+  "frontend-web/src/pages/admin/AdminNavigation.tsx": "7bc9be7ff31fe260e731d7eabdba66e07ce775e975e579eea924c3772fa4eee8",
+  "frontend-web/src/pages/admin/AdminPage.tsx": "4b6edd931dab6c8d0e4318c03613fff150114c932a53b07b65bc92e94d9e7e89",
+  "frontend-web/src/pages/admin/AdminRoute.tsx": "a01414bf1f45260e0c419da46ea492856156218569cd571f5803c6338deb84f6",
+  "frontend-web/src/pages/admin/AdminUI.tsx": "dbbba6620ee5e00728208564dc109cd4838bae402679abb48374ce2c3295e3be",
+  "frontend-web/src/pages/admin/AuditPanel.tsx": "be3b580425f9234f0c365e51c4a1f344311474bfe49e446eb0b18cbcdde3ac02",
+  "frontend-web/src/pages/admin/ContentPanel.tsx": "22f99097f8bf5194f062e50b20bf6f433a3bb45a772b8fb13fe1e12cf861a1a1",
+  "frontend-web/src/pages/admin/adminState.ts": "130d66e0834d5ee96d3b50555347f9b234f228854a755926d8f9ac8ca51497ca",
+  "frontend-web/src/pages/admin/auditData.ts": "c7c73d78535bbbf90be64cb7e837d3f07252c5d82e7dcf01142e263fd4dcca69",
+  "frontend-web/src/styles/medix-admin.css": "09e5fbe445446ad5c97db37bf2edad9b36a976f6bb897223aab3a817a8347b7c"
+}

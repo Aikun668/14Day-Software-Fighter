@@ -1,342 +1,141 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Form, Input, message, Modal, Select } from 'antd'
+import { SearchOutlined, UserOutlined, ProfileOutlined, DownOutlined } from '@ant-design/icons'
 import { apiFetch } from '../../api/client'
-import {
-  Card,
-  FilterBar,
-  HeroBar,
-  PatientRow,
-  type PatientRowItem,
-} from '../../components/clinic'
+import { PageHeading, PatientIdentity, RowAction, StatusTag } from '../../components/medix/Medix'
 
-interface Patient {
-  id: string
-  patient_code: string
-  display_name: string
-  diagnosis_label: string | null
-  assigned_clinician_id: string | null
-  account_user_id: string | null
-}
-
-interface PageResp {
-  items: Patient[]
-  total: number
-}
-
+interface Patient { id: string; patient_code: string; display_name: string; diagnosis_label: string | null; assigned_clinician_id: string | null; account_user_id: string | null; avatar_url?: string | null }
+interface PageResp { items: Patient[]; total: number }
 interface DeviceModel { id: string; model_name: string }
 interface Guide { id: string; title: string; steps: { id: string; step_no: number; text: string }[] }
-
 const PAGE_SIZE = 20
+const cleanDemo = (value: string | null) => value ? value.replace(/\s*[(（]DEMO[)）]/gi, '').trim() : null
 
-// 去掉演示数据标记：档案标签里的 (DEMO) 是给种子脚本用的，不该出现在业务文案里
-const cleanDemo = (value: string | null) =>
-  value ? value.replace(/\s*[(（]DEMO[)）]/gi, '').trim() : null
-
-// M02 患者列表/详情（J016）+ 现场评估（J024）
 export default function PatientListPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<Patient[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  // 筛选：诊断标签 / 账号绑定状态（均在服务端过滤，不是只筛当前页）
+  const [query, setQuery] = useState('')
   const [diagnosisFilter, setDiagnosisFilter] = useState<string[]>([])
-  const [accountFilter, setAccountFilter] = useState<string[]>([])
+  const [accountFilter, setAccountFilter] = useState<string | undefined>()
   const [diagnosisOptions, setDiagnosisOptions] = useState<{ label: string; value: string }[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loadedRequest, setLoadedRequest] = useState('')
+  const [error, setError] = useState('')
+  const [reload, setReload] = useState(0)
   const [modalOpen, setModalOpen] = useState(false)
   const [form] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
+  const createPending = useRef(false)
   const [evalPatient, setEvalPatient] = useState<Patient | null>(null)
   const [evalOpen, setEvalOpen] = useState(false)
   const [evalForm] = Form.useForm()
   const [evalModels, setEvalModels] = useState<DeviceModel[]>([])
   const [evalGuides, setEvalGuides] = useState<Guide[]>([])
+  const [evalSubmitting, setEvalSubmitting] = useState(false)
+  const [guideLoading, setGuideLoading] = useState(false)
+  const [modelSelected, setModelSelected] = useState(false)
+  const guideRequest = useRef(0)
+  const evalPending = useRef(false)
+  const request = useRef(0)
+  const requestKey = JSON.stringify([page, query, diagnosisFilter, accountFilter, reload])
+  const loading = loadedRequest !== requestKey
 
-  const fetchList = async (
-    p = page,
-    s = search,
-    diag = diagnosisFilter,
-    acct = accountFilter,
-  ) => {
-    setLoading(true)
-    try {
-      const q = new URLSearchParams({ page: String(p), page_size: String(PAGE_SIZE) })
-      if (s) q.set('search', s)
-      // 筛选全部在服务端：多选诊断标签重复传参，按「任一」匹配
-      diag.forEach((label) => q.append('diagnosis_label', label))
-      if (acct.length === 1) q.set('account_status', acct[0])
-      // 两个都选 = 不筛选（省略参数，避免空值触发 422）
-      const resp = await apiFetch<PageResp>(`/api/patients?${q}`)
-      setData(resp.items)
-      setTotal(resp.total)
-    } catch (e) {
-      message.error((e as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { fetchList(page, search) }, [page])  // eslint-disable-line react-hooks/exhaustive-deps
-
-  // 筛选项：全量诊断标签（服务端去重，不受当前页影响）
+  useEffect(() => {
+    const sequence = ++request.current
+    let active = true
+    const q = new URLSearchParams({ page: String(page), page_size: String(PAGE_SIZE) })
+    if (query) q.set('search', query)
+    diagnosisFilter.forEach(label => q.append('diagnosis_label', label))
+    if (accountFilter) q.set('account_status', accountFilter)
+    apiFetch<PageResp>(`/api/patients?${q}`).then(r => {
+      if (active && sequence === request.current) { setData(r.items); setTotal(r.total); setError('') }
+    }).catch(e => { if (active && sequence === request.current) setError((e as Error).message) })
+      .finally(() => { if (active && sequence === request.current) setLoadedRequest(JSON.stringify([page, query, diagnosisFilter, accountFilter, reload])) })
+    return () => { active = false }
+  }, [page, query, diagnosisFilter, accountFilter, reload])
   useEffect(() => {
     apiFetch<{ diagnosis_labels: string[] }>('/api/patients/filter-options')
-      .then((r) => setDiagnosisOptions(r.diagnosis_labels.map((v) => ({ label: v, value: v }))))
-      .catch(() => setDiagnosisOptions([]))
+      .then(r => setDiagnosisOptions(r.diagnosis_labels.map(v => ({ label: cleanDemo(v) || v, value: v })))).catch(() => {})
   }, [])
 
   const onCreate = async (values: { patient_code: string; display_name: string; diagnosis_label?: string; note?: string }) => {
+    if (createPending.current) return
+    createPending.current = true
     setSubmitting(true)
     try {
       await apiFetch('/api/patients', { method: 'POST', body: JSON.stringify(values) })
       message.success('建档成功')
-      setModalOpen(false)
-      form.resetFields()
-      fetchList(1, search)
-    } catch (e) {
-      message.error((e as Error).message)
-    } finally {
-      setSubmitting(false)
-    }
+      setModalOpen(false); form.resetFields(); setPage(1); setReload(r => r + 1)
+    } catch (e) { message.error((e as Error).message) }
+    finally { createPending.current = false; setSubmitting(false) }
   }
-
   const openEval = async (p: Patient) => {
-    setEvalPatient(p)
-    setEvalOpen(true)
+    guideRequest.current += 1
+    setEvalPatient(p); setEvalOpen(true); setEvalGuides([]); setModelSelected(false); setGuideLoading(false); evalForm.resetFields()
     try {
       const ms = await apiFetch<{ items: DeviceModel[] }>('/api/device-models?page_size=100')
       setEvalModels(ms.items)
     } catch (e) { message.error((e as Error).message) }
   }
-
   const onModelChange = async (modelId: string) => {
+    const sequence = ++guideRequest.current
+    setModelSelected(true); setEvalGuides([]); setGuideLoading(true); evalForm.setFieldValue('guide_id', undefined)
     try {
       const g = await apiFetch<Guide>(`/api/device-models/${modelId}/guide`)
-      setEvalGuides([g])
-    } catch {
-      setEvalGuides([])
-    }
+      if (sequence === guideRequest.current) setEvalGuides([g])
+    } catch { if (sequence === guideRequest.current) setEvalGuides([]) }
+    finally { if (sequence === guideRequest.current) setGuideLoading(false) }
   }
-
-  const submitEval = async (v: { guide_id: string; result?: string }) => {
-    if (!evalPatient) return
-    const guide = evalGuides.find((g) => g.id === v.guide_id)
-    if (!guide) { message.error('请先选择指导'); return }
+  const submitEval = async (v: { device_model_id: string; guide_id: string; result?: string }) => {
+    if (!evalPatient || evalPending.current) return
+    const guide = evalGuides.find(g => g.id === v.guide_id)
+    if (!guide || guideLoading) { message.error('请先选择指导'); return }
+    evalPending.current = true; setEvalSubmitting(true)
     try {
-      const stepResults = guide.steps.map((s) => ({ step_id: s.id, check_state: 'DONE' }))
-      await apiFetch('/api/training-sessions', {
-        method: 'POST',
-        body: JSON.stringify({
-          patient_id: evalPatient.id,
-          device_model_id: guide.id,
-          guide_id: guide.id,
-          result: v.result || '现场观察',
-          step_results: stepResults,
-        }),
-      })
-      message.success('现场评估已记录')
-      setEvalOpen(false)
-      evalForm.resetFields()
+      await apiFetch('/api/training-sessions', { method: 'POST', body: JSON.stringify({
+        patient_id: evalPatient.id, device_model_id: v.device_model_id, guide_id: guide.id,
+        result: v.result || '现场观察', step_results: guide.steps.map(s => ({ step_id: s.id, check_state: 'DONE' })),
+      }) })
+      message.success('现场评估已记录'); setEvalOpen(false); evalForm.resetFields()
     } catch (e) { message.error((e as Error).message) }
+    finally { evalPending.current = false; setEvalSubmitting(false) }
   }
-
-  // 只有「还没绑定」会推动动作。口径是当前这一页，不是全库总数。
-  const unboundOnPage = useMemo(
-    () => data.filter((p) => !p.account_user_id).length,
-    [data],
-  )
-  const unboundOnly = accountFilter.length === 1 && accountFilter[0] === 'unbound'
-
-  const rows: PatientRowItem[] = data.map((p) => ({
-    key: p.id,
-    name: p.display_name,
-    code: p.patient_code,
-    diagnosis: cleanDemo(p.diagnosis_label),
-    account: {
-      bound: Boolean(p.account_user_id),
-      label: p.account_user_id ? '已绑定' : '未绑定',
-    },
-    onClick: () => navigate(`/patients/${p.id}`),
-    actions: [
-      {
-        key: 'detail',
-        label: '查看详情',
-        onClick: () => navigate(`/patients/${p.id}`),
-      },
-      {
-        key: 'eval',
-        label: '现场评估',
-        onClick: () => { void openEval(p) },
-      },
-    ],
-  }))
-
-  const hasFilter = diagnosisFilter.length > 0 || accountFilter.length > 0 || search.length > 0
+  const hasFilter = !!(diagnosisFilter.length || accountFilter || query)
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
-
-  return (
-    <div className="cc-page cc-patients-page">
-      <HeroBar
-        eyebrow={<>患者管理 · <span className={total > 0 ? 'ok' : undefined}>{total > 0 ? '系统正常' : '暂无患者'}</span></>}
-        title="患者管理"
-        sub={unboundOnPage > 0
-          ? `共 ${total} 位。这一页有 ${unboundOnPage} 位还没绑定账号。`
-          : `共 ${total} 位。用搜索、诊断或账号状态把人找出来。`}
-        actions={
-          <Button type="primary" onClick={() => setModalOpen(true)}>新建患者</Button>
-        }
-      />
-
-      <Card
-        title="患者列表"
-        hint={unboundOnPage > 0
-          ? (unboundOnly
-            ? `本页 ${unboundOnPage} 位未绑定`
-            : (
-              <button
-                type="button"
-                className="cc-chip warn cc-chip-btn"
-                onClick={() => {
-                  setAccountFilter(['unbound'])
-                  setPage(1)
-                  void fetchList(1, search, diagnosisFilter, ['unbound'])
-                }}
-              >
-                筛出未绑定 · 本页 {unboundOnPage}
-              </button>
-            ))
-          : `共 ${total} 位`}
-      >
-        <FilterBar
-          search={
-            <Input.Search
-              placeholder="搜索编号或姓名"
-              aria-label="搜索编号或姓名"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onSearch={(v) => { setPage(1); fetchList(1, v) }}
-              allowClear
-            />
-          }
-          filters={
-            <>
-              <Select
-                mode="multiple"
-                allowClear
-                placeholder="诊断标签"
-                aria-label="按诊断标签筛选"
-                style={{ minWidth: 180 }}
-                maxTagCount="responsive"
-                value={diagnosisFilter}
-                onChange={(v) => {
-                  setDiagnosisFilter(v)
-                  setPage(1)
-                  fetchList(1, search, v, accountFilter)
-                }}
-                options={diagnosisOptions}
-              />
-              <Select
-                mode="multiple"
-                allowClear
-                placeholder="账号状态"
-                aria-label="按账号绑定状态筛选"
-                style={{ minWidth: 140 }}
-                maxTagCount="responsive"
-                value={accountFilter}
-                onChange={(v) => {
-                  setAccountFilter(v)
-                  setPage(1)
-                  fetchList(1, search, diagnosisFilter, v)
-                }}
-                options={[
-                  { label: '已绑定', value: 'bound' },
-                  { label: '未绑定', value: 'unbound' },
-                ]}
-              />
-              {hasFilter && (
-                <Button
-                  type="link"
-                  size="small"
-                  onClick={() => {
-                    setSearch('')
-                    setDiagnosisFilter([])
-                    setAccountFilter([])
-                    setPage(1)
-                    fetchList(1, '', [], [])
-                  }}
-                >
-                  清除筛选
-                </Button>
-              )}
-            </>
-          }
-        />
-
-        {loading ? (
-          <p className="cc-empty-line">加载中…</p>
-        ) : rows.length === 0 ? (
-          <div className="cc-empty-line" style={{ padding: '32px 0', textAlign: 'center' }}>
-            {hasFilter ? '当前筛选条件下没有患者。' : '还没有患者。点右上角「新建患者」建档。'}
-          </div>
-        ) : (
-          <div className="cc-patient-list">
-            {rows.map((item) => <PatientRow key={item.key} item={item} />)}
-          </div>
-        )}
-
-        {pageCount > 1 && (
-          <div className="cc-pager">
-            <Button
-              size="small"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              上一页
-            </Button>
-            <span className="cc-pager-text">{page} / {pageCount}</span>
-            <Button
-              size="small"
-              disabled={page >= pageCount}
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-            >
-              下一页
-            </Button>
-          </div>
-        )}
-      </Card>
-
-      <Modal title="新建患者" open={modalOpen} onCancel={() => setModalOpen(false)} onOk={() => form.submit()} confirmLoading={submitting} destroyOnHidden>
-        <Form form={form} layout="vertical" onFinish={onCreate}>
-          <Form.Item name="patient_code" label="患者编号" rules={[{ required: true, message: '请输入患者编号' }]}>
-            <Input placeholder="如 P-013" />
-          </Form.Item>
-          <Form.Item name="display_name" label="姓名/别名" rules={[{ required: true, message: '请输入姓名或别名' }]}>
-            <Input placeholder="如 林女士" />
-          </Form.Item>
-          <Form.Item name="diagnosis_label" label="诊断标签">
-            <Input placeholder="如 哮喘（已知档案，非系统诊断）" />
-          </Form.Item>
-          <Form.Item name="note" label="备注">
-            <Input.TextArea rows={3} placeholder="备注" />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal title={`现场评估 - ${evalPatient?.display_name || ''}`} open={evalOpen} onCancel={() => setEvalOpen(false)} onOk={() => evalForm.submit()} destroyOnHidden>
-        <Form form={evalForm} layout="vertical" onFinish={submitEval}>
-          <Form.Item name="device_model_id" label="型号" rules={[{ required: true }]}>
-            <Select placeholder="选择型号" options={evalModels.map(m => ({ value: m.id, label: m.model_name }))} onChange={onModelChange} />
-          </Form.Item>
-          <Form.Item name="guide_id" label="指导版本" rules={[{ required: true }]}>
-            <Select placeholder="选择指导" options={evalGuides.map(g => ({ value: g.id, label: `${g.title}` }))} />
-          </Form.Item>
-          <Form.Item name="result" label="评估结论">
-            <Input placeholder="如：操作熟练 / 需重新训练" />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
-  )
+  return <div className="ml-page ml-patients-page">
+    <PageHeading title="患者管理">
+      <Input className="ml-patient-search" prefix={<SearchOutlined />} placeholder="搜索姓名或编号" aria-label="搜索姓名或编号" value={search} allowClear onChange={e => { setSearch(e.target.value); if (!e.target.value) { setQuery(''); setPage(1) } }} onPressEnter={() => { setQuery(search.trim()); setPage(1) }} />
+      <Select className="ml-diagnosis-filter" mode="multiple" allowClear placeholder="诊断标签" aria-label="按诊断标签筛选" maxTagCount="responsive" suffixIcon={<DownOutlined />} value={diagnosisFilter} onChange={v => { setDiagnosisFilter(v); setPage(1) }} options={diagnosisOptions} />
+      <Select className="ml-account-filter" allowClear placeholder="账号状态" aria-label="按账号绑定状态筛选" suffixIcon={<DownOutlined />} value={accountFilter} onChange={v => { setAccountFilter(v); setPage(1) }} options={[{ label: '已绑定', value: 'bound' }, { label: '未绑定', value: 'unbound' }]} />
+      <Button type="primary" onClick={() => setModalOpen(true)}>新建患者</Button>
+      {hasFilter && <button className="ml-text-button" type="button" onClick={() => { setSearch(''); setQuery(''); setDiagnosisFilter([]); setAccountFilter(undefined); setPage(1) }}>清除筛选</button>}
+    </PageHeading>
+    <section className="ml-surface ml-patients-table" aria-label="患者列表" aria-busy={loading}>
+      {error && <p role="alert" className="ml-section-error">{error} <button type="button" className="ml-text-button" onClick={() => setReload(r => r + 1)}>重试</button></p>}
+      {loading && data.length === 0 ? <p className="ml-empty">加载中…</p> : data.length === 0 ? <p className="ml-empty">{error ? '患者列表暂不可用' : hasFilter ? '没有匹配患者' : '暂无患者'}</p> : <div className="ml-table-wrap"><table className="ml-table">
+        <colgroup><col style={{ width: '32%' }} /><col style={{ width: '34%' }} /><col style={{ width: '20%' }} /><col style={{ width: '14%' }} /></colgroup>
+        <thead><tr><th>患者</th><th>诊断</th><th>账号状态</th><th>操作</th></tr></thead>
+        <tbody>{data.map(p => <tr key={p.id}><td><PatientIdentity name={p.display_name} code={p.patient_code} src={p.avatar_url} demoPatient={Boolean(p.diagnosis_label?.includes('DEMO'))} onClick={() => navigate(`/patients/${p.id}`)} /></td><td>{cleanDemo(p.diagnosis_label) || '—'}</td><td><StatusTag bound={Boolean(p.account_user_id)} /></td><td className="ml-actions-cell"><div className="ml-row-actions"><RowAction label={`查看${p.display_name}详情`} icon={<UserOutlined />} onClick={() => navigate(`/patients/${p.id}`)} /><RowAction label={`为${p.display_name}现场评估`} icon={<ProfileOutlined />} onClick={() => { void openEval(p) }} /></div></td></tr>)}</tbody>
+      </table></div>}
+      <footer className="ml-table-footer"><span>共 {total} 位</span>{pageCount > 1 && <div className="ml-pager"><Button disabled={page <= 1 || loading} onClick={() => setPage(p => p - 1)}>上一页</Button><span>{page} / {pageCount}</span><Button disabled={page >= pageCount || loading} onClick={() => setPage(p => p + 1)}>下一页</Button></div>}</footer>
+    </section>
+    <Modal rootClassName="ml-theme" title="新建患者" open={modalOpen} onCancel={() => setModalOpen(false)} onOk={() => form.submit()} confirmLoading={submitting} destroyOnHidden>
+      <Form form={form} layout="vertical" onFinish={onCreate}>
+        <Form.Item name="patient_code" label="患者编号" rules={[{ required: true, message: '请输入患者编号' }]}><Input /></Form.Item>
+        <Form.Item name="display_name" label="姓名/别名" rules={[{ required: true, message: '请输入姓名或别名' }]}><Input /></Form.Item>
+        <Form.Item name="diagnosis_label" label="诊断标签"><Input /></Form.Item>
+        <Form.Item name="note" label="备注"><Input.TextArea rows={3} /></Form.Item>
+      </Form>
+    </Modal>
+    <Modal rootClassName="ml-theme" title={`现场评估 · ${evalPatient?.display_name || ''}`} open={evalOpen} onCancel={() => { guideRequest.current += 1; setEvalOpen(false) }} onOk={() => evalForm.submit()} confirmLoading={evalSubmitting} okButtonProps={{ disabled: guideLoading || !evalGuides.length }} destroyOnHidden>
+      <Form form={evalForm} layout="vertical" onFinish={submitEval}>
+        <Form.Item name="device_model_id" label="型号" rules={[{ required: true, message: '请选择型号' }]}><Select placeholder="选择型号" options={evalModels.map(m => ({ value: m.id, label: m.model_name }))} onChange={onModelChange} /></Form.Item>
+        <Form.Item name="guide_id" label="指导版本" rules={[{ required: true, message: '请选择指导' }]}><Select placeholder={modelSelected && !guideLoading && !evalGuides.length ? '暂无已发布指导' : '选择指导'} loading={guideLoading} options={evalGuides.map(g => ({ value: g.id, label: g.title }))} /></Form.Item>
+        <Form.Item name="result" label="评估结论"><Input /></Form.Item>
+      </Form>
+    </Modal>
+  </div>
 }

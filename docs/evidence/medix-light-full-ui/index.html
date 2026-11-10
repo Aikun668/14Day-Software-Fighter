@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>吸入治疗指导与依从性辅助管理软件 · Medix Light 全站截图</title>
+<!--
+  静态画廊，仅相对路径，可用 file:// 打开。00–15 产品代码与截图已分批校准；00为公共框架，不单列页面图。
+  主图（均为已有实拍拷贝，不用冻结稿）：
+  01 docs/evidence/medix-0123-alignment-v1/01-login.png
+  02 docs/evidence/medix-0123-alignment-v1/02-workbench.png
+  03 docs/evidence/medix-0123-alignment-v1/03-patients.png
+  04 docs/evidence/medix-04050607-alignment-v1/04-patient-detail.png
+  05 docs/evidence/medix-04050607-alignment-v1/05-plans.png
+  06 docs/evidence/medix-04050607-alignment-v1/06-stats.png
+  07 docs/evidence/medix-04050607-alignment-v1/07-patient-report.png
+  08 docs/evidence/medix-08091011-alignment-v1/08-followups.png
+  09 docs/evidence/medix-08091011-alignment-v1/09-task-close-modal.png
+  10 docs/evidence/medix-08091011-alignment-v1/10-medication-backfill-modal.png
+  11 docs/evidence/medix-08091011-alignment-v1/11-admin-devices.png
+  12 docs/evidence/medix-12131415-alignment-v1/12-admin-guides.png
+  13 docs/evidence/medix-12131415-alignment-v1/13-admin-accounts.png
+  14 docs/evidence/medix-12131415-alignment-v1/14-admin-knowledge.png
+  15 docs/evidence/medix-12131415-alignment-v1/15-admin-audit.png
+  07 使用本轮独立浏览器截图，不复用06。
+  15 屏都有实拍，没有缺图占位。文件名里的 mock 是请求拦截，不是设计冻结稿。
+-->
+<style>
+  :root {
+    --bg: #F4F6F9;
+    --surface: #ffffff;
+    --line: #E5EAF1;
+    --line-soft: #EEF2F7;
+    --ink: #1A1D26;
+    --ink-2: #4A5160;
+    --muted: #8B93A7;
+    --primary: #8146FF;
+    --primary-soft: #F4F0FF;
+    --primary-text: #5E2BC4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: Inter, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 36px 40px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  .sub { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .meta span {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font-size: 12px;
+  }
+  main { padding: 8px 40px 56px; max-width: 1440px; margin: 0 auto; }
+  section { margin-top: 34px; }
+  h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .shot {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  }
+  .shot:hover {
+    border-color: #D4C4FF;
+    box-shadow: 0 8px 24px rgba(26, 29, 38, 0.06);
+    transform: translateY(-2px);
+  }
+  .thumb {
+    position: relative;
+    height: 460px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 55%, rgba(255,255,255,.9) 100%);
+    pointer-events: none;
+  }
+  /* 01–15 按实拍比例完整展示，避免渐白蒙层改变已验收的颜色与头像。 */
+  .shot.revised .thumb { height: auto; aspect-ratio: 8 / 5; }
+  .shot.revised .thumb::after { display: none; }
+  .shot.revised[href="08-followups.png"] .thumb { aspect-ratio: 1440 / 984; }
+  .shot.revised[href="07-patient-report.png"] .thumb { aspect-ratio: 1440 / 1112; }
+  .zoom {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(26, 29, 38, .72);
+    color: #fff;
+    font-size: 12px;
+  }
+  .cap { padding: 14px 16px 16px; }
+  .cap b { display: block; font-size: 14px; font-weight: 600; }
+  .cap span { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
+  .tall .thumb { height: 560px; }
+  .modal .thumb { height: 400px; background: var(--line-soft); }
+  footer {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  @media (max-width: 900px) {
+    header, main, footer { padding-left: 18px; padding-right: 18px; }
+    .grid { grid-template-columns: 1fr; }
+    .thumb { height: 420px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>吸入治疗指导与依从性辅助管理软件 · Medix Light 全站截图</h1>
+  <p class="sub">00–11 已获用户通过；12–15 已完成代码与实拍。07单独列图，09按整个视口居中，全部页面齐全。</p>
+  <div class="meta">
+    <span>00–11 用户已通过 · 12–15 本轮收尾</span>
+    <span>主图使用隔离演示数据；另附真实后端实拍</span>
+    <span><a href="../medix-0123-alignment-v1/index.html">00–03 对照与验收记录</a></span>
+    <span><a href="../medix-04050607-alignment-v1/index.html">04–07 对照与验收记录</a></span><span><a href="../medix-08091011-alignment-v1/index.html">08–11 对照与验收记录</a></span><span><a href="../medix-12131415-alignment-v1/index.html">12–15 对照与验收记录</a></span><span><a href="../medix-light-implementation-final-v1/index.html">整体交付与代码交接</a></span><span>1440 桌面主图 · 另附390/1280实拍</span>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>认证</h2>
+    <div class="grid">
+      <a class="shot revised" href="01-login.png" target="_blank">
+        <div class="thumb"><img src="01-login.png" alt="登录页" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>01 · 登录页</b><span>浅灰底、白卡片、品牌紫登录按钮</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>医护端</h2>
+    <div class="grid">
+      <a class="shot revised" href="02-workbench.png" target="_blank">
+        <div class="thumb"><img src="02-workbench.png" alt="工作台" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>02 · 工作台</b><span>近 7 日团队登记、需关注、待核查；默认展示 7 条，可展开</span></div>
+      </a>
+      <a class="shot revised" href="03-patients.png" target="_blank">
+        <div class="thumb"><img src="03-patients.png" alt="患者管理" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>03 · 患者管理</b><span>写实演示头像、单层白表、浅色账号状态、灰操作按钮</span></div>
+      </a>
+      <a class="shot revised" href="04-patient-detail.png" target="_blank">
+        <div class="thumb"><img src="04-patient-detail.png" alt="患者详情" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>04 · 患者详情</b><span>写实头像、三段摘要、七日登记矩阵、轻量待办；本轮代码实拍。</span></div>
+      </a>
+      <a class="shot revised" href="05-plans.png" target="_blank">
+        <div class="thumb"><img src="05-plans.png" alt="用药计划" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>05 · 用药计划</b><span>左新建、右历史：生效中、已结束、待生效</span></div>
+      </a>
+      <a class="shot revised" href="06-stats.png" target="_blank">
+        <div class="thumb"><img src="06-stats.png" alt="统计与核查 · 团队概览" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>06 · 统计与核查 · 团队概览</b><span>蓝折线、登记分布环图、患者登记概览</span></div>
+      </a>
+      <a class="shot revised" href="07-patient-report.png" target="_blank">
+        <div class="thumb"><img src="07-patient-report.png" alt="患者报告" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>07 · 患者报告</b><span>本轮独立实拍：85.7% 登记覆盖、未登记时点、来源、随访摘要、重复核查。</span></div>
+      </a>
+      <a class="shot revised" href="08-followups.png" target="_blank">
+        <div class="thumb"><img src="08-followups.png" alt="随访中心" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>08 · 随访中心</b><span>待核查与随访记录两张表</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>弹窗</h2>
+    <div class="grid">
+      <a class="shot revised" href="09-task-close-modal.png" target="_blank">
+        <div class="thumb"><img src="09-task-close-modal.png" alt="处理任务弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>09 · 处理任务弹窗</b><span>整个视口居中；200字处理说明，提交中锁定</span></div>
+      </a>
+      <a class="shot revised" href="10-medication-backfill-modal.png" target="_blank">
+        <div class="thumb"><img src="10-medication-backfill-modal.png" alt="补登用药弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>10 · 补登用药弹窗</b><span>时点平铺点选，已登记与未到时点分开标出</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>管理端</h2>
+    <div class="grid">
+      <a class="shot revised" href="11-admin.png" target="_blank">
+        <div class="thumb"><img src="11-admin.png" alt="装置型号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>11 · 装置型号</b><span>侧栏五项，类别标签，服务端分页</span></div>
+      </a>
+      <a class="shot revised" href="12-admin-guides.png" target="_blank">
+        <div class="thumb"><img src="12-admin-guides.png" alt="指导版本" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>12 · 指导版本</b><span>草稿可审核通过，已发布只有查看</span></div>
+      </a>
+      <a class="shot revised" href="13-admin-accounts.png" target="_blank">
+        <div class="thumb"><img src="13-admin-accounts.png" alt="账号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>13 · 账号</b><span>角色与状态胶囊，停用需确认</span></div>
+      </a>
+      <a class="shot revised" href="14-admin-knowledge.png" target="_blank">
+        <div class="thumb"><img src="14-admin-knowledge.png" alt="知识内容" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>14 · 知识内容</b><span>片段数与状态，已发布可查看</span></div>
+      </a>
+      <a class="shot revised" href="15-admin-audit.png" target="_blank">
+        <div class="thumb"><img src="15-admin-audit.png" alt="审计日志" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>15 · 审计日志</b><span>操作趋势、类型条形和事件记录</span></div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  01–15 全部使用分批交付的代码实拍。00为公共框架。完整记录、源码快照和校验文件见整体交付；本轮独立复验与用户最终视觉确认分别记录。
+</footer>
+</body>
+</html>

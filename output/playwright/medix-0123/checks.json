@@ -1,0 +1,60 @@
+{
+  "login_required_and_error": true,
+  "geometry": {
+    ".ml-sidebar": {
+      "x": 0,
+      "y": 0,
+      "w": 240,
+      "h": 900,
+      "font": "17px"
+    },
+    ".ml-topbar": {
+      "x": 240,
+      "y": 0,
+      "w": 1200,
+      "h": 80,
+      "font": "17px"
+    },
+    ".ml-surface": {
+      "x": 268,
+      "y": 172,
+      "w": 1144,
+      "h": 692,
+      "font": "17px"
+    },
+    ".ml-avatar": {
+      "x": 1174.4375,
+      "y": 20,
+      "w": 40,
+      "h": 40,
+      "font": "15px"
+    },
+    ".ml-table th": {
+      "x": 288,
+      "y": 192,
+      "w": 353.265625,
+      "h": 44,
+      "font": "17px"
+    },
+    ".ml-table td": {
+      "x": 288,
+      "y": 236,
+      "w": 353.265625,
+      "h": 56,
+      "font": "17px"
+    },
+    ".ml-nav a": {
+      "x": 13,
+      "y": 96,
+      "w": 213,
+      "h": 47,
+      "font": "18px"
+    }
+  },
+  "server_search_and_clear": true,
+  "responsive_1280_and_390": true,
+  "duplicate_patient_tasks_preserved": true,
+  "partial_failure_and_no_due": true,
+  "task_modals_reachable": true,
+  "uncaught_js_errors": []
+}

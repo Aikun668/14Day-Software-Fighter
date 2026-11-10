@@ -1,0 +1,22 @@
+{
+  "archived_on": "2026-11-09",
+  "authority": "Latest textual requirements override earlier image details; never overwrite frozen files",
+  "files": [
+    {
+      "file": "06-stats-charts.png",
+      "sha256": "F6E25DE3631191B332D9B71648534E30DFE22E98A22415D7924E0AD8231E4E27",
+      "source": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\docs\\design\\medix-light\\review-charts-v2\\06-stats-charts.png"
+    },
+    {
+      "file": "15-audit-overview.png",
+      "sha256": "25A56CFC602959E1F4663FF5FD10DA0E7AFA43C6709F08670C38FC1E7E426170",
+      "source": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\docs\\design\\medix-light\\review-charts-v2\\15-audit-overview.png"
+    },
+    {
+      "file": "review.json",
+      "sha256": "957739AEFD514E1A8184E8C5EF672588CA04EACB57C3949DA2F146C2487218A6",
+      "source": "D:\\My_Grand_Projects2026\\14Day-Software-Fighter\\docs\\design\\medix-light\\review-charts-v2\\review.json"
+    }
+  ],
+  "status": "user-approved-frozen"
+}

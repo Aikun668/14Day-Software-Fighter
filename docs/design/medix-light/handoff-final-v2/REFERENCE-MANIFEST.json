@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-09",
+  "files": [
+    {
+      "file": "references/04-patient-detail.png",
+      "source": "docs/design/medix-light/approved-batch-02/04-patient-detail.png",
+      "sha256": "655901ADA8336C4279A8E08E1A1B48C82869A4712F5120FB38A070C9FCB086A2",
+      "visual_approval": "user-approved"
+    },
+    {
+      "file": "references/10-medication-backfill-modal.png",
+      "source": "docs/design/medix-light/approved-batch-03/10-medication-backfill-modal.png",
+      "sha256": "CDCE832BF55A84702E11123AEDABD43C303CB99096032BA89FF08953CAF21788",
+      "visual_approval": "user-approved"
+    },
+    {
+      "file": "references/11-admin-devices.png",
+      "source": "docs/design/medix-light/approved-batch-03/11-admin-devices.png",
+      "sha256": "2A3FCA1C2B2F9D90C9AD12495BA650EC8F09DFE12952D80A32DE9C9FF4D907A6",
+      "visual_approval": "user-approved"
+    },
+    {
+      "file": "references/12-admin-guides.png",
+      "source": "docs/design/medix-light/approved-batch-03/12-admin-guides.png",
+      "sha256": "E55FB6E8431B45288C91D21751345F5EB539F77A44D238F6AEFE0F707C24418D",
+      "visual_approval": "user-approved"
+    },
+    {
+      "file": "references/13-admin-accounts.png",
+      "source": "docs/design/medix-light/review-batch-04/13-admin-accounts.png",
+      "sha256": "E0AE7A61EA1AB560CF87178C222F1DC5B9D0B12281F9D37E5340DA9292E3D0A4",
+      "visual_approval": "retained-reference-no-individual-approval-record"
+    },
+    {
+      "file": "references/14-admin-knowledge.png",
+      "source": "docs/design/medix-light/review-batch-04/14-admin-knowledge.png",
+      "sha256": "1E5ACE690FEB849EEB0701D8DD89572774B055A29E4BA8A9F298EE200C2BC155",
+      "visual_approval": "retained-reference-no-individual-approval-record"
+    },
+    {
+      "file": "references/15-audit-overview.png",
+      "source": "docs/design/medix-light/approved-charts-v2/15-audit-overview.png",
+      "sha256": "25A56CFC602959E1F4663FF5FD10DA0E7AFA43C6709F08670C38FC1E7E426170",
+      "visual_approval": "user-approved"
+    },
+    {
+      "file": "references/07-patient-report.png",
+      "source": "docs/design/medix-light/handoff-07-v1/references/07-patient-report.png",
+      "sha256": "355296CC590A0D5F7DA7A1696970B107DC66C3AF32FFB996ABCF9610E8A8475E",
+      "visual_approval": "user-approved"
+    }
+  ],
+  "dependencies": [
+    {
+      "file": "docs/design/medix-light/approved-batch-02/selection.json",
+      "sha256": "9C6735C298F1B502E79563BE3E3F7E8562A9B2701B2B4F2B16C74243E666003D"
+    },
+    {
+      "file": "docs/design/medix-light/approved-batch-03/FREEZE.json",
+      "sha256": "1BCD98A49ABD76294467E62383F70AE199A0472F46182131ACA95688FAAD2D69"
+    },
+    {
+      "file": "docs/design/medix-light/approved-charts-v2/FREEZE.json",
+      "sha256": "4F67F538BA9D1922FCD28E5CCF7F6F7F60D5F5D86B36307D12A4B907401EEED3"
+    },
+    {
+      "file": "docs/design/medix-light/review-batch-04/review.json",
+      "sha256": "39BC524E8152022400DA7A6E82F9717385BEEA0C61468EB37E329337DEC33918"
+    },
+    {
+      "file": "docs/design/medix-light/handoff-0123-v1/FREEZE.json",
+      "sha256": "939411DEDCA8B882C63948D20B53BD13A29A4846C26586829205740952C82D68"
+    },
+    {
+      "file": "docs/design/medix-light/handoff-05060809-v1/FREEZE.json",
+      "sha256": "820D32C7A9AABE063D38CC889202C95B133B4D9E497D866D2AA1567052699306"
+    },
+    {
+      "file": "docs/design/medix-light/handoff-07-v1/FREEZE.json",
+      "sha256": "04C8EA93D29A9FF844E2F44AAA2F5A128D1E42F89C6C173A71E648A02DC3B894"
+    },
+    {
+      "file": "docs/design/medix-light/handoff-final-v1/FREEZE.json",
+      "sha256": "A4AB182B83C490916F18DDC85D1C119CF622AC89640AF91B8954F2225E743211"
+    }
+  ]
+}

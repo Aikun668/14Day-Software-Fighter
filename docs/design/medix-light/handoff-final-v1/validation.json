@@ -1,0 +1,32 @@
+{
+  "status": "pass",
+  "readonly_checked": true,
+  "markdown_files": 34,
+  "relative_links": 117,
+  "page_ids": [
+    "00",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15"
+  ],
+  "reference_images": 7,
+  "dependency_files": 6,
+  "freeze_manifests": 5,
+  "frozen_entries_checked": 40,
+  "source_drift": [],
+  "errors": [],
+  "stage": "pre-freeze-content-and-protected-baseline-check",
+  "date": "2026-11-09"
+}

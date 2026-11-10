@@ -1,0 +1,192 @@
+{
+  "kind": "documentation-only-validation",
+  "date": "2026-11-09",
+  "markdownFiles": 9,
+  "links": [
+    {
+      "file": "01-LOGIN.md",
+      "target": "../approved-batch-01/01-login.png",
+      "exists": true
+    },
+    {
+      "file": "02-WORKBENCH.md",
+      "target": "../approved-batch-01/02-workbench.png",
+      "exists": true
+    },
+    {
+      "file": "03-PATIENTS.md",
+      "target": "../approved-batch-01/03-patients.png",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "RULES.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "00-SYSTEM.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "01-LOGIN.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "02-WORKBENCH.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "03-PATIENTS.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "IMPLEMENTATION.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "ACCEPTANCE.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "REVIEW.md",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "../approved-batch-01/01-login.png",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "../approved-batch-01/02-workbench.png",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "../approved-batch-01/03-patients.png",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "../approved-charts-v2/06-stats-charts.png",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "../approved-charts-v2/15-audit-overview.png",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "../approved-batch-03/09-task-close-modal.png",
+      "exists": true
+    },
+    {
+      "file": "HANDOFF.md",
+      "target": "../approved-batch-03/10-medication-backfill-modal.png",
+      "exists": true
+    },
+    {
+      "file": "IMPLEMENTATION.md",
+      "target": "00-SYSTEM.md",
+      "exists": true
+    },
+    {
+      "file": "IMPLEMENTATION.md",
+      "target": "RULES.md",
+      "exists": true
+    },
+    {
+      "file": "IMPLEMENTATION.md",
+      "target": "ACCEPTANCE.md",
+      "exists": true
+    }
+  ],
+  "sourcePathsChecked": [
+    "frontend-web/src/styles/theme.ts",
+    "frontend-web/src/components/WebLayout.tsx",
+    "frontend-web/src/pages/auth/LoginPage.tsx",
+    "frontend-web/src/pages/clinician/WorkbenchPage.tsx",
+    "frontend-web/src/pages/clinician/PatientListPage.tsx",
+    "frontend-web/src/components/MedicationBackfillModal.tsx",
+    "frontend-web/src/components/TaskCloseModal.tsx",
+    "frontend-web/src/components/todayCoverage.ts",
+    "backend/app/api/training.py",
+    "backend/app/schemas/training.py",
+    "docs/planning/UI-OPTIMIZATION-LOG.md"
+  ],
+  "sourceImages": [
+    {
+      "file": "01-login.png",
+      "width": 1586,
+      "height": 992
+    },
+    {
+      "file": "02-workbench.png",
+      "width": 1586,
+      "height": 992
+    },
+    {
+      "file": "03-patients.png",
+      "width": 1586,
+      "height": 992
+    }
+  ],
+  "archives": [
+    {
+      "file": "approved-batch-01\\01-login.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-batch-01\\02-workbench.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-batch-01\\03-patients.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-charts-v2\\06-stats-charts.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-charts-v2\\15-audit-overview.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-charts-v2\\review.json",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-batch-03\\09-task-close-modal.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-batch-03\\10-medication-backfill-modal.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-batch-03\\11-admin-devices.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-batch-03\\12-admin-guides.png",
+      "hashMatches": true
+    },
+    {
+      "file": "approved-batch-03\\review.json",
+      "hashMatches": true
+    }
+  ],
+  "errors": [],
+  "buildRun": false,
+  "runtimeTestsRun": false,
+  "status": "PASS"
+}

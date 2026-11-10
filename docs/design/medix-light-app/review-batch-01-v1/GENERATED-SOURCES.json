@@ -1,0 +1,31 @@
+{
+  "tool": "built-in image_gen",
+  "default_source_directory": "C:/Users/杨玉璋/.codex/generated_images/01a1befa-767f-79e3-97d8-9de43ad67d2e",
+  "final": {
+    "01-login.png": {
+      "version": "R2",
+      "source": "exec-ae29fddc-0f20-4303-ab33-d4bf8613bf77.png",
+      "prompt": "prompt-01-r2.txt"
+    },
+    "02-change-password.png": {
+      "version": "R2",
+      "source": "exec-f4aa1a43-cb97-433a-921e-c9e68e348daf.png",
+      "prompt": "prompt-02-r2.txt"
+    },
+    "03-today.png": {
+      "version": "R3",
+      "source": "exec-38c49f49-9bbc-4fb2-a3d6-e59550306ac0.png",
+      "prompt": "prompt-03-r3.txt"
+    },
+    "04-guide.png": {
+      "version": "R6",
+      "source": "exec-fd8284a9-a427-4f5c-841d-4041456a7681.png",
+      "prompt": "prompt-04-r6.txt"
+    },
+    "05-training.png": {
+      "version": "R4",
+      "source": "exec-f4a3d520-541d-49f5-a558-f4f9992c9be2.png",
+      "prompt": "prompt-05-r4.txt"
+    }
+  }
+}

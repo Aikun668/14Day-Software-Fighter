@@ -1,0 +1,8 @@
+{
+  "real_backend": true,
+  "patients": 10,
+  "seed_demo_portraits": 10,
+  "uncaught_js_errors": [],
+  "mutations": "authentication only",
+  "logout": true
+}

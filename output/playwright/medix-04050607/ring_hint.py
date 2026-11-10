@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path('frontend-web/src/pages/clinician/StatsPage.tsx');s=p.read_text(encoding='utf-8');s=s.replace('<ClinicalPanel title="登记构成">', '<ClinicalPanel title="登记构成" actions={overview && <InfoHint label="登记构成数据">已登记 {overview.total_M}（{rateText(overview.coverage_rate)}），未发现登记 {overview.total_N - overview.total_M}（{overview.coverage_rate === null ? "—" : `${Math.round((100 - overview.coverage_rate) * 10) / 10}%`}）。</InfoHint>}>');p.write_text(s,encoding='utf-8')

@@ -1,0 +1,51 @@
+{
+  "status": "pass",
+  "broken_links": [],
+  "scope": [
+    "00",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15"
+  ],
+  "current_frontend_files": 74,
+  "preserved_source_files": 53,
+  "preserved_gallery_images": 11,
+  "interaction-checks.json": 12,
+  "stress-checks.json": 16,
+  "design_frozen_entries": 103,
+  "preserved_prior_manifests": {
+    "medix-0123-alignment-v1": 67,
+    "medix-04050607-alignment-v1": 50,
+    "medix-08091011-alignment-v1": 55
+  },
+  "gallery_images": 15,
+  "comparison_images": 4,
+  "final_images": 15,
+  "build": "pass",
+  "lint_warnings": 4,
+  "lint_errors": 0,
+  "independent_review": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0
+  },
+  "user_approved_through": "11",
+  "user_review_pending": [
+    "12",
+    "13",
+    "14",
+    "15"
+  ]
+}

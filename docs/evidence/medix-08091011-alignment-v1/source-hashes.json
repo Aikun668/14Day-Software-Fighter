@@ -1,0 +1,16 @@
+{
+  "frontend-web/src/App.tsx": "aa13fcf1cfb260027a95ce2c109f95003d3e33008160f0d32362541e78e6266f",
+  "frontend-web/src/components/MedicationBackfillModal.tsx": "c28c654c23723fb3e60550f803f4306225c320fa6a4c0ca5a9c60d3efd33e8e6",
+  "frontend-web/src/components/TaskCloseModal.tsx": "0106234ef8c5f0a434a2c0526cfa04c44daf8721e13bcc44c360d505274135a9",
+  "frontend-web/src/components/medix/FollowupComposer.tsx": "8c27e870e302f8d0407bede2e6498b42504979b63ef93cd39af2cc691cb9bc8a",
+  "frontend-web/src/components/medix/MedixLayout.tsx": "d33dec07228567f6e9fedb011038af7d21d8b8eb4368670fbdc8caee393a14ec",
+  "frontend-web/src/components/medix/useBatchedList.ts": "df0baefe6edd9ac9d7511172558083ebc6027daaf142fca77606b7cd13078f73",
+  "frontend-web/src/pages/admin/AdminPage.tsx": "c3dd429baf2eb833c9c02431bd270b09d23c79e20f41d7c05d92a8fb510c25c6",
+  "frontend-web/src/pages/admin/AdminRoute.tsx": "c7ba810a7ef4f16e20481ec04f5eec6f8feed21729a3f2d6f8c6ddb0d6963d3a",
+  "frontend-web/src/pages/admin/DeviceModelsPanel.tsx": "cc8251c759449d7bbaae4066fc6bc6cf7b6af228e667d55d36cceb4411d28966",
+  "frontend-web/src/pages/clinician/FollowupPage.tsx": "828bcc091d17e96f92e26a4ad3a4ede46d8eff82a9356c92669f04fb8c1885a1",
+  "frontend-web/src/pages/clinician/PatientDetailPage.tsx": "4558f2ea7e502317897e7d08421439b1b70beb52d25742b9f6e23cc5a4db28ce",
+  "frontend-web/src/pages/clinician/WorkbenchPage.tsx": "d054ed6ff331f30159838f2c37255121eb4136ced16ffcfea0d19fb67b4a09f8",
+  "frontend-web/src/styles/medix-dialogs.css": "a92c7abbac5167e6b5616d4a8acf9c3fda0249fa7a3e1b69e192e666e264f06e",
+  "frontend-web/src/styles/medix-followups.css": "e36c293597b15ae7cfc7ec1416593c349d5fd559db07b9f4c38d8e5e895babe6"
+}

@@ -1,0 +1,29 @@
+{
+  "status": "pass",
+  "broken_links": [],
+  "gallery_images": 15,
+  "comparison_images": 4,
+  "gallery_new_target_sizes": {
+    "08-followups.png": [
+      1440,
+      984
+    ],
+    "09-task-close-modal.png": [
+      1440,
+      900
+    ],
+    "10-medication-backfill-modal.png": [
+      1440,
+      900
+    ],
+    "11-admin.png": [
+      1440,
+      900
+    ]
+  },
+  "source_snapshot_files": 14,
+  "unchanged_original_sources": 43,
+  "unchanged_gallery_images": 11,
+  "interaction_checks": 18,
+  "boundary_checks": 10
+}

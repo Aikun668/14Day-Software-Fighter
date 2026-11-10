@@ -1,0 +1,15 @@
+{
+  "passed": [
+    "08 verification locks page/context controls, unknown result stays blocked",
+    "10 mismatched patient/missing history plan blocked and selection field focused",
+    "10 future actual time blocked with field focus",
+    "10 someone else registered slot: no false success or repeat POST",
+    "10 each radio disabled while POST pending and outcome unknown; selection preserved",
+    "10 patient-detail entry uses same functioning dialog as workbench",
+    "08 patient directory >100 and followup history >50 are reachable",
+    "08 slow old patient response cannot replace new patient history",
+    "09 short mobile viewport keeps centered dialog and reachable buttons",
+    "08 ordinary patient without photo uses neutral avatar"
+  ],
+  "pageerrors": []
+}

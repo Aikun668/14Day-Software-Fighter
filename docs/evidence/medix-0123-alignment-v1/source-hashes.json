@@ -1,0 +1,22 @@
+{
+  "frontend-web/package.json": "6a66529d3e02cb20dbad71cdc846c7ff9bc868b36fef8d2da702f545462708c4",
+  "frontend-web/pnpm-lock.yaml": "954edc0619ec1510250de381b2f88701e498c814725a076a37ee63488a8bae2d",
+  "frontend-web/src/App.tsx": "a06b5da3cb7a17ce16ed0a9ea4386d78d1e1f0748990b44bb7460d2a914ff4c1",
+  "frontend-web/src/index.css": "2b6121368cb64acf4227d9aa9cd2957afda20da50a9f8ec0beddc15a9e6da26f",
+  "frontend-web/src/pages/auth/LoginPage.tsx": "feb884ad5f3095bea49a30a4ccd881de0698cceb5a86e110364d416ef56171d1",
+  "frontend-web/src/pages/clinician/WorkbenchPage.tsx": "8899a98aaf81be222c41485892748cc80053cf217e3eba82b68f5775599a0dba",
+  "frontend-web/src/pages/clinician/PatientListPage.tsx": "f73bc326b20d63aba119c2fe5c3910bf5139d2a444450c11a4139008d2090a77",
+  "frontend-web/src/styles/medix-theme.ts": "8e595efe403f255ab4ed442a1fe02daa0b90971afc9fb344fae720a5f10ec7ee",
+  "frontend-web/src/styles/medix-light.css": "486d2582131c66ad98c89cad306c6a91b8848bae89beffb7b1673df407cf982f",
+  "frontend-web/src/components/medix/Medix.tsx": "afad904a2f684085e00129111065fd159457b14c273e2019c964cc47da642296",
+  "frontend-web/src/components/medix/MedixLayout.tsx": "02b371dfffe52eb5bf17a9ec98ce060f08f963984213660c91771b6c796c9a9b",
+  "frontend-web/src/assets/medix/brand-symbol.png": "8aeb6103d8fdfa2ea1ee4cc7fc73868b2e13d1b02226ce55ae149fa7c6aeeae6",
+  "frontend-web/src/assets/medix/demo-portraits.png": "767fed20d2ae0c4c5e766df19e1434023f052e9dcc264f621408351e4ce683a5",
+  "frontend-web/src/assets/medix/doctor-assistant.png": "90962de35f6330f5197221be696ad0dd4a863356bd4973005c3d211a1594275c",
+  "frontend-web/src/assets/medix/README.md": "baa2fcc0ed1ff5124bab072a67cd100f5145e6b1dbf0963b6ff7fb44a5808cb1",
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-medium-core.woff2": "a9ed59bfd9708fd13f691899ca05fe0587a160d9dd0236a33da6ce31b86e2b61",
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-medium.woff2": "eea997e5cdc0bbac1e66d1d512a564ec13da73b88d3fde78b176480d6deb1aa6",
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-regular-core.woff2": "dc0c6030dbd8c852b2cd523b791ed1d84096d4376a6e32d0a973c75f84acd86e",
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-regular.woff2": "f50c5bc8c5e332120221582cac0fd09e42c87701e4583f30f9a8abce9e762b1f",
+  "frontend-web/src/assets/medix/fonts/OFL.txt": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+}

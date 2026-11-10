@@ -1,0 +1,3 @@
+from pathlib import Path
+p=Path('output/playwright/medix-04050607/interactions.py');s=p.read_text(encoding='utf-8');s=s.replace("expect(page.locator('.ant-select-selection-item').filter(has_text='李先生')).to_be_visible()", "expect(page.locator('.ant-select').filter(has=page.get_by_role('combobox',name='按患者筛选随访记录'))).to_contain_text('李先生')");p.write_text(s,encoding='utf-8')
+p=Path('output/playwright/medix-04050607/capture.py');s=p.read_text(encoding='utf-8').replace("self.seed=json.loads", "self.tasks=[{**t,'created_at':'2026-11-08T10:00:00+08:00'} for t in self.tasks]\n  self.seed=json.loads");s=s.replace("dict(f,id=f'follow-{i}')", "dict(f,id=f'follow-{i}',patient_id=PID)");p.write_text(s,encoding='utf-8')

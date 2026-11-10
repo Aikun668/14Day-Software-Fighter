@@ -1,0 +1,49 @@
+{
+  "status": "user-approved-image-and-self-reviewed-specification-frozen",
+  "date": "2026-11-09",
+  "authority": "User explicitly approved final edited 07 image: 通过，按这版归档",
+  "scope": "07 independent image, specification, fixture, acceptance and approval evidence",
+  "runtime_acceptance": "not-executed",
+  "files": [
+    {
+      "file": "07-PATIENT-REPORT.md",
+      "sha256": "1A6211340EDE35342564B7AEC2923C80A649C330D65396D7CE3317DF2BFA80AE"
+    },
+    {
+      "file": "ACCEPTANCE.md",
+      "sha256": "EF4CA706D671039FF3505D1D48A76010D753AD903B3212C47C824FD344C4C63A"
+    },
+    {
+      "file": "APPROVAL.md",
+      "sha256": "CFA2BC7D158306A70AC44F75AA634FAE6EB785DBB1D7B8DC15AAF0145366405D"
+    },
+    {
+      "file": "fixture.json",
+      "sha256": "A9E1EC085B5F9F2BE9B08C616325A684EB9B3A2A5937667DA322964F0A6287CD"
+    },
+    {
+      "file": "HANDOFF.md",
+      "sha256": "14CB765AA4EBF5A530754CD22FD1A0C53C8013776F3ACCFDC7F1040D398A8885"
+    },
+    {
+      "file": "IMAGE-PROMPT.md",
+      "sha256": "4CF752B9D3B760F534B5915EFC8D70AAE52E5D3B528D65824A395D63832DFDB4"
+    },
+    {
+      "file": "references/07-patient-report.png",
+      "sha256": "355296CC590A0D5F7DA7A1696970B107DC66C3AF32FFB996ABCF9610E8A8475E"
+    },
+    {
+      "file": "review.json",
+      "sha256": "03F827209633E09DE204850AFB1A5EC8E97975EED75F09FEDE80F1F29265C4F3"
+    },
+    {
+      "file": "REVIEW.md",
+      "sha256": "509961DD5A019E43BCAA3CC704A907C4819F8DACC49E3F5085897B6CFFE6D786"
+    },
+    {
+      "file": "RULES.md",
+      "sha256": "CE955126345B9B12B6FD3E3BB7B705E58EA4AA4F0541994F3B82419D1444439F"
+    }
+  ]
+}

@@ -1,20 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useClinicalQuery } from '../../components/medix/useClinicalQuery'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button, DatePicker, Drawer, Dropdown, Empty, Form, Input, Modal, Select, Spin, message } from 'antd'
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
+import { CheckOutlined, ClockCircleOutlined, EditOutlined, EllipsisOutlined, FileTextOutlined, MinusOutlined } from '@ant-design/icons'
+import { PatientAvatar } from '../../components/medix/Medix'
+import { ClinicalPanel, InfoHint, LoadError } from '../../components/medix/ClinicalUI'
+import { addDays, derivePlanPhase, fetchAll, midnight, shanghaiDay, shortTime, validTimes } from '../../components/medix/clinical'
 import { apiFetch } from '../../api/client'
 import MedicationBackfillModal from '../../components/MedicationBackfillModal'
-import {
-  AttentionPanel,
-  Card,
-  HeroBar,
-  StatBand,
-  TimeScale,
-  TwoColumn,
-  type AttentionItem,
-  type ScaleCellKind,
-  type ScaleSlot,
-} from '../../components/clinic'
+import { isDemoPatient } from '../../components/medix/clinical'
+
 
 interface PatientDetail {
   id: string
@@ -22,18 +18,20 @@ interface PatientDetail {
   display_name: string
   diagnosis_label: string | null
   note: string | null
+  avatar_url?: string | null
   assigned_clinician_id: string | null
   account_user_id: string | null
 }
 
 interface Plan {
   id: string
+  device_model_id: string
   version: number
   drug_label: string
   plan_type: string
   starts_at: string
   ends_at: string | null
-  daily_times: { local_time: string; label: string | null }[]
+  daily_times: { local_time: string; label: string | null; is_enabled?: boolean }[]
 }
 
 interface Event {
@@ -63,21 +61,15 @@ interface ClinicTask {
   status: string
 }
 
-const WEEK_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const MONTH_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const WEEK_ZH = ['日', '一', '二', '三', '四', '五', '六']
 
 function cleanDemoMarker(value: string) {
   return value.replace(/\s*[(（]DEMO[)）]/gi, '').trim()
 }
 
-function rangeOf(now = dayjs()) {
-  const start = now.startOf('day').subtract(6, 'day')
-  return {
-    from: start.format('YYYY-MM-DD'),
-    to: now.startOf('day').add(1, 'day').format('YYYY-MM-DD'),
-    start,
-  }
+function rangeOf() {
+  const today = shanghaiDay()
+  return { from: addDays(today, -6), to: addDays(today, 1) }
 }
 
 function shanghaiParts(iso: string) {
@@ -102,68 +94,39 @@ function formatRate(stats: CoverageStats | null) {
   return `${stats.coverage_rate}%`
 }
 
-// 患者详情：Clinic Comfort 两层。数据仍来自现有患者、计划、统计、时点与任务接口。
+// Remount the detail context on patient navigation, including all pending modal state.
 export default function PatientDetailPage() {
   const { id } = useParams<{ id: string }>()
+  return id ? <PatientDetailContext key={id} id={id} /> : <Empty description="患者不可访问" />
+}
+function PatientDetailContext({ id }: { id: string }) {
   const navigate = useNavigate()
+  const [range] = useState(rangeOf)
   const [asOf, setAsOf] = useState(() => Date.now())
-  const [patient, setPatient] = useState<PatientDetail | null>(null)
-  const [plans, setPlans] = useState<Plan[]>([])
-  const [events, setEvents] = useState<Event[]>([])
-  const [eventTotal, setEventTotal] = useState(0)
-  const [coverageStats, setCoverageStats] = useState<CoverageStats | null>(null)
-  const [slots, setSlots] = useState<DailySlot[]>([])
-  const [tasks, setTasks] = useState<ClinicTask[] | null>(null)
-  const [rangeStart, setRangeStart] = useState(() => rangeOf().from)
-  const [loading, setLoading] = useState(true)
   const [backfillOpen, setBackfillOpen] = useState(false)
   const [recordsOpen, setRecordsOpen] = useState(false)
-
-  const load = async (patientId: string) => {
-    const range = rangeOf()
-    const [p, pl, ev, coverage, slotRes, taskRes] = await Promise.all([
-      apiFetch<PatientDetail>(`/api/patients/${patientId}`),
-      apiFetch<{ items: Plan[] }>(`/api/patients/${patientId}/medication-plans?include_history=true&page_size=100`).catch(() => ({ items: [] as Plan[] })),
-      apiFetch<{ items: Event[]; total: number }>(`/api/patients/${patientId}/medication-events?page_size=50`).catch(() => ({ items: [] as Event[], total: 0 })),
-      apiFetch<CoverageStats>(`/api/patients/${patientId}/stats?from=${range.from}&to=${range.to}`).catch(() => null),
-      apiFetch<{ items: DailySlot[] }>(`/api/patients/${patientId}/daily-slots?from=${range.from}&to=${range.to}`).catch(() => ({ items: [] as DailySlot[] })),
-      apiFetch<{ items: ClinicTask[] }>(`/api/tasks?patient_id=${patientId}&page_size=50`).catch(() => null),
-    ])
-    setPatient(p)
-    setPlans(pl.items)
-    setEvents(ev.items)
-    setEventTotal(ev.total ?? ev.items.length)
-    setCoverageStats(coverage)
-    setSlots(slotRes.items)
-    setTasks(taskRes ? taskRes.items : null)
-    setRangeStart(range.from)
-    setAsOf(Date.now())
-  }
-
-  useEffect(() => {
-    if (!id) return
-    let alive = true
-    setLoading(true)
-    load(id)
-      .catch((e) => { if (alive) message.error((e as Error).message) })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [id])
-
-  const reload = async () => {
-    if (!id) return
-    try {
-      await load(id)
-    } catch (e) {
-      message.error((e as Error).message)
-    }
-  }
-
+  const [eventPage, setEventPage] = useState(1)
+  const patientQuery = useClinicalQuery(id, useCallback(signal => apiFetch<PatientDetail>(`/api/patients/${id}`, { signal }), [id]))
+  const plansQuery = useClinicalQuery(id, useCallback(signal => fetchAll<Plan>(`/api/patients/${id}/medication-plans?include_history=true`, signal), [id]))
+  const eventsQuery = useClinicalQuery(`${id}-${eventPage}`, useCallback(signal => apiFetch<{ items: Event[]; total: number }>(`/api/patients/${id}/medication-events?page=${eventPage}&page_size=50`, { signal }), [id, eventPage]))
+  const statsQuery = useClinicalQuery(id, useCallback(signal => apiFetch<CoverageStats>(`/api/patients/${id}/stats?from=${range.from}&to=${range.to}`, { signal }), [id, range]))
+  const slotsQuery = useClinicalQuery(id, useCallback(signal => apiFetch<{ items: DailySlot[] }>(`/api/patients/${id}/daily-slots?from=${range.from}&to=${range.to}`, { signal }), [id, range]))
+  const tasksQuery = useClinicalQuery(id, useCallback(signal => fetchAll<ClinicTask>(`/api/tasks?patient_id=${id}`, signal), [id]))
+  const patient = patientQuery.data ?? null
+  const plans = useMemo(() => plansQuery.data ?? [], [plansQuery.data])
+  const events = eventsQuery.data?.items ?? []
+  const eventTotal = eventsQuery.data?.total ?? 0
+  const coverageStats = statsQuery.data ?? null
+  const slots = useMemo(() => slotsQuery.data?.items ?? [], [slotsQuery.data])
+  const tasks = tasksQuery.data ?? null
+  const rangeStart = range.from
+  const loading = patientQuery.loading
+  const reload = () => { patientQuery.retry(); plansQuery.retry(); eventsQuery.retry(); statsQuery.retry(); slotsQuery.retry(); tasksQuery.retry(); setAsOf(Date.now()) }
+  const savingLock = useRef(false)
   const activePlans = plans
-    .filter((plan) => plan.ends_at === null)
+    .filter((plan) => derivePlanPhase(plan, asOf) === 'active')
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at))
   const regularPlan = activePlans.find((plan) => plan.plan_type === 'REGULAR') ?? null
-  const headlinePlan = regularPlan ?? activePlans[0] ?? null
 
   const days = useMemo(
     () => Array.from({ length: 7 }, (_, index) => dayjs(rangeStart).add(index, 'day')),
@@ -171,17 +134,18 @@ export default function PatientDetailPage() {
   )
 
   const slotByCell = useMemo(() => {
-    const map = new Map<string, DailySlot>()
+    const map = new Map<string, DailySlot[]>()
     for (const slot of slots) {
       const parts = shanghaiParts(slot.scheduled_at)
-      map.set(`${parts.day}|${parts.time}`, slot)
+      const key = `${parts.day}|${parts.time}`
+      map.set(key, [...(map.get(key) ?? []), slot])
     }
     return map
   }, [slots])
 
   const times = useMemo(() => {
     const values = new Set<string>()
-    for (const time of regularPlan?.daily_times ?? []) values.add(String(time.local_time).slice(0, 5))
+    for (const time of (regularPlan?.daily_times ?? []).filter(t => t.is_enabled !== false)) values.add(String(time.local_time).slice(0, 5))
     for (const slot of slots) values.add(shanghaiParts(slot.scheduled_at).time)
     return [...values].sort()
   }, [regularPlan, slots])
@@ -189,6 +153,8 @@ export default function PatientDetailPage() {
   const [editOpen, setEditOpen] = useState(false)
   const [bindAcctOpen, setBindAcctOpen] = useState(false)
   const [bindDevOpen, setBindDevOpen] = useState(false)
+  const [choosePlanOpen, setChoosePlanOpen] = useState(false)
+  const [passwordResult, setPasswordResult] = useState<string | null>(null)
   const [revOpen, setRevOpen] = useState<Plan | null>(null)
   const [revokeTarget, setRevokeTarget] = useState<Event | null>(null)
   const [revokeReason, setRevokeReason] = useState('')
@@ -209,55 +175,61 @@ export default function PatientDetailPage() {
   }
 
   const submitEdit = async (v: { display_name: string; diagnosis_label?: string; note?: string }) => {
-    setBusy(true)
+    if (savingLock.current) return
+    savingLock.current = true; setBusy(true)
     try {
       await apiFetch(`/api/patients/${id}`, { method: 'PATCH', body: JSON.stringify(v) })
       message.success('患者信息已更新')
       setEditOpen(false)
       await reload()
-    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { message.error((e as Error).message) } finally { savingLock.current = false; setBusy(false) }
   }
 
   const submitBindAcct = async (v: { account: string; initial_password?: string }) => {
-    setBusy(true)
+    if (savingLock.current) return
+    savingLock.current = true; setBusy(true)
     try {
       const r = await apiFetch<{ temporary_password: string | null }>(`/api/patients/${id}/account`, {
         method: 'POST', body: JSON.stringify(v),
       })
-      message.success(r.temporary_password
-        ? `账号已创建，临时密码（一次性展示，请立即转告）：${r.temporary_password}`
-        : '账号绑定成功')
+      if (r.temporary_password) setPasswordResult(r.temporary_password)
+      else message.success('账号绑定成功')
       setBindAcctOpen(false)
       bindAcctForm.resetFields()
-      await reload()
-    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+      // Keep the one-time credential visible even if the next read fails.
+      if (!r.temporary_password) reload()
+    } catch (e) { message.error((e as Error).message) } finally { savingLock.current = false; setBusy(false) }
   }
 
   const openBindDev = async () => {
     try {
       const ms = await apiFetch<{ items: { id: string; model_name: string }[] }>('/api/device-models?page_size=100')
       setDeviceOptions(ms.items.map((m) => ({ value: m.id, label: m.model_name })))
+      bindDevForm.resetFields()
       setBindDevOpen(true)
     } catch (e) { message.error((e as Error).message) }
   }
 
-  const submitBindDev = async (v: { device_model_id: string; effective_from: string }) => {
-    setBusy(true)
+  const submitBindDev = async (v: { device_model_id: string; effective_from: Dayjs }) => {
+    if (savingLock.current) return
+    savingLock.current = true; setBusy(true)
     try {
       await apiFetch(`/api/patients/${id}/devices`, {
         method: 'POST',
-        body: JSON.stringify({ device_model_id: v.device_model_id, effective_from: `${v.effective_from}T00:00:00+08:00` }),
+        body: JSON.stringify({ device_model_id: v.device_model_id, effective_from: midnight(v.effective_from.format('YYYY-MM-DD')) }),
       })
       message.success('装置已绑定（旧装置生效期自动关闭）')
       setBindDevOpen(false)
       bindDevForm.resetFields()
       await reload()
-    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { message.error((e as Error).message) } finally { savingLock.current = false; setBusy(false) }
   }
 
-  const submitRevision = async (v: { starts_at: string; drug_label?: string; times_text?: string }) => {
+  const submitRevision = async (v: { starts_at: Dayjs; drug_label?: string; times_text?: string }) => {
     if (!revOpen) return
-    setBusy(true)
+    if (revOpen.plan_type === 'REGULAR' && !validTimes((v.times_text || '').split('\n').map(t => t.trim()).filter(Boolean))) { message.error('请填写合法且不重复的 HH:mm 时点'); return }
+    if (savingLock.current) return
+    savingLock.current = true; setBusy(true)
     try {
       const daily = (v.times_text || '')
         .split('\n').map((s) => s.trim()).filter(Boolean)
@@ -265,7 +237,7 @@ export default function PatientDetailPage() {
       await apiFetch(`/api/medication-plans/${revOpen.id}/revisions`, {
         method: 'POST',
         body: JSON.stringify({
-          starts_at: `${v.starts_at}T00:00:00+08:00`,
+          starts_at: midnight(v.starts_at.format('YYYY-MM-DD')),
           drug_label: v.drug_label || undefined,
           daily_times: revOpen.plan_type === 'REGULAR' ? daily : undefined,
         }),
@@ -274,13 +246,14 @@ export default function PatientDetailPage() {
       setRevOpen(null)
       revForm.resetFields()
       await reload()
-    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { message.error((e as Error).message) } finally { savingLock.current = false; setBusy(false) }
   }
 
   const submitRevoke = async () => {
     if (!revokeTarget) return
     if (!revokeReason.trim()) { message.warning('请填写撤销原因'); return }
-    setBusy(true)
+    if (savingLock.current) return
+    savingLock.current = true; setBusy(true)
     try {
       await apiFetch(`/api/medication-events/${revokeTarget.id}/revoke`, {
         method: 'POST', body: JSON.stringify({ reason: revokeReason.trim() }),
@@ -289,225 +262,77 @@ export default function PatientDetailPage() {
       setRevokeTarget(null)
       setRevokeReason('')
       await reload()
-    } catch (e) { message.error((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { message.error((e as Error).message) } finally { savingLock.current = false; setBusy(false) }
   }
 
-  const openRevision = () => {
-    if (!headlinePlan) return
+  const openRevision = (plan: Plan) => {
+    revForm.resetFields()
     revForm.setFieldsValue({
-      starts_at: dayjs().format('YYYY-MM-DD'),
-      drug_label: headlinePlan.drug_label,
-      times_text: headlinePlan.daily_times?.map((t) => String(t.local_time).slice(0, 5)).join('\n') || '',
+      starts_at: dayjs(shanghaiDay()),
+      drug_label: plan.drug_label,
+      times_text: plan.daily_times?.map((t) => String(t.local_time).slice(0, 5)).join('\n') || '',
     })
-    setRevOpen(headlinePlan)
+    setRevOpen(plan)
+    setChoosePlanOpen(false)
   }
 
   if (loading) {
-    return <div style={{ padding: 48, textAlign: 'center' }}><Spin /></div>
+    return <div className="ml-empty"><Spin /></div>
   }
   if (!patient) {
-    return <Empty description="患者不存在或无权访问" style={{ marginTop: 64 }} />
+    return <LoadError error={patientQuery.error || "患者不存在或无权访问"} retry={patientQuery.retry} />
   }
 
-  const now = dayjs()
   const isDemoData = [patient.diagnosis_label, patient.note, ...plans.map((plan) => plan.drug_label)]
     .some((value) => value?.includes('DEMO'))
   const unbound = !patient.account_user_id
   const missingCount = coverageStats ? Math.max(coverageStats.N - coverageStats.M, 0) : null
   const openTaskCount = tasks?.filter((task) => task.status === 'OPEN' || task.status === 'IN_PROGRESS').length ?? null
-  const duplicateCount = coverageStats?.duplicate_slots?.length ?? 0
-
-  const drugLine = headlinePlan
-    ? headlinePlan.plan_type === 'REGULAR' && headlinePlan.daily_times?.length
-      ? `${cleanDemoMarker(headlinePlan.drug_label)} · ${headlinePlan.daily_times.map((time) => String(time.local_time).slice(0, 5)).join(' / ')}。下面是近 7 日登记覆盖与待办。`
-      : `${cleanDemoMarker(headlinePlan.drug_label)} · 按需。下面是近 7 日登记覆盖与待办。`
-    : '暂无进行中的用药计划。下面是近 7 日登记覆盖与待办。'
-
+  const follow = () => navigate(`/followups?patientId=${id}`)
   const primary = unbound
-    ? { key: 'bind', label: '绑定账号', onClick: () => setBindAcctOpen(true) }
+    ? { key: 'bind', label: '绑定账号', onClick: () => { bindAcctForm.resetFields(); setBindAcctOpen(true) } }
     : (missingCount ?? 0) > 0
       ? { key: 'backfill', label: '补登用药', onClick: () => setBackfillOpen(true) }
-      : (openTaskCount ?? 0) > 0
-        ? { key: 'follow', label: '去随访', onClick: () => navigate('/followups') }
-        : null
-
-  const attention: AttentionItem[] = []
-  if (unbound) {
-    attention.push({
-      key: 'bind',
-      mark: '绑',
-      tone: 'warn',
-      title: '账号未绑定',
-      detail: '绑定后才能同步 App 登记',
-      chip: '待处理',
-      chipTone: 'warn',
-      onClick: () => setBindAcctOpen(true),
-    })
-  }
-  if ((missingCount ?? 0) > 0) {
-    attention.push({
-      key: 'coverage',
-      mark: '覆',
-      tone: 'info',
-      title: '近 7 日覆盖偏低',
-      detail: missingCount === 1 ? '有 1 个时点未发现登记' : '多个时点未发现登记',
-      chip: '查看',
-      chipTone: 'blue',
-      onClick: () => document.getElementById('coverage-scale')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
-    })
-  }
-  if (duplicateCount > 0) {
-    attention.push({
-      key: 'dup',
-      mark: '核',
-      tone: 'info',
-      title: '同一时点有多条登记',
-      detail: '请核对，覆盖只计一次',
-      chip: '查看',
-      chipTone: 'blue',
-      onClick: () => setRecordsOpen(true),
-    })
-  }
-  if ((openTaskCount ?? 0) > 0) {
-    attention.push({
-      key: 'task',
-      mark: '访',
-      tone: 'warn',
-      title: '有待随访',
-      detail: '任务仍未关闭',
-      chip: '去处理',
-      chipTone: 'warn',
-      onClick: () => navigate('/followups'),
-    })
-  }
-  const shownAttention = attention.slice(0, 2)
-  if (shownAttention.length === 0) {
-    shownAttention.push({
-      key: 'clear',
-      mark: '稳',
-      tone: 'info',
-      title: '暂无需关注',
-      detail: '近 7 日没有待处理事项',
-      chip: '正常',
-      chipTone: 'blue',
-    })
-  }
-
+      : (openTaskCount ?? 0) > 0 ? { key: 'follow', label: '去随访', onClick: follow } : null
   const moreItems = [
-    primary?.key !== 'backfill' ? { key: 'backfill', label: '补登用药', onClick: () => setBackfillOpen(true) } : null,
     { key: 'edit', label: '编辑档案', onClick: openEdit },
     { key: 'device', label: '绑定装置', onClick: () => { void openBindDev() } },
-    headlinePlan ? { key: 'revise', label: '修订时点', onClick: openRevision } : null,
-    primary?.key !== 'follow' ? { key: 'follow', label: '去随访', onClick: () => navigate('/followups') } : null,
+    { key: 'plans', label: '用药计划', onClick: () => navigate(`/plans?patientId=${id}`) },
+    plans.length ? { key: 'revise', label: '修订时点', onClick: () => plans.length === 1 ? openRevision(plans[0]) : setChoosePlanOpen(true) } : null,
     { key: 'records', label: '查看登记', onClick: () => setRecordsOpen(true) },
-  ].filter((item) => item !== null)
-
-  // 刻度数据交给共享组件：行=时点，列=近 7 日
-  const scaleDays = days.map((day) => ({
-    key: day.format('YYYY-MM-DD'),
-    date: String(day.date()),
-    weekday: WEEK_ZH[day.day()],
-  }))
-  const scaleSlots = times.map((time): ScaleSlot => ({
-    key: time,
-    label: time,
-    cells: days.map((day) => {
-      const key = `${day.format('YYYY-MM-DD')}|${time}`
-      const slot = slotByCell.get(key)
-      const future = slot ? new Date(slot.scheduled_at).getTime() > asOf : false
-      const kind: ScaleCellKind = !slot ? 'none' : future ? 'pending' : slot.has_active_record ? 'ok' : 'miss'
-      const label = !slot
-        ? `${day.format('M月D日')} ${time} 无此时点`
-        : future
-          ? `${day.format('M月D日')} ${time} 未到时点`
-          : `${day.format('M月D日')} ${time} ${kind === 'ok' ? '已登记' : '未发现登记'}`
-      return { kind, label }
-    }),
-  }))
-
+    primary?.key !== 'bind' ? { key: 'account', label: '绑定账号', onClick: () => { bindAcctForm.resetFields(); setBindAcctOpen(true) } } : null,
+  ].filter(item => item !== null)
   return (
-    <div className="cc-page">
-      <HeroBar
-        eyebrow={
-          <>
-            {WEEK_EN[now.day()]} · {MONTH_EN[now.month()]} {now.date()} ·{' '}
-            <span className={coverageStats ? 'ok' : undefined}>{coverageStats ? '系统正常' : '统计未更新'}</span>
-          </>
-        }
-        title={
-          <>
-            你好，{patient.display_name}
-            {isDemoData && <span className="cc-demo">演示数据</span>}
-          </>
-        }
-        sub={drugLine}
-        actions={
-          <>
-            <Dropdown menu={{ items: moreItems }} trigger={['click']}>
-              <Button>更多</Button>
-            </Dropdown>
-            {primary && (
-              <Button type="primary" onClick={primary.onClick}>{primary.label}</Button>
-            )}
-          </>
-        }
-      />
-
-      <StatBand
-        label="近 7 日摘要"
-        items={[
-          {
-            key: 'coverage',
-            label: '近 7 日覆盖',
-            value: formatRate(coverageStats),
-            warn: Boolean(missingCount),
-            meta: coverageStats
-              ? coverageStats.N > 0
-                ? `${coverageStats.M} / ${coverageStats.N} 时点 · 非依从性`
-                : '近 7 日无到期时点'
-              : '统计暂不可用',
-          },
-          {
-            key: 'missing',
-            label: '未发现登记',
-            value: missingCount == null ? '—' : missingCount,
-            meta: '近 7 日',
-          },
-          {
-            key: 'account',
-            label: '账号',
-            value: unbound ? '未绑定' : '已绑定',
-            words: true,
-            warn: unbound,
-            meta: unbound ? '需处理' : '已关联',
-          },
-          {
-            key: 'followup',
-            label: '待随访',
-            value: openTaskCount == null ? '—' : openTaskCount,
-            meta: openTaskCount ? '计划内' : '暂无',
-          },
-        ]}
-      />
-
-      <TwoColumn
-        aside={
-          <AttentionPanel items={shownAttention} count={shownAttention.length} />
-        }
-      >
-        <Card title="近 7 日时点" hint="覆盖 ≠ 依从性" id="coverage-scale">
-          {times.length === 0 ? (
-            <p className="cc-empty-line">近 7 日没有可显示的时点。</p>
-          ) : (
-            <TimeScale days={scaleDays} slots={scaleSlots} ariaLabel="近七日时点登记覆盖" />
-          )}
-        </Card>
-      </TwoColumn>
-
+    <div className="ml-clinical-page ml-detail-page">
+      <div className="ml-breadcrumb"><Link to="/patients">患者管理</Link><span>/</span><span>患者详情</span></div>
+      <header className="ml-detail-identity"><PatientAvatar code={patient.patient_code} src={patient.avatar_url} large demoPatient={isDemoData} /><h1>{patient.display_name}</h1><span>{cleanDemoMarker(patient.diagnosis_label || '')}</span>{isDemoData && <span className="ml-demo-label">演示数据</span>}<div className="ml-detail-actions">{primary && <Button type="primary" onClick={primary.onClick}>{primary.label}</Button>}<Dropdown menu={{ items: moreItems }} trigger={['click']}><Button aria-label="更多患者操作" icon={<EllipsisOutlined />} /></Dropdown></div></header>
+      <div className="ml-summary-strip" aria-label="患者近七日摘要">
+        <span>近 7 日登记覆盖 <strong>{formatRate(coverageStats)}</strong></span>
+        <span>已登记 {coverageStats?.M ?? '—'} / 应记录 {coverageStats?.N ?? '—'}{coverageStats?.N === 0 && <span className="ml-summary-note">无到期时点</span>}</span>
+        <span>待随访 <b className="ml-count-apricot">{openTaskCount ?? '—'}</b></span>
+      </div>
+      {statsQuery.error && <LoadError error={`登记统计不可用：${statsQuery.error}`} retry={statsQuery.retry} />}
+      {plansQuery.error && <LoadError error={`计划加载失败：${plansQuery.error}`} retry={plansQuery.retry} />}
+      <div className="ml-detail-grid">
+        <ClinicalPanel title="登记记录" actions={<div className="ml-inline-tools"><span>{dayjs(rangeStart).format('M月D日')}—{dayjs(rangeStart).add(6, 'day').format('M月D日')}</span><InfoHint>只统计已到期固定计划时点；登记覆盖不等于实际服药依从性。</InfoHint></div>}>
+          {slotsQuery.loading ? <p className="ml-empty">加载中…</p> : slotsQuery.error ? <LoadError error={slotsQuery.error} retry={slotsQuery.retry} /> : times.length === 0 ? <p className="ml-empty">近 7 日无计划时点</p> : <div className="ml-table-wrap"><table className="ml-detail-matrix"><thead><tr><th aria-label="每日时点" />{days.map(d => <th key={d.format('YYYY-MM-DD')}><span>{d.format('MM/DD')}</span><span>周{WEEK_ZH[d.day()]}</span></th>)}</tr></thead><tbody>{times.map(time => <tr key={time}><th scope="row">{time}</th>{days.map(d => {
+            const cell = slotByCell.get(`${d.format('YYYY-MM-DD')}|${time}`) ?? []
+            const due = cell.filter(s => Date.parse(s.scheduled_at) <= asOf), M = due.filter(s => s.has_active_record).length
+            const kind = !cell.length ? 'none' : !due.length ? 'future' : M === due.length ? 'all' : M === 0 ? 'missing' : 'partial'
+            const label = `${d.format('M月D日')} ${time}：${cell.length} 个计划时点，已到期 ${due.length}，已登记 ${M}，未到期 ${cell.length - due.length}`
+            return <td key={d.format('YYYY-MM-DD')}><button type="button" className={`ml-slot-square ml-cell-${kind}`} aria-label={label} title={label}>{kind === 'all' ? <CheckOutlined /> : kind === 'missing' ? <MinusOutlined /> : kind === 'partial' ? `${M}/${due.length}` : kind === 'future' ? <ClockCircleOutlined /> : null}</button></td>
+          })}</tr>)}</tbody></table></div>}
+          <div className="ml-legend ml-detail-legend"><span><i className="ml-cell-all" />已登记</span><span><i className="ml-cell-missing" />未发现登记</span>{slots.some(s => Date.parse(s.scheduled_at) > asOf) && <span><ClockCircleOutlined />未到时点</span>}</div>
+        </ClinicalPanel>
+        <ClinicalPanel title="待办"><div className="ml-detail-todos"><button type="button" onClick={() => setBackfillOpen(true)}><EditOutlined aria-hidden /><span>补登用药</span></button><button type="button" onClick={follow}><FileTextOutlined aria-hidden /><span>记录随访</span>{openTaskCount !== null && openTaskCount > 0 && <b className="ml-count-apricot">{openTaskCount}</b>}</button></div>{tasksQuery.error && <LoadError error={`待办不可用：${tasksQuery.error}`} retry={tasksQuery.retry} />}</ClinicalPanel>
+      </div>
       <MedicationBackfillModal
         open={backfillOpen}
         patientId={patient.id}
         patientName={patient.display_name}
+        patientCode={patient.patient_code}
+        avatarUrl={patient.avatar_url}
+        demoPatient={isDemoPatient(patient)}
         onClose={() => setBackfillOpen(false)}
         onSuccess={() => { void reload() }}
       />
@@ -516,35 +341,38 @@ export default function PatientDetailPage() {
         title="用药登记"
         open={recordsOpen}
         onClose={() => setRecordsOpen(false)}
-        size={420}
+        size={480}
+        rootClassName="ml-theme ml-clinical-dialog"
       >
-        {eventTotal > events.length && (
-          <p className="cc-empty-line" style={{ marginBottom: 12 }}>仅显示最近 {events.length} 条，更早的记录仍保留。</p>
-        )}
-        {events.length === 0 ? (
-          <p className="cc-empty-line">暂无用药登记。</p>
+        {eventsQuery.error && <LoadError error={eventsQuery.error} retry={eventsQuery.retry} />}
+        {eventsQuery.loading && <p className="ml-empty">加载中…</p>}
+        <div className="ml-record-pager"><Button disabled={eventPage === 1} onClick={() => setEventPage(n => n - 1)}>上一页</Button><span>共 {eventTotal} 条</span><Button disabled={eventPage * 50 >= eventTotal} onClick={() => setEventPage(n => n + 1)}>下一页</Button></div>
+        {!eventsQuery.error && !eventsQuery.loading && (events.length === 0 ? (
+          <p className="ml-empty">暂无用药登记。</p>
         ) : (
-          <ul className="cc-record-list">
+          <ul className="ml-record-list">
             {events.map((event) => (
               <li key={event.id}>
-                <div className="cc-record-main">
-                  <strong>{new Date(event.occurred_at).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</strong>
+                <div className="ml-record-main">
+                  <strong>{shortTime(event.occurred_at)}</strong>
                   <span>
-                    {event.source === 'PATIENT_REPORT' ? '患者自述' : '医护观察'}
+                    {event.source === 'PATIENT_REPORT' ? '患者自述' : event.source === 'CLINICIAN_OBSERVED' ? '医护观察' : event.source}
                     {event.note ? ` · ${event.note}` : ''}
                   </span>
                 </div>
                 {event.status === 'REVOKED'
-                  ? <span className="cc-revoked">已撤销</span>
+                  ? <span className="ml-phase ml-phase-ended">已撤销</span>
                   : <Button size="small" onClick={() => { setRevokeTarget(event); setRevokeReason('') }}>撤销</Button>}
               </li>
             ))}
           </ul>
-        )}
+        ))}
       </Drawer>
 
-      <Modal title="编辑患者信息" open={editOpen} onCancel={() => setEditOpen(false)} onOk={() => editForm.submit()} confirmLoading={busy} destroyOnHidden>
-        <Form form={editForm} layout="vertical" onFinish={submitEdit}>
+      <Modal rootClassName="ml-theme ml-clinical-dialog" title="账号已创建" open={passwordResult !== null} onCancel={() => { setPasswordResult(null); reload() }} footer={<Button type="primary" onClick={() => { setPasswordResult(null); reload() }}>已保存</Button>}><p>临时密码仅本次展示，请保存后转告患者。</p><Input.Password readOnly value={passwordResult ?? ''} aria-label="临时密码" /></Modal>
+      <Modal rootClassName="ml-theme ml-clinical-dialog" title="选择要修订的计划" open={choosePlanOpen} onCancel={() => setChoosePlanOpen(false)} footer={null}><ul className="ml-plan-history">{plans.map(plan => <li key={plan.id}><Button type="text" onClick={() => openRevision(plan)}>{cleanDemoMarker(plan.drug_label)} · {shortTime(plan.starts_at)} · v{plan.version}</Button></li>)}</ul></Modal>
+      <Modal rootClassName="ml-theme ml-clinical-dialog" title="编辑患者信息" open={editOpen} onCancel={() => setEditOpen(false)} onOk={() => editForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <Form onKeyDown={event => { if (event.key === 'Enter' && (event.target as HTMLElement).closest('.ant-picker')) event.preventDefault() }} requiredMark={false} form={editForm} layout="vertical" onFinish={submitEdit}>
           <Form.Item name="display_name" label="姓名/别名" rules={[{ required: true, message: '请输入姓名或别名' }]}>
             <Input />
           </Form.Item>
@@ -557,11 +385,11 @@ export default function PatientDetailPage() {
         </Form>
       </Modal>
 
-      <Modal title="绑定登录账号" open={bindAcctOpen} onCancel={() => setBindAcctOpen(false)} onOk={() => bindAcctForm.submit()} confirmLoading={busy} destroyOnHidden>
-        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0 }}>
+      <Modal rootClassName="ml-theme ml-clinical-dialog" title="绑定登录账号" open={bindAcctOpen} onCancel={() => setBindAcctOpen(false)} onOk={() => bindAcctForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <p className="ml-dialog-note">
           账号已存在时将直接绑定（须为未绑定的患者账号）；新账号会生成一次性临时密码。
         </p>
-        <Form form={bindAcctForm} layout="vertical" onFinish={submitBindAcct}>
+        <Form onKeyDown={event => { if (event.key === 'Enter' && (event.target as HTMLElement).closest('.ant-picker')) event.preventDefault() }} requiredMark={false} form={bindAcctForm} layout="vertical" onFinish={submitBindAcct}>
           <Form.Item name="account" label="账号" rules={[{ required: true, min: 2, message: '请输入账号' }]}>
             <Input placeholder="如 patient_wang" />
           </Form.Item>
@@ -571,11 +399,11 @@ export default function PatientDetailPage() {
         </Form>
       </Modal>
 
-      <Modal title="绑定装置" open={bindDevOpen} onCancel={() => setBindDevOpen(false)} onOk={() => bindDevForm.submit()} confirmLoading={busy} destroyOnHidden>
-        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0 }}>
+      <Modal rootClassName="ml-theme ml-clinical-dialog" title="绑定装置" open={bindDevOpen} onCancel={() => setBindDevOpen(false)} onOk={() => bindDevForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <p className="ml-dialog-note">
           绑定新装置后，原装置生效期自动关闭；历史训练记录不改写。
         </p>
-        <Form form={bindDevForm} layout="vertical" onFinish={submitBindDev}>
+        <Form onKeyDown={event => { if (event.key === 'Enter' && (event.target as HTMLElement).closest('.ant-picker')) event.preventDefault() }} requiredMark={false} form={bindDevForm} layout="vertical" onFinish={submitBindDev}>
           <Form.Item name="device_model_id" label="装置型号" rules={[{ required: true, message: '请选择型号' }]}>
             <Select options={deviceOptions} placeholder="选择型号" />
           </Form.Item>
@@ -585,11 +413,11 @@ export default function PatientDetailPage() {
         </Form>
       </Modal>
 
-      <Modal title="修订用药时点" open={revOpen !== null} onCancel={() => setRevOpen(null)} onOk={() => revForm.submit()} confirmLoading={busy} destroyOnHidden>
-        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0 }}>
+      <Modal rootClassName="ml-theme ml-clinical-dialog" title="修订用药时点" open={revOpen !== null} onCancel={() => setRevOpen(null)} onOk={() => revForm.submit()} confirmLoading={busy} destroyOnHidden>
+        <p className="ml-dialog-note">
           修订会生成新的生效记录：旧记录停在新开始日，历史统计不改写。
         </p>
-        <Form form={revForm} layout="vertical" onFinish={submitRevision}>
+        <Form onKeyDown={event => { if (event.key === 'Enter' && (event.target as HTMLElement).closest('.ant-picker')) event.preventDefault() }} requiredMark={false} form={revForm} layout="vertical" onFinish={submitRevision}>
           <Form.Item name="starts_at" label="生效日期" rules={[{ required: true, message: '请选择生效日期' }]}>
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
@@ -604,8 +432,8 @@ export default function PatientDetailPage() {
         </Form>
       </Modal>
 
-      <Modal title="撤销此用药登记？" open={revokeTarget !== null} onCancel={() => { setRevokeTarget(null); setRevokeReason('') }} onOk={submitRevoke} confirmLoading={busy} okText="确认撤销" okButtonProps={{ danger: true }} destroyOnHidden>
-        <p style={{ color: 'var(--muted)', fontSize: 13 }}>
+      <Modal rootClassName="ml-theme ml-clinical-dialog" title="撤销此用药登记？" open={revokeTarget !== null} onCancel={() => { setRevokeTarget(null); setRevokeReason('') }} onOk={submitRevoke} confirmLoading={busy} okText="确认撤销" okButtonProps={{ danger: true }} destroyOnHidden>
+        <p className="ml-dialog-note">
           撤销后该记录不再计入统计，原记录与撤销留痕保留、不可删除。
         </p>
         <Input.TextArea

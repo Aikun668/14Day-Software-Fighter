@@ -1,0 +1,9 @@
+{
+  "combined_server_filters": true,
+  "evaluation_model_guide_and_stale_clear": true,
+  "pagination_and_create_reset_page": true,
+  "patient_error_visible": true,
+  "close_task_atomic_followup_and_refresh": true,
+  "admin_and_first_password_routes": true,
+  "uncaught_js_errors": []
+}

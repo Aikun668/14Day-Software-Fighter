@@ -1,0 +1,20 @@
+{
+  "frontend-web/package.json": true,
+  "frontend-web/pnpm-lock.yaml": true,
+  "frontend-web/src/index.css": true,
+  "frontend-web/src/pages/auth/LoginPage.tsx": true,
+  "frontend-web/src/pages/clinician/WorkbenchPage.tsx": true,
+  "frontend-web/src/pages/clinician/PatientListPage.tsx": true,
+  "frontend-web/src/styles/medix-theme.ts": true,
+  "frontend-web/src/styles/medix-light.css": true,
+  "frontend-web/src/components/medix/Medix.tsx": true,
+  "frontend-web/src/assets/medix/brand-symbol.png": true,
+  "frontend-web/src/assets/medix/demo-portraits.png": true,
+  "frontend-web/src/assets/medix/doctor-assistant.png": true,
+  "frontend-web/src/assets/medix/README.md": true,
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-medium-core.woff2": true,
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-medium.woff2": true,
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-regular-core.woff2": true,
+  "frontend-web/src/assets/medix/fonts/noto-sans-sc-regular.woff2": true,
+  "frontend-web/src/assets/medix/fonts/OFL.txt": true
+}

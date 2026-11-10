@@ -1,0 +1,34 @@
+.ml-follow-page > .ml-clinical-panel + .ml-clinical-panel { margin-top: 1.25rem; }
+.ml-follow-page .ml-table { min-width: 48rem; }
+.ml-follow-queue .ml-row-actions .ant-btn { height: 2rem; color: var(--ml-muted); padding-inline: .75rem; }
+.ml-follow-page .ml-clinical-panel { padding: 1.25rem; }
+.ml-follow-composer { margin-bottom: 1.25rem; }
+.ml-follow-records .ml-section-head > .ant-select { width: 10rem; }
+.ml-follow-more { display: flex; gap: 1.5rem; justify-content: center; padding-top: 1rem; }
+.ml-follow-tag { display: inline-block; border-radius: .25rem; padding: .125rem .75rem; font-size: var(--ml-fs-caption); }
+.ml-follow-tag.is-teal { background: #EAF8EF; color: #287442; }
+.ml-follow-tag.is-apricot { background: #FFF1E7; color: #92532C; }
+.ml-follow-copy { overflow-wrap: anywhere; }
+.ml-follow-copy .is-clamped { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ml-follow-copy .ml-follow-tag { width: fit-content; max-width: 100%; }
+.ml-follow-copy .ml-text-button { display: block; margin-top: .25rem; font-size: var(--ml-fs-small); }
+.ml-follow-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.5rem; }
+.ml-follow-form-grid .ant-picker { width: 100%; }
+.ml-follow-form .ant-form-item { margin-bottom: 1.25rem; }
+.ml-follow-checks, .ml-follow-submit { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 1.25rem; }
+.ml-follow-submit { justify-content: flex-end; margin: 1.5rem 0 0; }
+.ml-follow-form > [role="alert"] { margin-block: 1rem; }
+.ml-admin-models .ml-table { min-width: 45rem; }
+.ml-admin-models .ml-table td { height: 4.625rem; overflow-wrap: anywhere; }
+.ml-model-category { display: inline-block; background: #F4F5F7; color: #697180; border-radius: .25rem; padding: .125rem .75rem; min-width: 4.5rem; text-align: center; }
+.ml-admin-heading { color: var(--ml-muted); font-size: var(--ml-fs-section); }
+@media(max-width: 767px) { .ml-follow-form-grid { grid-template-columns: 1fr; } .ml-follow-queue .ml-row-actions .ant-btn { height: 2.75rem; } .ml-follow-records .ml-section-head { flex-wrap: wrap; } }
+@media(max-width: 767px) {
+  .ml-follow-queue .ml-table { min-width: 0; }
+  .ml-follow-queue col:last-child { width: 55% !important; }
+  .ml-follow-queue .ml-row-actions { flex-direction: column; align-items: stretch; gap: .375rem; }
+  .ml-follow-queue .ml-table td, .ml-follow-queue .ml-table th { padding-inline: .25rem; }
+  .ml-follow-queue .ml-identity { gap: .375rem; }
+  .ml-follow-queue .ml-avatar { width: 2.25rem; height: 2.25rem; }
+}
+

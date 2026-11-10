@@ -1,0 +1,34 @@
+{
+  "same_time_multiple_plans": true,
+  "partial_failure_not_empty": true,
+  "patient_switch": true,
+  "detail_followup_patient_context": true,
+  "one_time_password_survives_failed_refresh": true,
+  "device_date_shanghai": true,
+  "events_page_51_unknown_source": true,
+  "create_failure_keeps_draft": true,
+  "plan_inclusive_end_date_and_single_submit": true,
+  "prn_discards_fixed_slots": true,
+  "switch_confirm_and_reset": true,
+  "date_plan_boundary_checks": {
+    "phases": [
+      "active",
+      "pending",
+      "ended"
+    ],
+    "times": [
+      false,
+      false,
+      true
+    ],
+    "shanghai": "2026-11-09"
+  },
+  "chart_table_and_matrix_reachable": true,
+  "weighted_2_of_10_is_20": true,
+  "zero_N_neutral_not_zero_percent": true,
+  "mismatch_retry_then_visible_error": true,
+  "report_12_slots_13_events": true,
+  "report_followup_patient_context": true,
+  "responsive_1280_390": true,
+  "uncaught_js_errors": []
+}

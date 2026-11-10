@@ -1,0 +1,18 @@
+Create a realistic production-quality Chinese patient mobile app UI, grounded in the attached approved Medix Light web design. This is one of five coordinated pages in an existing app, not a new brand. Recompose for a phone; do not shrink a desktop screen. Target logical viewport 390 x 844, exact tall portrait ratio 195:422, render at high resolution. Output APP CONTENT ONLY, edge-to-edge rectangular canvas. No phone frame, mockup backdrop, OS status bar, clock, battery, home indicator, browser chrome, title captions outside the app, or multiple screens.
+
+Visual system: quiet neutral light-gray #F6F6F8 background, pure white working surfaces, bright violet #8146FF for primary action and current navigation only, readable charcoal #424650 text, secondary #697180, pale dividers #EEF0F3. Use #3185ED blue for charts and #43B7A0 teal for completed states, apricot #E8B77E very sparingly for attention. Do not tint the whole page violet. No dark theme, glass, gradients, heavy shadow, nested cards, excessive pills, or decorative color dots. Match the restrained lively feeling of the approved web reference. Clean Noto Sans SC / modern Chinese sans-serif. Main body 16 logical px; secondary 14; headings 22; control height >=48; content side margins24. Fine simple consistent line icons. Purposeful whitespace and confident hierarchy; no tiny filler explanations. Cards only where actually useful, with radius10-12 and no thick borders.
+
+Current date anchor 2026-11-10. All visible data are illustrative design fixture values. This is a design image, not evidence of a running implementation. Every visible Chinese glyph must be clear, correct and legible. Do not include any documentation or disclaimers inside the UI. Use only the exact page-specific copy specified below, not English filler or invented features.
+
+PAGE: 患者登录. Attached image 1 is the approved desktop login, use its brand symbol and typography. Attached image 2 is the actual reusable doctor illustration, use the same friendly doctor, white coat, glasses, muted teal plant and pale violet laptop. This is not a character portrait for a patient.
+
+LAYOUT at logical 390x844:
+- Entire base pale neutral background, not a centered desktop login card.
+- At x24 y40 a small purple existing four-way medical brand mark and exact purple wordmark “吸入治疗管理” (22px).
+- A compact clean doctor illustration centered in the upper region y105–290, roughly180px wide, integrated directly into the base surface. No enclosing panel. Keep its teal plant and blue tie for restrained liveliness.
+- At x24 y322 clear heading “患者登录”, 24px charcoal.
+- Below, one simple full-width form integrated into the page: label “账号”, white input with faint outline, placeholder “请输入账号”; label “密码”, white input same size, placeholder “请输入密码”, small gray eye visibility control on right within a44px touch area.
+- Input boxes width342 and height52. Labels16px. Generous 22px separation between fields.
+- Full width solid violet primary button height52, label “登录”, below the second field at about y593. Button white text 17px. Avoid gradient and shadow.
+- Keep bottom area comfortably empty for natural breathing room. Do not add footer copy, subtitles under brand, legal disclaimer, patient codes, registration, forgot-password link, alternate login methods, version number, or bottom tabs.
+- Everything must fit fully inside the tall screen; no clipping or distorted typography.
