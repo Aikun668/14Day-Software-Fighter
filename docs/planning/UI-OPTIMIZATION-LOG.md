@@ -842,3 +842,13 @@
 - 患者详情仍是原来的 Comfort 页。只补了上海七日、失败不装成空、同时刻多个时点、临时密码弹窗、绑定日期和多个计划时先选择。没有为了贴图重做这一页。
 
 **证据**：`docs/evidence/medix-final/implementation-report.md`。build 通过，lint 0 error。截图是请求拦截，不是 8010。07 有单独截图。用户视觉终验未签。
+
+### 2026-11-10 · Medix Light 全站截图画廊
+
+**问题**：00–15 的实拍散在三批证据目录里，Clinic Comfort 全站画廊又没有单独的 07，主人不能一页看完 Medix Light。
+
+**原因**：各批只留了自己的 screenshots/，没有一份只用相对路径、能用 file:// 打开的全站索引。
+
+**改动**：新增 `docs/evidence/medix-light-full-ui/`。结构对齐 Clinic Comfort 画廊：认证、医护端、弹窗、管理端，共 15 张。强调色改为 `#8146FF`。04 注明仍是 Comfort，未按 Medix 冻结稿重做。07 用 medix-final 的独立截图，不复用 06 页签。未改产品代码。
+
+**证据**：`docs/evidence/medix-light-full-ui/index.html`。来源 `docs/evidence/medix-0123/screenshots/`、`docs/evidence/medix-05060809/screenshots/`、`docs/evidence/medix-final/screenshots/`。本页不签视觉终验。

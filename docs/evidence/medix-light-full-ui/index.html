@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>吸入治疗指导与依从性辅助管理软件 · Medix Light 全站截图</title>
+<!--
+  静态画廊，仅相对路径，可用 file:// 打开。未改产品代码。
+  主图（均为已有实拍拷贝，不用冻结稿）：
+  01 docs/evidence/medix-0123/screenshots/01-login-1440x900.png
+  02 docs/evidence/medix-0123/screenshots/02-workbench-1440-full-mock.png
+  03 docs/evidence/medix-0123/screenshots/03-patients-1440-mock.png
+  04 docs/evidence/medix-0123/screenshots/04-patient-detail-still-comfort-mock.png
+  05 docs/evidence/medix-05060809/screenshots/05-plans-1440.png
+  06 docs/evidence/medix-05060809/screenshots/06-stats-1440.png
+  07 docs/evidence/medix-final/screenshots/07-patient-report-1440.png
+  08 docs/evidence/medix-05060809/screenshots/08-followups-1440.png
+  09 docs/evidence/medix-05060809/screenshots/09-task-close-1440.png
+  10 docs/evidence/medix-final/screenshots/10-backfill-1440.png
+  11 docs/evidence/medix-final/screenshots/11-devices-1440.png
+  12 docs/evidence/medix-final/screenshots/12-guides-1440.png
+  13 docs/evidence/medix-final/screenshots/13-accounts-1440.png
+  14 docs/evidence/medix-final/screenshots/14-knowledge-1440.png
+  15 docs/evidence/medix-final/screenshots/15-audit-1440.png
+  07 使用 medix-final 的独立截图，不复用 06-stats-report-1440.png。
+  15 屏都有实拍，没有缺图占位。文件名里的 mock 是请求拦截，不是设计冻结稿。
+-->
+<style>
+  :root {
+    --bg: #F4F6F9;
+    --surface: #ffffff;
+    --line: #E5EAF1;
+    --line-soft: #EEF2F7;
+    --ink: #1A1D26;
+    --ink-2: #4A5160;
+    --muted: #8B93A7;
+    --primary: #8146FF;
+    --primary-soft: #F4F0FF;
+    --primary-text: #5E2BC4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: Inter, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 36px 40px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  .sub { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .meta span {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font-size: 12px;
+  }
+  main { padding: 8px 40px 56px; max-width: 1440px; margin: 0 auto; }
+  section { margin-top: 34px; }
+  h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .shot {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  }
+  .shot:hover {
+    border-color: #D4C4FF;
+    box-shadow: 0 8px 24px rgba(26, 29, 38, 0.06);
+    transform: translateY(-2px);
+  }
+  .thumb {
+    position: relative;
+    height: 460px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 55%, rgba(255,255,255,.9) 100%);
+    pointer-events: none;
+  }
+  .zoom {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(26, 29, 38, .72);
+    color: #fff;
+    font-size: 12px;
+  }
+  .cap { padding: 14px 16px 16px; }
+  .cap b { display: block; font-size: 14px; font-weight: 600; }
+  .cap span { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
+  .tall .thumb { height: 560px; }
+  .modal .thumb { height: 400px; background: var(--line-soft); }
+  footer {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  @media (max-width: 900px) {
+    header, main, footer { padding-left: 18px; padding-right: 18px; }
+    .grid { grid-template-columns: 1fr; }
+    .thumb { height: 420px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>吸入治疗指导与依从性辅助管理软件 · Medix Light 全站截图</h1>
+  <p class="sub">认证、医护端、弹窗、管理端，共 15 张桌面主图。点卡片在新标签页查看原图。04 仍是 Clinic Comfort，未按 Medix 冻结稿重做。</p>
+  <div class="meta">
+    <span>截图来自 PR #4–#7 证据批次</span>
+    <span>浏览器证据使用请求拦截，8010 未启动</span>
+    <span>本页不签视觉终验</span>
+    <span>1440 桌面主图</span>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>认证</h2>
+    <div class="grid">
+      <a class="shot" href="01-login.png" target="_blank">
+        <div class="thumb"><img src="01-login.png" alt="登录页" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>01 · 登录页</b><span>浅灰底、白卡片、品牌紫登录按钮</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>医护端</h2>
+    <div class="grid">
+      <a class="shot" href="02-workbench.png" target="_blank">
+        <div class="thumb"><img src="02-workbench.png" alt="工作台" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>02 · 工作台</b><span>近 7 日团队登记、需关注、待核查；超过 6 条折叠</span></div>
+      </a>
+      <a class="shot" href="03-patients.png" target="_blank">
+        <div class="thumb"><img src="03-patients.png" alt="患者管理" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>03 · 患者管理</b><span>一行工具栏加患者表，账号状态用胶囊</span></div>
+      </a>
+      <a class="shot tall" href="04-patient-detail.png" target="_blank">
+        <div class="thumb"><img src="04-patient-detail.png" alt="患者详情" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>04 · 患者详情</b><span>仍是 Clinic Comfort 页，未按 Medix 冻结稿重做。问候、四格摘要、近 7 日时点。</span></div>
+      </a>
+      <a class="shot" href="05-plans.png" target="_blank">
+        <div class="thumb"><img src="05-plans.png" alt="用药计划" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>05 · 用药计划</b><span>左新建、右历史：生效中、已结束、待生效</span></div>
+      </a>
+      <a class="shot tall" href="06-stats.png" target="_blank">
+        <div class="thumb"><img src="06-stats.png" alt="统计与核查 · 团队概览" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>06 · 统计与核查 · 团队概览</b><span>蓝折线、登记分布环图、患者登记概览</span></div>
+      </a>
+      <a class="shot tall" href="07-patient-report.png" target="_blank">
+        <div class="thumb"><img src="07-patient-report.png" alt="患者报告" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>07 · 患者报告</b><span>medix-final 独立截图。李先生 85.7%，未登记时点、来源、随访摘要、重复登记。</span></div>
+      </a>
+      <a class="shot tall" href="08-followups.png" target="_blank">
+        <div class="thumb"><img src="08-followups.png" alt="随访中心" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>08 · 随访中心</b><span>待核查与随访记录两张表</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>弹窗</h2>
+    <div class="grid">
+      <a class="shot modal" href="09-task-close-modal.png" target="_blank">
+        <div class="thumb"><img src="09-task-close-modal.png" alt="处理任务弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>09 · 处理任务弹窗</b><span>处理说明必填，最多 200 字，品牌紫确认</span></div>
+      </a>
+      <a class="shot modal" href="10-medication-backfill-modal.png" target="_blank">
+        <div class="thumb"><img src="10-medication-backfill-modal.png" alt="补登用药弹窗" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>10 · 补登用药弹窗</b><span>时点平铺点选，已登记与未到时点分开标出</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>管理端</h2>
+    <div class="grid">
+      <a class="shot" href="11-admin.png" target="_blank">
+        <div class="thumb"><img src="11-admin.png" alt="装置型号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>11 · 装置型号</b><span>侧栏五项，类别标签，服务端分页</span></div>
+      </a>
+      <a class="shot" href="12-admin-guides.png" target="_blank">
+        <div class="thumb"><img src="12-admin-guides.png" alt="指导版本" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>12 · 指导版本</b><span>草稿可审核通过，已发布只有查看</span></div>
+      </a>
+      <a class="shot" href="13-admin-accounts.png" target="_blank">
+        <div class="thumb"><img src="13-admin-accounts.png" alt="账号" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>13 · 账号</b><span>角色与状态胶囊，停用需确认</span></div>
+      </a>
+      <a class="shot" href="14-admin-knowledge.png" target="_blank">
+        <div class="thumb"><img src="14-admin-knowledge.png" alt="知识内容" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>14 · 知识内容</b><span>片段数与状态，已发布可查看</span></div>
+      </a>
+      <a class="shot" href="15-admin-audit.png" target="_blank">
+        <div class="thumb"><img src="15-admin-audit.png" alt="审计日志" loading="lazy" /><span class="zoom">查看原图</span></div>
+        <div class="cap"><b>15 · 审计日志</b><span>操作趋势、类型条形和事件记录</span></div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  截图目录：docs/evidence/medix-light-full-ui。主图来自 docs/evidence/medix-0123/screenshots、docs/evidence/medix-05060809/screenshots、docs/evidence/medix-final/screenshots。点击任意卡片在新标签页查看原始图片。本页不签视觉终验。
+</footer>
+</body>
+</html>
