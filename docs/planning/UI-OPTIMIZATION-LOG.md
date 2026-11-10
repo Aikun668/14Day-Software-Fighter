@@ -852,3 +852,13 @@
 **改动**：新增 `docs/evidence/medix-light-full-ui/`。结构对齐 Clinic Comfort 画廊：认证、医护端、弹窗、管理端，共 15 张。强调色改为 `#8146FF`。04 注明仍是 Comfort，未按 Medix 冻结稿重做。07 用 medix-final 的独立截图，不复用 06 页签。未改产品代码。
 
 **证据**：`docs/evidence/medix-light-full-ui/index.html`。来源 `docs/evidence/medix-0123/screenshots/`、`docs/evidence/medix-05060809/screenshots/`、`docs/evidence/medix-final/screenshots/`。本页不签视觉终验。
+
+### 2026-11-10 · Medix Light 冻结参考画廊
+
+**问题**：实现画廊只有实拍，主人没法在旁边对照 Medix Light 已批准/冻结稿。
+
+**原因**：冻结稿在 Medix-Light-Complete-Handoff-v2，仓库里没有一份同文件名、能用 file:// 打开的静态参考画廊。
+
+**改动**：按提供的压缩包原样新增 `docs/evidence/medix-light-refs/`（`index.html` 与 01–15 冻结图）。实现画廊页脚只加一条到该页的链接。未改产品代码。
+
+**证据**：`docs/evidence/medix-light-refs/index.html`。图源：01–03 approved-batch-01；04、13、14 handoff-final-v2/references；05、08 approved-batch-02；06、15 approved-charts-v2（06 为 06-stats-charts，不是更早的 06-stats）；07 handoff-07-v1/references；09–12 approved-batch-03。本页不签视觉终验。
